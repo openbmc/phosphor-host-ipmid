@@ -52,6 +52,24 @@
       "parentUuid": "5384e124_54d7cf92",
       "revId": "5fc4663ac1fb4908f6059a835810767ea414e4ac",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "44a82002_5faeb519",
+        "filename": "user_channel/user_layer.hpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000182
+      },
+      "writtenOn": "2025-09-28T17:04:38Z",
+      "side": 1,
+      "message": "Thanks for pointing out, just to stick with same definitions as pum. Overall, I don\u0027t see any problems then.",
+      "parentUuid": "b475dad7_b0a64766",
+      "revId": "5fc4663ac1fb4908f6059a835810767ea414e4ac",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
