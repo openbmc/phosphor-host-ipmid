@@ -52,6 +52,24 @@
       "parentUuid": "0de55d3f_987d7e04",
       "revId": "0906e19a82fde89e9c8d13852a2b93f20d32e9a5",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "48f07433_9759eb60",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 621,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-09-30T23:23:33Z",
+      "side": 1,
+      "message": "Can you check if bypass the creating password steps (hard code the password) helps improve the time out?\nI implemented code following the Redfish host interface spec, the spec does not mention which interface can use this interface and how to deal with the time out in creating the user name and passwords.\nThere is no guarantee that all the message in SSIF interface can finish in 500ms. What happens when BMC is busy and can\u0027t response the message in 500ms? What happens in BMCLess?\n\nIf you have any idea in improving the creating passwords and user time, feel free to propose but as my opinion we should not compromise the security just because the SSIF has 500ms time out.",
+      "parentUuid": "7965b743_96088b3f",
+      "revId": "0906e19a82fde89e9c8d13852a2b93f20d32e9a5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
