@@ -16,6 +16,24 @@
       "message": "I did some testing today on an AST2600 EVB and this function is consistently taking \u003e 500ms, which makes the SSIF driver abort the command.  I captured these timestamps with busctl:\n\n```\n6.691       start\n6.696 :+005 get bootstrapping enabled\n6.697 :+001 return\n6.700 :+003 mapper subtree paths\n6.704 :+004 return\n6.706 :+002 get managed objects\n6.707 :+001 return\n6.727 :+020 create user\n6.819 :+092 return\n6.951 :+132 get role id\n6.953 :+002 return\n6.956 :+003 set user priv\n7.056 :+100 return\n7.142 :+086 set bootstrap account\n7.150 :+008 return\n7.191 :+041 set user enabled\n7.228 :+037 return\n7.269 :+041 end\n```\n\nThere is a 132ms gap between creating the user and getting the role id, which seems to be where we generate the password.\n\nAlso setting the user attributes takes a bit:\n100 + 8 + 37 \u003d 145ms",
       "revId": "0906e19a82fde89e9c8d13852a2b93f20d32e9a5",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0de55d3f_987d7e04",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 621,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-09-30T08:02:06Z",
+      "side": 1,
+      "message": "Can I asked why the SSIF driver abort the command when it take more than 500ms?",
+      "parentUuid": "a90c16a3_b618d995",
+      "revId": "0906e19a82fde89e9c8d13852a2b93f20d32e9a5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
