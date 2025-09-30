@@ -34,6 +34,24 @@
       "parentUuid": "a90c16a3_b618d995",
       "revId": "0906e19a82fde89e9c8d13852a2b93f20d32e9a5",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7965b743_96088b3f",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 621,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2025-09-30T11:05:49Z",
+      "side": 1,
+      "message": "There is this comment in the driver:\n\n```\n/*\n * IPMI 2.0 Spec, section 12.7 SSIF Timing,\n * Request-to-Response Time is T6max(250ms) - T1max(20ms) - 3ms \u003d 227ms\n * Recover ssif_bmc from busy state if it takes up to 500ms\n */\n#define RESPONSE_TIMEOUT                        500 /* ms */\n```",
+      "parentUuid": "0de55d3f_987d7e04",
+      "revId": "0906e19a82fde89e9c8d13852a2b93f20d32e9a5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
