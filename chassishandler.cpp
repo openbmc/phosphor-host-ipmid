@@ -720,7 +720,7 @@ ipmi::RspType<> ipmiSetChassisCap(
 
     uint8_t smDeviceAddr,
 
-    uint8_t bridgeDeviceAddr)
+    std::optional<uint8_t> bridgeDeviceAddr)
 {
     // check input data
     if (reserved1 != 0)
@@ -756,11 +756,15 @@ ipmi::RspType<> ipmiSetChassisCap(
         return ipmi::responseInvalidFieldRequest();
     }
 
-    if ((bridgeDeviceAddr & ~chassisCapAddrMask) != 0)
+    if (bridgeDeviceAddr.has_value())
     {
-        lg2::error("Unsupported request parameter(Bridge Addr) for REQ={REQ}",
-                   "REQ", lg2::hex, bridgeDeviceAddr);
-        return ipmi::responseInvalidFieldRequest();
+        if ((bridgeDeviceAddr.value() & ~chassisCapAddrMask) != 0)
+        {
+            lg2::error(
+                "Unsupported request parameter(Bridge Addr) for REQ={REQ}",
+                "REQ", lg2::hex, bridgeDeviceAddr.value());
+            return ipmi::responseInvalidFieldRequest();
+        }
     }
 
     try
@@ -793,9 +797,13 @@ ipmi::RspType<> ipmiSetChassisCap(
                               chassisCapObject.first, chassisCapIntf,
                               chassisSMDevAddrProp, smDeviceAddr);
 
-        ipmi::setDbusProperty(bus, chassisCapObject.second,
-                              chassisCapObject.first, chassisCapIntf,
-                              chassisBridgeDevAddrProp, bridgeDeviceAddr);
+        if (bridgeDeviceAddr.has_value())
+        {
+            ipmi::setDbusProperty(bus, chassisCapObject.second,
+                                  chassisCapObject.first, chassisCapIntf,
+                                  chassisBridgeDevAddrProp,
+                                  bridgeDeviceAddr.value());
+        }
     }
     catch (const std::exception& e)
     {
