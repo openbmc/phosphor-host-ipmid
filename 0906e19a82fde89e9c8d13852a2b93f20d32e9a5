@@ -70,6 +70,24 @@
       "parentUuid": "7965b743_96088b3f",
       "revId": "0906e19a82fde89e9c8d13852a2b93f20d32e9a5",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c8d62e6a_8190ae31",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 621,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2025-10-01T12:10:51Z",
+      "side": 1,
+      "message": "\u003e Can you check if bypass\n\nThat was the first thing I tried and it doesn\u0027t make any difference.\n\n\u003e There is no guarantee that all the message in SSIF interface can finish in 500ms.\n\nI agree.  I suppose if the command could be processed with the bmc under no/light load, we could respond with a busy response when under heavy load so the host retries.  but we can\u0027t even respond in time with no load, so that doesn\u0027t really help.\n\n\u003e What happens in BMCLess?\n\nI don\u0027t understand.  If there is no bmc, the host side ssif driver isn\u0027t even going to load so we won\u0027t be doing ssif.\n\n\u003e If you have any idea in improving the creating passwords and user time\n\nThe only thing I could come up with is some kind of super-optimized user mgr interface.  We are making a lot of dbus calls back and forth to the user manager - I suspect we could shave off a fair amount of time there.  But that seems like a bigger problem with the user manager.\n\nSo Quan@Ampere wrote the bmc ssif driver and the 500ms timeout.  Do they still work at Ampere?  Maybe you could chat with them about it.   I patched my kernel to 1s and the command work fine.\n\n@vernon.mauery@gmail.com I\u0027d be curious to get your take on this if you have time, thanks.",
+      "parentUuid": "48f07433_9759eb60",
+      "revId": "0906e19a82fde89e9c8d13852a2b93f20d32e9a5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
