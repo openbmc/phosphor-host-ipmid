@@ -88,6 +88,24 @@
       "parentUuid": "48f07433_9759eb60",
       "revId": "0906e19a82fde89e9c8d13852a2b93f20d32e9a5",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2aebb85b_e4280606",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 621,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-10-02T23:48:24Z",
+      "side": 1,
+      "message": "I think that the 500ms timeout seems very short. Depending on what else the BMC is doing at the time, it might not take much to have any IPMI command timeout, much less one that is involved, like creating a user.\n\nI am also not opposed to optimizing the user management interface. It seems like we should be able to just provide all the details we want for the user in one go. I am not sure what the bottlenecks are in actually creating the user, but a second is a long time to wait and that should be addressed.",
+      "parentUuid": "c8d62e6a_8190ae31",
+      "revId": "0906e19a82fde89e9c8d13852a2b93f20d32e9a5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
