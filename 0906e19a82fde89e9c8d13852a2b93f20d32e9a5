@@ -106,6 +106,24 @@
       "parentUuid": "c8d62e6a_8190ae31",
       "revId": "0906e19a82fde89e9c8d13852a2b93f20d32e9a5",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e78d6065_e5e5878d",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 621,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2025-10-03T14:35:33Z",
+      "side": 1,
+      "message": "Thanks @vernon.mauery@gmail.com.  The 500ms is 2x a number from the IPMI spec itself in the SSIF section, so I wasn\u0027t sure if increasing that timeout was reasonable or if IPMI implementations have just gotten slower over the years and the spec is out of touch.",
+      "parentUuid": "2aebb85b_e4280606",
+      "revId": "0906e19a82fde89e9c8d13852a2b93f20d32e9a5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
