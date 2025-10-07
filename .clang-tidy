@@ -3,8 +3,6 @@ Checks: '-*,
     modernize-use-nullptr
     '
 
-CheckOptions: []
-
 HeaderFilterRegex: (?!^subprojects).*
 
 WarningsAsErrors: '*'
