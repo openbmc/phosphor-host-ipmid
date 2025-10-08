@@ -219,6 +219,11 @@ ipmi::RspType<> ipmiSetWatchdogTimer(
         return ipmi::responseInvalidFieldRequest();
     }
 
+    if (preTimeoutInterrupt > 3)
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+
     if (preTimeoutInterval > (initialCountdown / 10))
     {
         return ipmi::responseInvalidFieldRequest();
