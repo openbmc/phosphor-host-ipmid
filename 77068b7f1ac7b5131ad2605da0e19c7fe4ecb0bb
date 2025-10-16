@@ -16,6 +16,23 @@
       "message": "@prithvi24pai@gmail.com\nPlease take a look at this patch.",
       "revId": "77068b7f1ac7b5131ad2605da0e19c7fe4ecb0bb",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e08aa0a4_d77ba5b7",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2025-10-16T13:13:41Z",
+      "side": 1,
+      "message": "Thank you for the initial review.\n\nPlease do not merge this until Ed modifies the commit message and adds his signed off by.  Alternatively, @prithvi24pai@gmail.com can do that.  I just need someone from nvidia to do add their signed off by since I\u0027m removing their copyright indicators.",
+      "revId": "77068b7f1ac7b5131ad2605da0e19c7fe4ecb0bb",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
