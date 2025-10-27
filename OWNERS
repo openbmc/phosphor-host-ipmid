@@ -33,7 +33,6 @@
 
 owners:
 - liuxiwei@ieisystem.com
-- rushtotom@gmail.com
 - vernon.mauery@gmail.com
 
 reviewers:
@@ -62,9 +61,6 @@ openbmc:
 - name: Ratan Gupta
   email: ratankgupta31@gmail.com
   discord: rgupta
-- name: Tom Joseph
-  email: rushtotom@gmail.com
-  discord: tomjose
 - name: Vernon Mauery
   email: vernon.mauery@gmail.com
   discord: vmauery
