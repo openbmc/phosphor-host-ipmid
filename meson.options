@@ -1,4 +1,3 @@
-
 option('tests', type: 'feature', description: 'Build tests')
 option(
     'boot-flag-safe-mode-support',
@@ -52,7 +51,6 @@ option(
     value: 'host@%u-request',
     description: 'File to create if host has initiated shutdown or reboot',
 )
-
 
 # Config Variables
 option(
@@ -262,8 +260,6 @@ option(
     choices: ['null', 'serial'],
     description: 'transport',
 )
-
-
 
 #######################################################################
 # OEM Libraries
