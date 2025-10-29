@@ -142,6 +142,24 @@
       "parentUuid": "e78d6065_e5e5878d",
       "revId": "0906e19a82fde89e9c8d13852a2b93f20d32e9a5",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0d6ab082_82a6d356",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 621,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-10-29T08:25:34Z",
+      "side": 1,
+      "message": "\u003e I\u0027m thinking about response for the Ipmi request right after handler has the username and password. The process creating the user account us IPMI API will be handled in a timer which will be started before handler response for the request.\n\u003e \n\u003e The Cont of this approach is if creating the account is failed. The host application, service will not know, and it will failed to access redfish host interface although it got the BootStrap account from the mmc service.\n\nAs my comment in the discord chat about the SSIF driver 500ms timeout settings.\nIt is too small in the real case. As the contributor of SSIF driver, Ampere had on internal patch to change this value, as Ed comments they also change to code to remove that time out.\nSo I think timeout issue in SSIF should be fixed in SSIF.\nhttps://github.com/ampere-openbmc/ssifbridge/commit/9dd7e1372f6259b447d72e5cf0ca09a236c40a76\n\n\u003e \n\u003e About the delay in access D-Bus to check the existing of the default `bootstrap0`, I think we can use internal variable which will be inited in the start of ipmid service. BMC also need handle adding/removing the user object path to detect the remove of bootstrap0.\n\nSupported in the latest patch set.\n\n\u003e \n\u003e @Brad Bishop,\n\u003e Can you help verify the below case:\n\u003e 1. Remove the code call `getAvailableUserLists(ctx);`, force the userName to `firstUserName`. So we can by pass the D-Bus calling.\n\u003e Check the response time for Ipmi command to getBootStrap account thru SSIF.\n\u003e 2. Apply 1 + Comment out the code call IPMI APIs to setup bootStrap account.\n\u003e Comment out all code from line `auto rc \u003d ipmi::ipmiUserSetUserName(userId, userName);` to line `/* Respond data */`.\n\u003e Check the response time in this case.\n\u003e \n\u003e I will update code after get your feedback from you and Vernon about the solution and test results.",
+      "parentUuid": "749fc6f6_a0a8a279",
+      "revId": "0906e19a82fde89e9c8d13852a2b93f20d32e9a5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
