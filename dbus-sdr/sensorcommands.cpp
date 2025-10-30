@@ -916,7 +916,7 @@ ipmi::RspType<uint8_t, uint8_t, uint8_t, std::optional<uint8_t>>
             return ipmi::responseIllegalCommand();
         }
 
-        uint8_t operation;
+        uint8_t operation = 0;
         try
         {
             ipmi::sensor::GetSensorResponse getResponse =
@@ -1617,7 +1617,7 @@ ipmi::RspType<uint8_t,         // sensorEventStatus
         std::bitset<16> assertions;
         // deassertions are not used.
         std::bitset<16> deassertions = 0;
-        uint8_t sensorEventStatus;
+        uint8_t sensorEventStatus = 0;
         if (response.readingOrStateUnavailable)
         {
             sensorEventStatus |= static_cast<uint8_t>(
