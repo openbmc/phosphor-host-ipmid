@@ -1,4 +1,51 @@
 {
-  "comments": [],
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b2f472bc_353956ec",
+        "filename": "sensordatahandler.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 342,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-10-31T01:00:24Z",
+      "side": 1,
+      "message": "make this into a constexpr value with a name. Otherwise it\u0027s just a magic value.\n```\nconstexpr uint8_t reserved_as_ones \u003d 0xc0;\n```",
+      "range": {
+        "startLine": 342,
+        "startChar": 8,
+        "endLine": 342,
+        "endChar": 12
+      },
+      "revId": "0cd01ace2f872bed2317d98bdcc1a64971f4cb11",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f45d917e_3cc32a1b",
+        "filename": "sensordatahandler.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 345,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2025-10-31T01:00:24Z",
+      "side": 1,
+      "message": "I don\u0027t see a need to change the order of the bits here. Before we had it listed as MSB first, now it has MSB last? I understand changing the shift values to match, but don\u0027t change the order because that makes it harder to see the actual change made.",
+      "range": {
+        "startLine": 344,
+        "startChar": 0,
+        "endLine": 345,
+        "endChar": 51
+      },
+      "revId": "0cd01ace2f872bed2317d98bdcc1a64971f4cb11",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ],
   "submitRequirementResults": []
 }
