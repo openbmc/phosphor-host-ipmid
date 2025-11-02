@@ -7,6 +7,9 @@
 *~
 .cscope/
 
+# auto-generation files from generate_whitelist_create.sh
+/ipmiwhitelist.cpp
+
 # Meson
 /build*/
 /subprojects/*
