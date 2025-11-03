@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a2dc9630_a51d7f33",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 822,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-11-03T01:21:55Z",
+      "side": 1,
+      "message": "When creating a new user, the default role is USER — does this need to be synchronized?\n\nAlso, I saw an earlier mailing list post describing the mapping between user roles and user groups.\nhttps://lists.ozlabs.org/pipermail/openbmc/2020-November/024061.html?utm_source\u003dchatgpt.com\nBut I’m not sure whether there’s a new specification for the role-to-group relationship?",
+      "range": {
+        "startLine": 821,
+        "startChar": 41,
+        "endLine": 822,
+        "endChar": 69
+      },
+      "revId": "68d0e63e6e538dff6181cc0d4f7fb128be957147",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
