@@ -179,10 +179,10 @@ void initSensorMatches()
                     try
                     {
                         // This is signal callback
-                        std::string interfaceName;
-                        msg.read(interfaceName);
-                        ipmi::PropertyMap props;
-                        msg.read(props);
+                        auto interfaceName = msg.unpack<std::string>();
+
+                        auto props = msg.unpack<ipmi::PropertyMap>();
+
                         s.second.getFunc(s.first, s.second, props);
                     }
                     catch (const std::exception& e)

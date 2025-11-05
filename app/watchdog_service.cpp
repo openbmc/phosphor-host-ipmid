@@ -117,8 +117,8 @@ T WatchdogService::getProperty(const std::string& key)
     try
     {
         auto response = bus.call(request);
-        std::variant<T> value;
-        response.read(value);
+        auto value = response.unpack<std::variant<T>>();
+
         return std::get<T>(value);
     }
     catch (const std::exception& e)

@@ -210,8 +210,9 @@ std::string getService(sdbusplus::bus_t& bus, const std::string& intf,
 
     auto mapperResponseMsg = bus.call(mapperCall);
 
-    std::map<std::string, std::vector<std::string>> mapperResponse;
-    mapperResponseMsg.read(mapperResponse);
+    auto mapperResponse =
+        mapperResponseMsg
+            .unpack<std::map<std::string, std::vector<std::string>>>();
 
     if (mapperResponse.begin() == mapperResponse.end())
     {
@@ -230,8 +231,7 @@ ObjectTree getSubTree(sdbusplus::bus_t& bus, const InterfaceList& interfaces,
     mapperCall.append(subtreePath, depth, interfaces);
 
     auto mapperReply = bus.call(mapperCall);
-    ObjectTree objectTree;
-    mapperReply.read(objectTree);
+    auto objectTree = mapperReply.unpack<ObjectTree>();
 
     return objectTree;
 }
