@@ -22,6 +22,30 @@
       },
       "revId": "68d0e63e6e538dff6181cc0d4f7fb128be957147",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "016ca032_a69c2190",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 822,
+      "author": {
+        "id": 1000992
+      },
+      "writtenOn": "2025-11-06T04:10:47Z",
+      "side": 1,
+      "message": "Hi George,\n\n\u003e When creating a new user, the default role is USER — does this need to be synchronized?\n\nI don\u0027t believe this needs to be updated because we already have the set privileges command.\n\n\u003e But I’m not sure whether there’s a new specification for the role-to-group relationship?\n\nCurrently, there is no specification defining the mapping between the group and Privilege Role. As shown in https://github.com/openbmc/meta-phosphor/blob/master/recipes-core/dropbear/dropbear/dropbear.default, if an accounts does not include the priv-admin group in its group list, the user will be an able to SSH into the BMC due to Dropbear\u0027s enforced restriction.",
+      "parentUuid": "a2dc9630_a51d7f33",
+      "range": {
+        "startLine": 821,
+        "startChar": 41,
+        "endLine": 822,
+        "endChar": 69
+      },
+      "revId": "68d0e63e6e538dff6181cc0d4f7fb128be957147",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
