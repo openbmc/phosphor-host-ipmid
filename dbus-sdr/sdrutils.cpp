@@ -19,10 +19,13 @@
 #include <ipmid/utils.hpp>
 #include <nlohmann/json.hpp>
 #include <phosphor-logging/lg2.hpp>
+#include <xyz/openbmc_project/ObjectMapper/common.hpp>
 
 #include <fstream>
 #include <optional>
 #include <unordered_set>
+
+using ObjectMapper = sdbusplus::common::xyz::openbmc_project::ObjectMapper;
 
 #ifdef FEATURE_HYBRID_SENSORS
 
@@ -139,9 +142,8 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
     auto lbdUpdateSensorTree = [&dbus](const char* path,
                                        const auto& interfaces) {
         auto mapperCall = dbus->new_method_call(
-            "xyz.openbmc_project.ObjectMapper",
-            "/xyz/openbmc_project/object_mapper",
-            "xyz.openbmc_project.ObjectMapper", "GetSubTree");
+            ObjectMapper::default_service, ObjectMapper::instance_path,
+            ObjectMapper::interface, ObjectMapper::method_names::get_sub_tree);
         SensorSubTree sensorTreePartial;
 
         mapperCall.append(path, depth, interfaces);
@@ -392,10 +394,9 @@ std::optional<std::map<std::string, std::vector<std::string>>>
     std::vector<std::string> interfaces;
     std::shared_ptr<sdbusplus::asio::connection> dbus = getSdBus();
 
-    sdbusplus::message_t getObjectMessage =
-        dbus->new_method_call("xyz.openbmc_project.ObjectMapper",
-                              "/xyz/openbmc_project/object_mapper",
-                              "xyz.openbmc_project.ObjectMapper", "GetObject");
+    sdbusplus::message_t getObjectMessage = dbus->new_method_call(
+        ObjectMapper::default_service, ObjectMapper::instance_path,
+        ObjectMapper::interface, ObjectMapper::method_names::get_object);
     getObjectMessage.append(path, interfaces);
 
     try
@@ -452,9 +453,9 @@ std::optional<std::unordered_set<std::string>>& getIpmiDecoratorPaths(
     using Paths = std::vector<std::string>;
     boost::system::error_code ec;
     Paths paths = ipmi::callDbusMethod<Paths>(
-        *ctx, ec, "xyz.openbmc_project.ObjectMapper",
-        "/xyz/openbmc_project/object_mapper",
-        "xyz.openbmc_project.ObjectMapper", "GetSubTreePaths", "/", int32_t(0),
+        *ctx, ec, ObjectMapper::default_service, ObjectMapper::instance_path,
+        ObjectMapper::interface, ObjectMapper::method_names::get_sub_tree_paths,
+        "/", int32_t(0),
         std::array<const char*, 1>{
             "xyz.openbmc_project.Inventory.Decorator.Ipmi"});
 

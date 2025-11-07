@@ -15,10 +15,6 @@ namespace ipmi
 namespace sel
 {
 
-static constexpr auto mapperBusName = "xyz.openbmc_project.ObjectMapper";
-static constexpr auto mapperObjPath = "/xyz/openbmc_project/object_mapper";
-static constexpr auto mapperIntf = "xyz.openbmc_project.ObjectMapper";
-
 static constexpr auto logWatchPath = "/xyz/openbmc_project/logging";
 static constexpr auto logBasePath = "/xyz/openbmc_project/logging/entry";
 static constexpr auto logEntryIntf = "xyz.openbmc_project.Logging.Entry";

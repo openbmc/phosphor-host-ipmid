@@ -29,6 +29,7 @@
 #include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/message/types.hpp>
 #include <sdbusplus/timer.hpp>
+#include <xyz/openbmc_project/ObjectMapper/common.hpp>
 
 #include <filesystem>
 #include <fstream>
@@ -36,6 +37,8 @@
 #include <optional>
 #include <stdexcept>
 #include <string_view>
+
+using ObjectMapper = sdbusplus::common::xyz::openbmc_project::ObjectMapper;
 
 static constexpr bool DEBUG = false;
 
@@ -593,9 +596,8 @@ ipmi::Cc getFruSdrs([[maybe_unused]] ipmi::Context::ptr ctx, size_t index,
     boost::system::error_code ec;
 
     Paths subtreePaths = ipmi::callDbusMethod<Paths>(
-        ctx, ec, "xyz.openbmc_project.ObjectMapper",
-        "/xyz/openbmc_project/object_mapper",
-        "xyz.openbmc_project.ObjectMapper", "GetSubTreePaths",
+        ctx, ec, ObjectMapper::default_service, ObjectMapper::instance_path,
+        ObjectMapper::interface, ObjectMapper::method_names::get_sub_tree_paths,
         "/xyz/openbmc_project/inventory", 0,
         std::array<const char*, 2>{
             "xyz.openbmc_project.Inventory.Decorator.I2CDevice",
