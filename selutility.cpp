@@ -8,6 +8,7 @@
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/lg2.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
+#include <xyz/openbmc_project/ObjectMapper/common.hpp>
 
 #include <charconv>
 #include <chrono>
@@ -18,6 +19,8 @@ extern const ipmi::sensor::InvObjectIDMap invSensors;
 using namespace phosphor::logging;
 using InternalFailure =
     sdbusplus::error::xyz::openbmc_project::common::InternalFailure;
+
+using ObjectMapper = sdbusplus::common::xyz::openbmc_project::ObjectMapper;
 
 namespace
 {
@@ -374,8 +377,10 @@ void readLoggingObjectPaths(ObjectPaths& paths)
     auto depth = 0;
     paths.clear();
 
-    auto mapperCall = bus.new_method_call(mapperBusName, mapperObjPath,
-                                          mapperIntf, "GetSubTreePaths");
+    auto mapperCall = bus.new_method_call(
+        ObjectMapper::default_service, ObjectMapper::instance_path,
+        ObjectMapper::interface,
+        ObjectMapper::method_names::get_sub_tree_paths);
     mapperCall.append(logBasePath);
     mapperCall.append(depth);
     mapperCall.append(ObjectPaths({logEntryIntf}));

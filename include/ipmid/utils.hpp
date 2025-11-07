@@ -17,10 +17,6 @@ namespace ipmi
 
 using namespace std::literals::chrono_literals;
 
-constexpr auto MAPPER_BUS_NAME = "xyz.openbmc_project.ObjectMapper";
-constexpr auto MAPPER_OBJ = "/xyz/openbmc_project/object_mapper";
-constexpr auto MAPPER_INTF = "xyz.openbmc_project.ObjectMapper";
-
 constexpr auto ROOT = "/";
 constexpr auto HOST_MATCH = "host0";
 
