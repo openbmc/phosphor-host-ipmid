@@ -24,6 +24,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "1f42f279_047d2e45",
+        "filename": "sensordatahandler.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 342,
+      "author": {
+        "id": 1001843
+      },
+      "writtenOn": "2025-11-07T15:25:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b2f472bc_353956ec",
+      "range": {
+        "startLine": 342,
+        "startChar": 8,
+        "endLine": 342,
+        "endChar": 12
+      },
+      "revId": "0cd01ace2f872bed2317d98bdcc1a64971f4cb11",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "f45d917e_3cc32a1b",
@@ -37,6 +61,30 @@
       "writtenOn": "2025-10-31T01:00:24Z",
       "side": 1,
       "message": "I don\u0027t see a need to change the order of the bits here. Before we had it listed as MSB first, now it has MSB last? I understand changing the shift values to match, but don\u0027t change the order because that makes it harder to see the actual change made.",
+      "range": {
+        "startLine": 344,
+        "startChar": 0,
+        "endLine": 345,
+        "endChar": 51
+      },
+      "revId": "0cd01ace2f872bed2317d98bdcc1a64971f4cb11",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ccf2412c_c0b557ac",
+        "filename": "sensordatahandler.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 345,
+      "author": {
+        "id": 1001843
+      },
+      "writtenOn": "2025-11-07T15:25:48Z",
+      "side": 1,
+      "message": "Hi,\nI’ve applied the formatting fixes and the bit-6/bit-7 changes you mentioned.\nYou can find the updated patch here:\n\nhttps://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/85049\n\nThanks for your review!",
+      "parentUuid": "f45d917e_3cc32a1b",
       "range": {
         "startLine": 344,
         "startChar": 0,
