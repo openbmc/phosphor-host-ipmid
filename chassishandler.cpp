@@ -125,6 +125,7 @@ using namespace phosphor::logging;
 using namespace sdbusplus::error::xyz::openbmc_project::common;
 using namespace sdbusplus::server::xyz::openbmc_project::control::boot;
 using Intrusion = sdbusplus::client::xyz::openbmc_project::chassis::Intrusion<>;
+using HostState = sdbusplus::common::xyz::openbmc_project::state::Host;
 
 namespace chassis
 {
@@ -821,8 +822,8 @@ int initiateHostStateTransition(ipmi::Context::ptr& ctx,
                                 State::Host::Transition transition)
 {
     // OpenBMC Host State Manager dbus framework
-    constexpr auto hostStatePath = "/xyz/openbmc_project/state/host0";
-    constexpr auto hostStateIntf = "xyz.openbmc_project.State.Host";
+    const auto hostStatePath =
+        std::format("{}/{}", HostState::namespace_path::value, "host0");
 
     // Convert to string equivalent of the passed in transition enum.
     auto request =
@@ -831,12 +832,13 @@ int initiateHostStateTransition(ipmi::Context::ptr& ctx,
 
     std::string service;
     boost::system::error_code ec =
-        ipmi::getService(ctx, hostStateIntf, hostStatePath, service);
+        ipmi::getService(ctx, HostState::interface, hostStatePath, service);
 
     if (!ec)
     {
-        ec = ipmi::setDbusProperty(ctx, service, hostStatePath, hostStateIntf,
-                                   "RequestedHostTransition", request);
+        ec = ipmi::setDbusProperty(
+            ctx, service, hostStatePath, HostState::interface,
+            HostState::property_names::requested_host_transition, request);
     }
     if (ec)
     {
@@ -1342,17 +1344,16 @@ static IpmiRestartCause restartCauseToIpmiRestartCause(
 static std::optional<uint4_t> getRestartCause(ipmi::Context::ptr ctx)
 {
     constexpr const char* restartCausePath = "/xyz/openbmc_project/state/host0";
-    constexpr const char* restartCauseIntf = "xyz.openbmc_project.State.Host";
 
     std::string service;
     boost::system::error_code ec =
-        ipmi::getService(ctx, restartCauseIntf, restartCausePath, service);
+        ipmi::getService(ctx, HostState::interface, restartCausePath, service);
     if (!ec)
     {
         std::string restartCauseStr;
         ec = ipmi::getDbusProperty<std::string>(
-            ctx, service, restartCausePath, restartCauseIntf, "RestartCause",
-            restartCauseStr);
+            ctx, service, restartCausePath, HostState::interface,
+            HostState::property_names::restart_cause, restartCauseStr);
         if (!ec)
         {
             auto cause =
@@ -1365,7 +1366,7 @@ static std::optional<uint4_t> getRestartCause(ipmi::Context::ptr ctx)
     lg2::error(
         "Failed to fetch RestartCause property ({PATH}/{INTERFACE}): {ERROR}",
         "ERROR", ec.message(), "PATH", restartCausePath, "INTERFACE",
-        restartCauseIntf);
+        HostState::interface);
     return std::nullopt;
 }
 

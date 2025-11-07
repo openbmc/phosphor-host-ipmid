@@ -14,16 +14,14 @@
 
 #include <chrono>
 
+using HostState = sdbusplus::common::xyz::openbmc_project::state::Host;
+
 namespace phosphor
 {
 namespace host
 {
 namespace command
 {
-
-constexpr auto HOST_STATE_PATH = "/xyz/openbmc_project/state/host0";
-constexpr auto HOST_STATE_INTERFACE = "xyz.openbmc_project.State.Host";
-constexpr auto HOST_TRANS_PROP = "RequestedHostTransition";
 
 // For throwing exceptions
 using namespace phosphor::logging;
@@ -36,7 +34,8 @@ Manager::Manager(sdbusplus::bus_t& bus) :
     bus(bus), timer(std::bind(&Manager::hostTimeout, this)),
     hostTransitionMatch(
         bus,
-        sdbusRule::propertiesChanged(HOST_STATE_PATH, HOST_STATE_INTERFACE),
+        sdbusRule::propertiesChanged("/xyz/openbmc_project/state/host0",
+                                     HostState::interface),
         std::bind(&Manager::clearQueueOnPowerOn, this, std::placeholders::_1))
 {
     // Nothing to do here.
@@ -175,13 +174,14 @@ void Manager::clearQueueOnPowerOn(sdbusplus::message_t& msg)
 
     msg.read(interface, properties);
 
-    if (properties.find(HOST_TRANS_PROP) == properties.end())
+    if (properties.find(HostState::property_names::requested_host_transition) ==
+        properties.end())
     {
         return;
     }
 
-    auto& requestedState =
-        std::get<std::string>(properties.at(HOST_TRANS_PROP));
+    auto& requestedState = std::get<std::string>(
+        properties.at(HostState::property_names::requested_host_transition));
 
     if (server::Host::convertTransitionFromString(requestedState) ==
         server::Host::Transition::On)
