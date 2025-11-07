@@ -5,12 +5,7 @@
 
 #include <string>
 
-static constexpr auto bmcStateRoot = "/xyz/openbmc_project/state";
-static constexpr auto bmcStateIntf = "xyz.openbmc_project.State.BMC";
-static constexpr auto reqTransition = "RequestedBMCTransition";
-static constexpr auto match = "bmc0";
-
-using BMC = sdbusplus::server::xyz::openbmc_project::state::BMC;
+using BMCState = sdbusplus::server::xyz::openbmc_project::state::BMC;
 
 void registerNetFnGlobalFunctions() __attribute__((constructor));
 
@@ -22,16 +17,19 @@ ipmi::RspType<> ipmiGlobalReset(ipmi::Context::ptr ctx)
 {
     ipmi::DbusObjectInfo bmcStateObj;
     boost::system::error_code ec = ipmi::getDbusObject(
-        ctx, bmcStateIntf, bmcStateRoot, match, bmcStateObj);
+        ctx, BMCState::interface, BMCState::namespace_path::value,
+        BMCState::namespace_path::bmc, bmcStateObj);
     if (!ec)
     {
         std::string service;
-        ec = ipmi::getService(ctx, bmcStateIntf, bmcStateObj.first, service);
+        ec = ipmi::getService(ctx, BMCState::interface, bmcStateObj.first,
+                              service);
         if (!ec)
         {
             ec = ipmi::setDbusProperty(
-                ctx, service, bmcStateObj.first, bmcStateIntf, reqTransition,
-                convertForMessage(BMC::Transition::Reboot));
+                ctx, service, bmcStateObj.first, BMCState::interface,
+                BMCState::property_names::requested_bmc_transition,
+                convertForMessage(BMCState::Transition::Reboot));
         }
     }
     if (ec)
