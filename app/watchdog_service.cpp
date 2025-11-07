@@ -22,17 +22,17 @@ using sdbusplus::error::xyz::openbmc_project::common::InternalFailure;
 using sdbusplus::server::xyz::openbmc_project::state::Watchdog;
 
 static constexpr auto wdPath = "/xyz/openbmc_project/watchdog/host0";
-static constexpr auto wdIntf = "xyz.openbmc_project.State.Watchdog";
 static constexpr auto propIntf = "org.freedesktop.DBus.Properties";
 
-ipmi::ServiceCache WatchdogService::wdService(wdIntf, wdPath);
+ipmi::ServiceCache WatchdogService::wdService(Watchdog::interface, wdPath);
 
 WatchdogService::WatchdogService() : bus(ipmid_get_sd_bus_connection()) {}
 
 void WatchdogService::resetTimeRemaining(bool enableWatchdog)
 {
     bool wasValid = wdService.isValid(bus);
-    auto request = wdService.newMethodCall(bus, wdIntf, "ResetTimeRemaining");
+    auto request =
+        wdService.newMethodCall(bus, Watchdog::interface, "ResetTimeRemaining");
     request.append(enableWatchdog);
     try
     {
@@ -57,7 +57,7 @@ WatchdogService::Properties WatchdogService::getProperties()
 {
     bool wasValid = wdService.isValid(bus);
     auto request = wdService.newMethodCall(bus, propIntf, "GetAll");
-    request.append(wdIntf);
+    request.append(Watchdog::interface);
 
     std::map<std::string, std::variant<bool, uint64_t, std::string>> properties;
     try
@@ -113,7 +113,7 @@ T WatchdogService::getProperty(const std::string& key)
 {
     bool wasValid = wdService.isValid(bus);
     auto request = wdService.newMethodCall(bus, propIntf, "Get");
-    request.append(wdIntf, key);
+    request.append(Watchdog::interface, key);
     try
     {
         auto response = bus.call(request);
@@ -145,7 +145,7 @@ void WatchdogService::setProperty(const std::string& key, const T& val)
 {
     bool wasValid = wdService.isValid(bus);
     auto request = wdService.newMethodCall(bus, propIntf, "Set");
-    request.append(wdIntf, key, std::variant<T>(val));
+    request.append(Watchdog::interface, key, std::variant<T>(val));
     try
     {
         auto response = bus.call(request);
