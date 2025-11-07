@@ -26,9 +26,6 @@
 #include <tuple>
 #include <vector>
 
-constexpr auto bmcStateInterface = "xyz.openbmc_project.State.BMC";
-constexpr auto bmcStateProperty = "CurrentBMCState";
-
 static constexpr auto redundancyIntf =
     "xyz.openbmc_project.Software.RedundancyPriority";
 static constexpr auto versionIntf = "xyz.openbmc_project.Software.Version";
@@ -43,7 +40,7 @@ using namespace sdbusplus::error::xyz::openbmc_project::common;
 using Version = sdbusplus::server::xyz::openbmc_project::software::Version;
 using Activation =
     sdbusplus::server::xyz::openbmc_project::software::Activation;
-using BMC = sdbusplus::server::xyz::openbmc_project::state::BMC;
+using BMCState = sdbusplus::server::xyz::openbmc_project::state::BMC;
 namespace fs = std::filesystem;
 
 /**
@@ -134,19 +131,21 @@ bool getCurrentBmcStateWithFallback(ipmi::Context::ptr& ctx,
     // Get the Inventory object implementing the BMC interface
     ipmi::DbusObjectInfo bmcObject{};
     boost::system::error_code ec =
-        ipmi::getDbusObject(ctx, bmcStateInterface, bmcObject);
+        ipmi::getDbusObject(ctx, BMCState::interface, bmcObject);
     std::string bmcState{};
     if (ec.value())
     {
         return fallbackAvailability;
     }
-    ec = ipmi::getDbusProperty(ctx, bmcObject.second, bmcObject.first,
-                               bmcStateInterface, bmcStateProperty, bmcState);
+    ec = ipmi::getDbusProperty(
+        ctx, bmcObject.second, bmcObject.first, BMCState::interface,
+        BMCState::property_names::current_bmc_state, bmcState);
     if (!ec.value())
     {
         return fallbackAvailability;
     }
-    return BMC::convertBMCStateFromString(bmcState) == BMC::BMCState::Ready;
+    return BMCState::convertBMCStateFromString(bmcState) ==
+           BMCState::BMCState::Ready;
 }
 
 typedef struct

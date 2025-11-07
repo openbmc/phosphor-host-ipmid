@@ -46,8 +46,6 @@
 
 extern sd_bus* bus;
 
-constexpr auto bmc_state_interface = "xyz.openbmc_project.State.BMC";
-constexpr auto bmc_state_property = "CurrentBMCState";
 constexpr auto versionPurposeHostEnd = ".Host";
 
 static constexpr auto redundancyIntf =
@@ -64,7 +62,7 @@ using namespace sdbusplus::error::xyz::openbmc_project::common;
 using Version = sdbusplus::server::xyz::openbmc_project::software::Version;
 using Activation =
     sdbusplus::server::xyz::openbmc_project::software::Activation;
-using BMC = sdbusplus::server::xyz::openbmc_project::state::BMC;
+using BMCState = sdbusplus::server::xyz::openbmc_project::state::BMC;
 namespace fs = std::filesystem;
 
 #ifdef ENABLE_I2C_WHITELIST_CHECK
@@ -186,14 +184,14 @@ bool getCurrentBmcState()
 
     // Get the Inventory object implementing the BMC interface
     ipmi::DbusObjectInfo bmcObject =
-        ipmi::getDbusObject(bus, bmc_state_interface);
-    auto variant =
-        ipmi::getDbusProperty(bus, bmcObject.second, bmcObject.first,
-                              bmc_state_interface, bmc_state_property);
+        ipmi::getDbusObject(bus, BMCState::interface);
+    auto variant = ipmi::getDbusProperty(
+        bus, bmcObject.second, bmcObject.first, BMCState::interface,
+        BMCState::property_names::current_bmc_state);
 
     return std::holds_alternative<std::string>(variant) &&
-           BMC::convertBMCStateFromString(std::get<std::string>(variant)) ==
-               BMC::BMCState::Ready;
+           BMCState::convertBMCStateFromString(
+               std::get<std::string>(variant)) == BMCState::BMCState::Ready;
 }
 
 bool getCurrentBmcStateWithFallback(const bool fallbackAvailability)
