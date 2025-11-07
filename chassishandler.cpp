@@ -126,6 +126,7 @@ using namespace sdbusplus::error::xyz::openbmc_project::common;
 using namespace sdbusplus::server::xyz::openbmc_project::control::boot;
 using Intrusion = sdbusplus::client::xyz::openbmc_project::chassis::Intrusion<>;
 using HostState = sdbusplus::common::xyz::openbmc_project::state::Host;
+using ChassisState = sdbusplus::common::xyz::openbmc_project::state::Chassis;
 
 namespace chassis
 {
@@ -861,11 +862,10 @@ int initiateChassisStateTransition(ipmi::Context::ptr& ctx,
 {
     // OpenBMC Chassis State Manager dbus framework
     constexpr auto chassisStatePath = "/xyz/openbmc_project/state/chassis0";
-    constexpr auto chassisStateIntf = "xyz.openbmc_project.State.Chassis";
 
     std::string service;
-    boost::system::error_code ec =
-        ipmi::getService(ctx, chassisStateIntf, chassisStatePath, service);
+    boost::system::error_code ec = ipmi::getService(
+        ctx, ChassisState::interface, chassisStatePath, service);
 
     // Convert to string equivalent of the passed in transition enum.
     auto request =
@@ -874,9 +874,9 @@ int initiateChassisStateTransition(ipmi::Context::ptr& ctx,
 
     if (!ec)
     {
-        ec = ipmi::setDbusProperty(ctx, service, chassisStatePath,
-                                   chassisStateIntf, "RequestedPowerTransition",
-                                   request);
+        ec = ipmi::setDbusProperty(
+            ctx, service, chassisStatePath, ChassisState::interface,
+            ChassisState::property_names::requested_power_transition, request);
     }
     if (ec)
     {
@@ -981,14 +981,12 @@ std::optional<bool> getPowerStatus()
     {
         constexpr const char* chassisStatePath =
             "/xyz/openbmc_project/state/chassis0";
-        constexpr const char* chassisStateIntf =
-            "xyz.openbmc_project.State.Chassis";
         auto service =
-            ipmi::getService(*busp, chassisStateIntf, chassisStatePath);
+            ipmi::getService(*busp, ChassisState::interface, chassisStatePath);
 
-        ipmi::Value powerState =
-            ipmi::getDbusProperty(*busp, service, chassisStatePath,
-                                  chassisStateIntf, "CurrentPowerState");
+        ipmi::Value powerState = ipmi::getDbusProperty(
+            *busp, service, chassisStatePath, ChassisState::interface,
+            ChassisState::property_names::current_power_state);
         std::string powerStateStr = std::get<std::string>(powerState);
         if (powerStateStr.ends_with(".On") ||
             powerStateStr.ends_with(".TransitioningToOff"))
