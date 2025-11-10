@@ -24,6 +24,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "686a537e_280bfc46",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 1696,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-11-10T02:57:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c38bb66e_054476a3",
+      "range": {
+        "startLine": 1696,
+        "startChar": 4,
+        "endLine": 1696,
+        "endChar": 9
+      },
+      "revId": "4923778e7de205488b088322f9a3aeb045cad8f3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "496690e1_b56589be",
@@ -37,6 +61,30 @@
       "writtenOn": "2025-11-03T01:38:09Z",
       "side": 1,
       "message": "All?",
+      "range": {
+        "startLine": 1699,
+        "startChar": 25,
+        "endLine": 1699,
+        "endChar": 29
+      },
+      "revId": "4923778e7de205488b088322f9a3aeb045cad8f3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ec70cc32_b2e0a347",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 1699,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-11-10T02:57:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "496690e1_b56589be",
       "range": {
         "startLine": 1699,
         "startChar": 25,
@@ -70,6 +118,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "56043aab_51daca14",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 1703,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-11-10T02:57:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f5bb26e9_254c0f05",
+      "range": {
+        "startLine": 1703,
+        "startChar": 9,
+        "endLine": 1703,
+        "endChar": 14
+      },
+      "revId": "4923778e7de205488b088322f9a3aeb045cad8f3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "3bc2eb5e_caf5a99a",
@@ -83,6 +155,30 @@
       "writtenOn": "2025-11-03T01:38:09Z",
       "side": 1,
       "message": "nit: Can you explain under what conditions the code would enter the `if` statement?",
+      "range": {
+        "startLine": 1730,
+        "startChar": 0,
+        "endLine": 1734,
+        "endChar": 5
+      },
+      "revId": "4923778e7de205488b088322f9a3aeb045cad8f3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "78831b2e_7ddc13da",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 1734,
+      "author": {
+        "id": 1000945
+      },
+      "writtenOn": "2025-11-10T02:57:39Z",
+      "side": 1,
+      "message": "Because the userName is from the API `ipmiUserGetUserName` and I\u0027m not sure about the output so I added the checking for empty of the userName.\n\nI check the other code which call `ipmiUserGetUserName`. No checking for `userName` so I removed the checking code in latest patch set.",
+      "parentUuid": "3bc2eb5e_caf5a99a",
       "range": {
         "startLine": 1730,
         "startChar": 0,
