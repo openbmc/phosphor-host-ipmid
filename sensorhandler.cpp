@@ -14,6 +14,8 @@
 #include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/message/types.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
+#include <xyz/openbmc_project/Sensor/Threshold/Critical/common.hpp>
+#include <xyz/openbmc_project/Sensor/Threshold/Warning/common.hpp>
 #include <xyz/openbmc_project/Sensor/Value/server.hpp>
 
 #include <bitset>
@@ -43,6 +45,10 @@ using InternalFailure =
     sdbusplus::error::xyz::openbmc_project::common::InternalFailure;
 
 using SensorValue = sdbusplus::common::xyz::openbmc_project::sensor::Value;
+using SensorThresholdCritical =
+    sdbusplus::common::xyz::openbmc_project::sensor::threshold::Critical;
+using SensorThresholdWarning =
+    sdbusplus::common::xyz::openbmc_project::sensor::threshold::Warning;
 
 void registerNetFnSenFunctions() __attribute__((constructor));
 
@@ -927,11 +933,6 @@ ipmi::RspType<> ipmiSenSetSensorThresholds(
         return ipmi::responseSuccess();
     }
 
-    constexpr auto warningThreshIntf =
-        "xyz.openbmc_project.Sensor.Threshold.Warning";
-    constexpr auto criticalThreshIntf =
-        "xyz.openbmc_project.Sensor.Threshold.Critical";
-
     std::string service;
     boost::system::error_code ec;
     ec = ipmi::getService(ctx, info.sensorInterface, info.sensorPath, service);
@@ -951,29 +952,34 @@ ipmi::RspType<> ipmiSenSetSensorThresholds(
     {
         ipmi::PropertyMap findThreshold;
         ec = ipmi::getAllDbusProperties(ctx, service, info.sensorPath,
-                                        criticalThreshIntf, findThreshold);
+                                        SensorThresholdCritical::interface,
+                                        findThreshold);
 
         if (!ec)
         {
             if (lowerCriticalThreshMask)
             {
-                auto findLower = findThreshold.find("CriticalLow");
+                auto findLower = findThreshold.find(
+                    SensorThresholdCritical::property_names::critical_low);
                 if (findLower == findThreshold.end())
                 {
                     return ipmi::responseInvalidFieldRequest();
                 }
-                thresholdsToSet.emplace_back("CriticalLow", lowerCritical,
-                                             criticalThreshIntf);
+                thresholdsToSet.emplace_back(
+                    SensorThresholdCritical::property_names::critical_low,
+                    lowerCritical, SensorThresholdCritical::interface);
             }
             if (upperCriticalThreshMask)
             {
-                auto findUpper = findThreshold.find("CriticalHigh");
+                auto findUpper = findThreshold.find(
+                    SensorThresholdCritical::property_names::critical_high);
                 if (findUpper == findThreshold.end())
                 {
                     return ipmi::responseInvalidFieldRequest();
                 }
-                thresholdsToSet.emplace_back("CriticalHigh", upperCritical,
-                                             criticalThreshIntf);
+                thresholdsToSet.emplace_back(
+                    SensorThresholdCritical::property_names::critical_high,
+                    upperCritical, SensorThresholdCritical::interface);
             }
         }
     }
@@ -981,29 +987,34 @@ ipmi::RspType<> ipmiSenSetSensorThresholds(
     {
         ipmi::PropertyMap findThreshold;
         ec = ipmi::getAllDbusProperties(ctx, service, info.sensorPath,
-                                        warningThreshIntf, findThreshold);
+                                        SensorThresholdWarning::interface,
+                                        findThreshold);
 
         if (!ec)
         {
             if (lowerNonCriticalThreshMask)
             {
-                auto findLower = findThreshold.find("WarningLow");
+                auto findLower = findThreshold.find(
+                    SensorThresholdWarning::property_names::warning_low);
                 if (findLower == findThreshold.end())
                 {
                     return ipmi::responseInvalidFieldRequest();
                 }
-                thresholdsToSet.emplace_back("WarningLow", lowerNonCritical,
-                                             warningThreshIntf);
+                thresholdsToSet.emplace_back(
+                    SensorThresholdWarning::property_names::warning_low,
+                    lowerNonCritical, SensorThresholdWarning::interface);
             }
             if (upperNonCriticalThreshMask)
             {
-                auto findUpper = findThreshold.find("WarningHigh");
+                auto findUpper = findThreshold.find(
+                    SensorThresholdWarning::property_names::warning_high);
                 if (findUpper == findThreshold.end())
                 {
                     return ipmi::responseInvalidFieldRequest();
                 }
-                thresholdsToSet.emplace_back("WarningHigh", upperNonCritical,
-                                             warningThreshIntf);
+                thresholdsToSet.emplace_back(
+                    SensorThresholdWarning::property_names::warning_high,
+                    upperNonCritical, SensorThresholdWarning::interface);
             }
         }
     }

@@ -20,6 +20,8 @@
 #include <nlohmann/json.hpp>
 #include <phosphor-logging/lg2.hpp>
 #include <xyz/openbmc_project/ObjectMapper/common.hpp>
+#include <xyz/openbmc_project/Sensor/Threshold/Critical/common.hpp>
+#include <xyz/openbmc_project/Sensor/Threshold/Warning/common.hpp>
 #include <xyz/openbmc_project/Sensor/Value/common.hpp>
 
 #include <fstream>
@@ -28,6 +30,10 @@
 
 using ObjectMapper = sdbusplus::common::xyz::openbmc_project::ObjectMapper;
 using SensorValue = sdbusplus::common::xyz::openbmc_project::sensor::Value;
+using SensorThresholdWarning =
+    sdbusplus::common::xyz::openbmc_project::sensor::threshold::Warning;
+using SensorThresholdCritical =
+    sdbusplus::common::xyz::openbmc_project::sensor::threshold::Critical;
 
 #ifdef FEATURE_HYBRID_SENSORS
 
@@ -173,8 +179,7 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
     // Add sensors to SensorTree
     static constexpr const std::array sensorInterfaces = {
         SensorValue::interface, "xyz.openbmc_project.Sensor.ValueMutability",
-        "xyz.openbmc_project.Sensor.Threshold.Warning",
-        "xyz.openbmc_project.Sensor.Threshold.Critical"};
+        SensorThresholdWarning::interface, SensorThresholdCritical::interface};
     static constexpr const std::array vrInterfaces = {
         "xyz.openbmc_project.Control.VoltageRegulatorMode"};
 

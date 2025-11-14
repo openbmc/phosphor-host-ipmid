@@ -31,6 +31,8 @@
 #include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/bus.hpp>
 #include <user_channel/channel_layer.hpp>
+#include <xyz/openbmc_project/Sensor/Threshold/Critical/common.hpp>
+#include <xyz/openbmc_project/Sensor/Threshold/Warning/common.hpp>
 #include <xyz/openbmc_project/Sensor/Value/common.hpp>
 
 #include <algorithm>
@@ -47,6 +49,10 @@
 #include <variant>
 
 using SensorValue = sdbusplus::common::xyz::openbmc_project::sensor::Value;
+using SensorThresholdWarning =
+    sdbusplus::common::xyz::openbmc_project::sensor::threshold::Warning;
+using SensorThresholdCritical =
+    sdbusplus::common::xyz::openbmc_project::sensor::threshold::Critical;
 
 #ifdef FEATURE_HYBRID_SENSORS
 
@@ -259,10 +265,8 @@ static void getSensorMaxMin(const DbusInterfaceMap& sensorMap, double& max,
     min = -128;
 
     auto sensorObject = sensorMap.find(SensorValue::interface);
-    auto critical =
-        sensorMap.find("xyz.openbmc_project.Sensor.Threshold.Critical");
-    auto warning =
-        sensorMap.find("xyz.openbmc_project.Sensor.Threshold.Warning");
+    auto critical = sensorMap.find(SensorThresholdCritical::interface);
+    auto warning = sensorMap.find(SensorThresholdWarning::interface);
 
     if (sensorObject != sensorMap.end())
     {
@@ -282,8 +286,10 @@ static void getSensorMaxMin(const DbusInterfaceMap& sensorMap, double& max,
     }
     if (critical != sensorMap.end())
     {
-        auto lower = critical->second.find("CriticalLow");
-        auto upper = critical->second.find("CriticalHigh");
+        auto lower = critical->second.find(
+            SensorThresholdCritical::property_names::critical_low);
+        auto upper = critical->second.find(
+            SensorThresholdCritical::property_names::critical_high);
         if (lower != critical->second.end())
         {
             double value = std::visit(VariantToDoubleVisitor(), lower->second);
@@ -303,8 +309,10 @@ static void getSensorMaxMin(const DbusInterfaceMap& sensorMap, double& max,
     }
     if (warning != sensorMap.end())
     {
-        auto lower = warning->second.find("WarningLow");
-        auto upper = warning->second.find("WarningHigh");
+        auto lower = warning->second.find(
+            SensorThresholdWarning::property_names::warning_low);
+        auto upper = warning->second.find(
+            SensorThresholdWarning::property_names::warning_high);
         if (lower != warning->second.end())
         {
             double value = std::visit(VariantToDoubleVisitor(), lower->second);
@@ -1050,12 +1058,13 @@ ipmi::RspType<uint8_t, uint8_t, uint8_t, std::optional<uint8_t>>
 
     uint8_t thresholds = 0;
 
-    auto warningObject =
-        sensorMap.find("xyz.openbmc_project.Sensor.Threshold.Warning");
+    auto warningObject = sensorMap.find(SensorThresholdWarning::interface);
     if (warningObject != sensorMap.end())
     {
-        auto alarmHigh = warningObject->second.find("WarningAlarmHigh");
-        auto alarmLow = warningObject->second.find("WarningAlarmLow");
+        auto alarmHigh = warningObject->second.find(
+            SensorThresholdWarning::property_names::warning_alarm_high);
+        auto alarmLow = warningObject->second.find(
+            SensorThresholdWarning::property_names::warning_alarm_low);
         if (alarmHigh != warningObject->second.end())
         {
             if (std::get<bool>(alarmHigh->second))
@@ -1074,12 +1083,13 @@ ipmi::RspType<uint8_t, uint8_t, uint8_t, std::optional<uint8_t>>
         }
     }
 
-    auto criticalObject =
-        sensorMap.find("xyz.openbmc_project.Sensor.Threshold.Critical");
+    auto criticalObject = sensorMap.find(SensorThresholdCritical::interface);
     if (criticalObject != sensorMap.end())
     {
-        auto alarmHigh = criticalObject->second.find("CriticalAlarmHigh");
-        auto alarmLow = criticalObject->second.find("CriticalAlarmLow");
+        auto alarmHigh = criticalObject->second.find(
+            SensorThresholdCritical::property_names::critical_alarm_high);
+        auto alarmLow = criticalObject->second.find(
+            SensorThresholdCritical::property_names::critical_alarm_low);
         if (alarmHigh != criticalObject->second.end())
         {
             if (std::get<bool>(alarmHigh->second))
@@ -1187,60 +1197,66 @@ ipmi::RspType<> ipmiSenSetSensorThresholds(
     // verifiy all needed fields are present
     if (lowerCriticalThreshMask || upperCriticalThreshMask)
     {
-        auto findThreshold =
-            sensorMap.find("xyz.openbmc_project.Sensor.Threshold.Critical");
+        auto findThreshold = sensorMap.find(SensorThresholdCritical::interface);
         if (findThreshold == sensorMap.end())
         {
             return ipmi::responseInvalidFieldRequest();
         }
         if (lowerCriticalThreshMask)
         {
-            auto findLower = findThreshold->second.find("CriticalLow");
+            auto findLower = findThreshold->second.find(
+                SensorThresholdCritical::property_names::critical_low);
             if (findLower == findThreshold->second.end())
             {
                 return ipmi::responseInvalidFieldRequest();
             }
-            thresholdsToSet.emplace_back("CriticalLow", lowerCritical,
-                                         findThreshold->first);
+            thresholdsToSet.emplace_back(
+                SensorThresholdCritical::property_names::critical_low,
+                lowerCritical, findThreshold->first);
         }
         if (upperCriticalThreshMask)
         {
-            auto findUpper = findThreshold->second.find("CriticalHigh");
+            auto findUpper = findThreshold->second.find(
+                SensorThresholdCritical::property_names::critical_high);
             if (findUpper == findThreshold->second.end())
             {
                 return ipmi::responseInvalidFieldRequest();
             }
-            thresholdsToSet.emplace_back("CriticalHigh", upperCritical,
-                                         findThreshold->first);
+            thresholdsToSet.emplace_back(
+                SensorThresholdCritical::property_names::critical_high,
+                upperCritical, findThreshold->first);
         }
     }
     if (lowerNonCriticalThreshMask || upperNonCriticalThreshMask)
     {
-        auto findThreshold =
-            sensorMap.find("xyz.openbmc_project.Sensor.Threshold.Warning");
+        auto findThreshold = sensorMap.find(SensorThresholdWarning::interface);
         if (findThreshold == sensorMap.end())
         {
             return ipmi::responseInvalidFieldRequest();
         }
         if (lowerNonCriticalThreshMask)
         {
-            auto findLower = findThreshold->second.find("WarningLow");
+            auto findLower = findThreshold->second.find(
+                SensorThresholdWarning::property_names::warning_low);
             if (findLower == findThreshold->second.end())
             {
                 return ipmi::responseInvalidFieldRequest();
             }
-            thresholdsToSet.emplace_back("WarningLow", lowerNonCritical,
-                                         findThreshold->first);
+            thresholdsToSet.emplace_back(
+                SensorThresholdWarning::property_names::warning_low,
+                lowerNonCritical, findThreshold->first);
         }
         if (upperNonCriticalThreshMask)
         {
-            auto findUpper = findThreshold->second.find("WarningHigh");
+            auto findUpper = findThreshold->second.find(
+                SensorThresholdWarning::property_names::warning_high);
             if (findUpper == findThreshold->second.end())
             {
                 return ipmi::responseInvalidFieldRequest();
             }
-            thresholdsToSet.emplace_back("WarningHigh", upperNonCritical,
-                                         findThreshold->first);
+            thresholdsToSet.emplace_back(
+                SensorThresholdWarning::property_names::warning_high,
+                upperNonCritical, findThreshold->first);
         }
     }
     for (const auto& property : thresholdsToSet)
@@ -1259,10 +1275,8 @@ ipmi::RspType<> ipmiSenSetSensorThresholds(
 IPMIThresholds getIPMIThresholds(const DbusInterfaceMap& sensorMap)
 {
     IPMIThresholds resp;
-    auto warningInterface =
-        sensorMap.find("xyz.openbmc_project.Sensor.Threshold.Warning");
-    auto criticalInterface =
-        sensorMap.find("xyz.openbmc_project.Sensor.Threshold.Critical");
+    auto warningInterface = sensorMap.find(SensorThresholdWarning::interface);
+    auto criticalInterface = sensorMap.find(SensorThresholdCritical::interface);
 
     if ((warningInterface != sensorMap.end()) ||
         (criticalInterface != sensorMap.end()))
@@ -1294,8 +1308,10 @@ IPMIThresholds getIPMIThresholds(const DbusInterfaceMap& sensorMap)
         {
             auto& warningMap = warningInterface->second;
 
-            auto warningHigh = warningMap.find("WarningHigh");
-            auto warningLow = warningMap.find("WarningLow");
+            auto warningHigh = warningMap.find(
+                SensorThresholdWarning::property_names::warning_high);
+            auto warningLow = warningMap.find(
+                SensorThresholdWarning::property_names::warning_low);
 
             if (warningHigh != warningMap.end())
             {
@@ -1322,8 +1338,10 @@ IPMIThresholds getIPMIThresholds(const DbusInterfaceMap& sensorMap)
         {
             auto& criticalMap = criticalInterface->second;
 
-            auto criticalHigh = criticalMap.find("CriticalHigh");
-            auto criticalLow = criticalMap.find("CriticalLow");
+            auto criticalHigh = criticalMap.find(
+                SensorThresholdCritical::property_names::critical_high);
+            auto criticalLow = criticalMap.find(
+                SensorThresholdCritical::property_names::critical_low);
 
             if (criticalHigh != criticalMap.end())
             {
@@ -1497,10 +1515,8 @@ ipmi::RspType<uint8_t, // enabled
         return ipmi::responseResponseError();
     }
 
-    auto warningInterface =
-        sensorMap.find("xyz.openbmc_project.Sensor.Threshold.Warning");
-    auto criticalInterface =
-        sensorMap.find("xyz.openbmc_project.Sensor.Threshold.Critical");
+    auto warningInterface = sensorMap.find(SensorThresholdWarning::interface);
+    auto criticalInterface = sensorMap.find(SensorThresholdCritical::interface);
     if ((warningInterface != sensorMap.end()) ||
         (criticalInterface != sensorMap.end()))
     {
@@ -1510,8 +1526,10 @@ ipmi::RspType<uint8_t, // enabled
         {
             auto& warningMap = warningInterface->second;
 
-            auto warningHigh = warningMap.find("WarningHigh");
-            auto warningLow = warningMap.find("WarningLow");
+            auto warningHigh = warningMap.find(
+                SensorThresholdWarning::property_names::warning_high);
+            auto warningLow = warningMap.find(
+                SensorThresholdWarning::property_names::warning_low);
             if (warningHigh != warningMap.end())
             {
                 double value =
@@ -1545,8 +1563,10 @@ ipmi::RspType<uint8_t, // enabled
         {
             auto& criticalMap = criticalInterface->second;
 
-            auto criticalHigh = criticalMap.find("CriticalHigh");
-            auto criticalLow = criticalMap.find("CriticalLow");
+            auto criticalHigh = criticalMap.find(
+                SensorThresholdCritical::property_names::critical_high);
+            auto criticalLow = criticalMap.find(
+                SensorThresholdCritical::property_names::critical_low);
 
             if (criticalHigh != criticalMap.end())
             {
@@ -1676,19 +1696,17 @@ ipmi::RspType<uint8_t,         // sensorEventStatus
                                      deassertions);
     }
 
-    auto warningInterface =
-        sensorMap.find("xyz.openbmc_project.Sensor.Threshold.Warning");
-    auto criticalInterface =
-        sensorMap.find("xyz.openbmc_project.Sensor.Threshold.Critical");
+    auto warningInterface = sensorMap.find(SensorThresholdWarning::interface);
+    auto criticalInterface = sensorMap.find(SensorThresholdCritical::interface);
 
-    std::optional<bool> criticalDeassertHigh =
-        thresholdDeassertMap[path]["CriticalAlarmHigh"];
-    std::optional<bool> criticalDeassertLow =
-        thresholdDeassertMap[path]["CriticalAlarmLow"];
-    std::optional<bool> warningDeassertHigh =
-        thresholdDeassertMap[path]["WarningAlarmHigh"];
-    std::optional<bool> warningDeassertLow =
-        thresholdDeassertMap[path]["WarningAlarmLow"];
+    std::optional<bool> criticalDeassertHigh = thresholdDeassertMap
+        [path][SensorThresholdCritical::property_names::critical_alarm_high];
+    std::optional<bool> criticalDeassertLow = thresholdDeassertMap
+        [path][SensorThresholdCritical::property_names::critical_alarm_low];
+    std::optional<bool> warningDeassertHigh = thresholdDeassertMap
+        [path][SensorThresholdWarning::property_names::warning_alarm_high];
+    std::optional<bool> warningDeassertLow = thresholdDeassertMap
+        [path][SensorThresholdWarning::property_names::warning_alarm_low];
 
     if (criticalDeassertHigh && !*criticalDeassertHigh)
     {
@@ -1719,8 +1737,10 @@ ipmi::RspType<uint8_t,         // sensorEventStatus
         {
             auto& warningMap = warningInterface->second;
 
-            auto warningHigh = warningMap.find("WarningAlarmHigh");
-            auto warningLow = warningMap.find("WarningAlarmLow");
+            auto warningHigh = warningMap.find(
+                SensorThresholdWarning::property_names::warning_alarm_high);
+            auto warningLow = warningMap.find(
+                SensorThresholdWarning::property_names::warning_alarm_low);
             auto warningHighAlarm = false;
             auto warningLowAlarm = false;
 
@@ -1749,8 +1769,10 @@ ipmi::RspType<uint8_t,         // sensorEventStatus
         {
             auto& criticalMap = criticalInterface->second;
 
-            auto criticalHigh = criticalMap.find("CriticalAlarmHigh");
-            auto criticalLow = criticalMap.find("CriticalAlarmLow");
+            auto criticalHigh = criticalMap.find(
+                SensorThresholdCritical::property_names::critical_alarm_high);
+            auto criticalLow = criticalMap.find(
+                SensorThresholdCritical::property_names::critical_alarm_low);
             auto criticalHighAlarm = false;
             auto criticalLowAlarm = false;
 

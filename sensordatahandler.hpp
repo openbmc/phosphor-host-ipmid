@@ -10,6 +10,8 @@
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/message/types.hpp>
+#include <xyz/openbmc_project/Sensor/Threshold/Critical/common.hpp>
+#include <xyz/openbmc_project/Sensor/Threshold/Warning/common.hpp>
 #include <xyz/openbmc_project/Sensor/Value/common.hpp>
 
 #include <cmath>
@@ -41,6 +43,10 @@ using MapperResponseType = std::map<Path, std::map<Service, Interfaces>>;
 using PropertyMap = ipmi::PropertyMap;
 
 using SensorValue = sdbusplus::common::xyz::openbmc_project::sensor::Value;
+using SensorThresholdWarning =
+    sdbusplus::common::xyz::openbmc_project::sensor::threshold::Warning;
+using SensorThresholdCritical =
+    sdbusplus::common::xyz::openbmc_project::sensor::threshold::Critical;
 
 using namespace phosphor::logging;
 
@@ -298,8 +304,8 @@ GetSensorResponse readingData(const Info& sensorInfo)
     {
         critAlarmHigh = std::get<bool>(ipmi::getDbusProperty(
             bus, service, sensorInfo.sensorPath,
-            "xyz.openbmc_project.Sensor.Threshold.Critical",
-            "CriticalAlarmHigh"));
+            SensorThresholdCritical::interface,
+            SensorThresholdCritical::property_names::critical_alarm_high));
     }
     catch (const std::exception& e)
     {
@@ -310,8 +316,8 @@ GetSensorResponse readingData(const Info& sensorInfo)
     {
         critAlarmLow = std::get<bool>(ipmi::getDbusProperty(
             bus, service, sensorInfo.sensorPath,
-            "xyz.openbmc_project.Sensor.Threshold.Critical",
-            "CriticalAlarmLow"));
+            SensorThresholdCritical::interface,
+            SensorThresholdCritical::property_names::critical_alarm_low));
     }
     catch (const std::exception& e)
     {
@@ -322,8 +328,8 @@ GetSensorResponse readingData(const Info& sensorInfo)
     {
         warningAlarmHigh = std::get<bool>(ipmi::getDbusProperty(
             bus, service, sensorInfo.sensorPath,
-            "xyz.openbmc_project.Sensor.Threshold.Warning",
-            "WarningAlarmHigh"));
+            SensorThresholdWarning::interface,
+            SensorThresholdWarning::property_names::warning_alarm_high));
     }
     catch (const std::exception& e)
     {
@@ -334,7 +340,8 @@ GetSensorResponse readingData(const Info& sensorInfo)
     {
         warningAlarmLow = std::get<bool>(ipmi::getDbusProperty(
             bus, service, sensorInfo.sensorPath,
-            "xyz.openbmc_project.Sensor.Threshold.Warning", "WarningAlarmLow"));
+            SensorThresholdWarning::interface,
+            SensorThresholdWarning::property_names::warning_alarm_low));
     }
     catch (const std::exception& e)
     {
