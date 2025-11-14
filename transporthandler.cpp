@@ -583,7 +583,7 @@ void reconfigureVLAN(sdbusplus::bus_t& bus, ChannelParams& params,
     bool dhcp4 = getEthProp<bool>(bus, params, "DHCP4");
     bool dhcp6 = getEthProp<bool>(bus, params, "DHCP6");
     bool ra = getEthProp<bool>(bus, params, "IPv6AcceptRA");
-    ObjectLookupCache ips(bus, params, INTF_IP);
+    ObjectLookupCache ips(bus, params, NetworkIP::interface);
     auto ifaddr4 = findIfAddr<AF_INET>(bus, params, 0, originsV4, ips);
     std::vector<IfAddr<AF_INET6>> ifaddrs6;
     for (uint8_t i = 0; i < MAX_IPV6_STATIC_ADDRESSES; ++i)

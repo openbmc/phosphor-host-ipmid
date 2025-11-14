@@ -311,7 +311,7 @@ auto getIfAddr(
         sdbusplus::server::xyz::openbmc_project::network::IP::AddressOrigin>&
         origins)
 {
-    ObjectLookupCache ips(bus, params, INTF_IP);
+    ObjectLookupCache ips(bus, params, NetworkIP::interface);
     return findIfAddr<family>(bus, params, idx, origins, ips);
 }
 
