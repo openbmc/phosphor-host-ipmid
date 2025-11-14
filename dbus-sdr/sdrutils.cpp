@@ -20,12 +20,14 @@
 #include <nlohmann/json.hpp>
 #include <phosphor-logging/lg2.hpp>
 #include <xyz/openbmc_project/ObjectMapper/common.hpp>
+#include <xyz/openbmc_project/Sensor/Value/common.hpp>
 
 #include <fstream>
 #include <optional>
 #include <unordered_set>
 
 using ObjectMapper = sdbusplus::common::xyz::openbmc_project::ObjectMapper;
+using SensorValue = sdbusplus::common::xyz::openbmc_project::sensor::Value;
 
 #ifdef FEATURE_HYBRID_SENSORS
 
@@ -170,8 +172,7 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
 
     // Add sensors to SensorTree
     static constexpr const std::array sensorInterfaces = {
-        "xyz.openbmc_project.Sensor.Value",
-        "xyz.openbmc_project.Sensor.ValueMutability",
+        SensorValue::interface, "xyz.openbmc_project.Sensor.ValueMutability",
         "xyz.openbmc_project.Sensor.Threshold.Warning",
         "xyz.openbmc_project.Sensor.Threshold.Critical"};
     static constexpr const std::array vrInterfaces = {

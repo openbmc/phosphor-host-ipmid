@@ -31,6 +31,7 @@
 #include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/bus.hpp>
 #include <user_channel/channel_layer.hpp>
+#include <xyz/openbmc_project/Sensor/Value/common.hpp>
 
 #include <algorithm>
 #include <array>
@@ -44,6 +45,8 @@
 #include <string>
 #include <utility>
 #include <variant>
+
+using SensorValue = sdbusplus::common::xyz::openbmc_project::sensor::Value;
 
 #ifdef FEATURE_HYBRID_SENSORS
 
@@ -247,8 +250,6 @@ namespace sensor
 {
 static constexpr const char* vrInterface =
     "xyz.openbmc_project.Control.VoltageRegulatorMode";
-static constexpr const char* sensorInterface =
-    "xyz.openbmc_project.Sensor.Value";
 } // namespace sensor
 
 static void getSensorMaxMin(const DbusInterfaceMap& sensorMap, double& max,
@@ -257,7 +258,7 @@ static void getSensorMaxMin(const DbusInterfaceMap& sensorMap, double& max,
     max = 127;
     min = -128;
 
-    auto sensorObject = sensorMap.find(sensor::sensorInterface);
+    auto sensorObject = sensorMap.find(SensorValue::interface);
     auto critical =
         sensorMap.find("xyz.openbmc_project.Sensor.Threshold.Critical");
     auto warning =
@@ -265,8 +266,10 @@ static void getSensorMaxMin(const DbusInterfaceMap& sensorMap, double& max,
 
     if (sensorObject != sensorMap.end())
     {
-        auto maxMap = sensorObject->second.find("MaxValue");
-        auto minMap = sensorObject->second.find("MinValue");
+        auto maxMap =
+            sensorObject->second.find(SensorValue::property_names::max_value);
+        auto minMap =
+            sensorObject->second.find(SensorValue::property_names::min_value);
 
         if (maxMap != sensorObject->second.end())
         {
@@ -475,7 +478,8 @@ static std::optional<double> calculateValue(
     uint8_t reading, const ipmi::DbusInterfaceMap& sensorMap,
     const ipmi::DbusInterfaceMap::mapped_type& valueObject)
 {
-    if (valueObject.find("Value") == valueObject.end())
+    if (valueObject.find(SensorValue::property_names::value) ==
+        valueObject.end())
     {
         lg2::error("Missing the required Value property");
         return std::nullopt;
@@ -562,7 +566,7 @@ bool getVrEventStatus(ipmi::Context::ptr ctx, const std::string& connection,
     {
         lg2::error("Failed to get Selected, path: {PATH}, "
                    "interface: {INTERFACE}, error: {ERROR}",
-                   "PATH", path, "INTERFACE", sensor::sensorInterface, "ERROR",
+                   "PATH", path, "INTERFACE", SensorValue::interface, "ERROR",
                    ec.message());
         return false;
     }
@@ -792,14 +796,14 @@ ipmi::RspType<> ipmiSetSensorReading(
 
     // we can tell the sensor type by its interface type
     if (std::find(interfaces.begin(), interfaces.end(),
-                  sensor::sensorInterface) != interfaces.end())
+                  SensorValue::interface) != interfaces.end())
     {
         DbusInterfaceMap sensorMap;
         if (!getSensorMap(ctx, connection, path, sensorMap))
         {
             return ipmi::responseResponseError();
         }
-        auto sensorObject = sensorMap.find(sensor::sensorInterface);
+        auto sensorObject = sensorMap.find(SensorValue::interface);
         if (sensorObject == sensorMap.end())
         {
             return ipmi::responseResponseError();
@@ -827,9 +831,9 @@ ipmi::RspType<> ipmiSetSensorReading(
                       "VALUE", *value);
         }
 
-        boost::system::error_code ec =
-            setDbusProperty(ctx, connection, path, sensor::sensorInterface,
-                            "Value", ipmi::Value(*value));
+        boost::system::error_code ec = setDbusProperty(
+            ctx, connection, path, SensorValue::interface,
+            SensorValue::property_names::value, ipmi::Value(*value));
 
         // setDbusProperty intended to resolve dbus exception/rc within the
         // function but failed to achieve that. Catch exception in the ipmi
@@ -838,7 +842,7 @@ ipmi::RspType<> ipmiSetSensorReading(
         {
             lg2::error("Failed to set Value, path: {PATH}, "
                        "interface: {INTERFACE}, ERROR: {ERROR}",
-                       "PATH", path, "INTERFACE", sensor::sensorInterface,
+                       "PATH", path, "INTERFACE", SensorValue::interface,
                        "ERROR", ec.message());
             return ipmi::responseResponseError();
         }
@@ -877,7 +881,7 @@ ipmi::RspType<> ipmiSetSensorReading(
         {
             lg2::error("Failed to set Selected, path: {PATH}, "
                        "interface: {INTERFACE}, ERROR: {ERROR}",
-                       "PATH", path, "INTERFACE", sensor::sensorInterface,
+                       "PATH", path, "INTERFACE", SensorValue::interface,
                        "ERROR", ec.message());
         }
         return ipmi::responseSuccess();
@@ -956,14 +960,16 @@ ipmi::RspType<uint8_t, uint8_t, uint8_t, std::optional<uint8_t>>
     {
         return ipmi::responseResponseError();
     }
-    auto sensorObject = sensorMap.find(sensor::sensorInterface);
+    auto sensorObject = sensorMap.find(SensorValue::interface);
 
     if (sensorObject == sensorMap.end() ||
-        sensorObject->second.find("Value") == sensorObject->second.end())
+        sensorObject->second.find(SensorValue::property_names::value) ==
+            sensorObject->second.end())
     {
         return ipmi::responseResponseError();
     }
-    auto& valueVariant = sensorObject->second["Value"];
+    auto& valueVariant =
+        sensorObject->second[SensorValue::property_names::value];
     double reading = std::visit(VariantToDoubleVisitor(), valueVariant);
 
     double max = 0;
@@ -1261,7 +1267,7 @@ IPMIThresholds getIPMIThresholds(const DbusInterfaceMap& sensorMap)
     if ((warningInterface != sensorMap.end()) ||
         (criticalInterface != sensorMap.end()))
     {
-        auto sensorPair = sensorMap.find(sensor::sensorInterface);
+        auto sensorPair = sensorMap.find(SensorValue::interface);
 
         if (sensorPair == sensorMap.end())
         {
@@ -1818,7 +1824,7 @@ bool constructSensorSdr(
 
     record.body.eventReadingType = getSensorEventTypeFromPath(path);
 
-    auto sensorObject = sensorMap.find(sensor::sensorInterface);
+    auto sensorObject = sensorMap.find(SensorValue::interface);
     if (sensorObject == sensorMap.end())
     {
         lg2::error("constructSensorSdr: sensorObject error");
@@ -2192,7 +2198,7 @@ static int getSensorDataRecord(
 
     // Construct full record (SDR type 1) for the threshold sensors
     if (std::find(interfaces.begin(), interfaces.end(),
-                  sensor::sensorInterface) != interfaces.end())
+                  SensorValue::interface) != interfaces.end())
     {
         get_sdr::SensorDataFullRecord record = {};
 
@@ -2619,7 +2625,7 @@ std::tuple<bool,    // Reading result
 {
     std::string service{};
     boost::system::error_code ec =
-        ipmi::getService(ctx, sensor::sensorInterface, objectPath, service);
+        ipmi::getService(ctx, SensorValue::interface, objectPath, service);
     if (ec.value())
     {
         return std::make_tuple(false, 0, false);
@@ -2627,7 +2633,7 @@ std::tuple<bool,    // Reading result
 
     ipmi::PropertyMap properties{};
     ec = ipmi::getAllDbusProperties(ctx, service, objectPath,
-                                    sensor::sensorInterface, properties);
+                                    SensorValue::interface, properties);
     if (ec.value())
     {
         return std::make_tuple(false, 0, false);
@@ -2640,7 +2646,7 @@ std::tuple<bool,    // Reading result
         scaleVal = std::visit(ipmi::VariantToDoubleVisitor(), scaleIt->second);
     }
 
-    auto tempValIt = properties.find("Value");
+    auto tempValIt = properties.find(SensorValue::property_names::value);
     double tempVal = 0.0;
     if (tempValIt == properties.end())
     {

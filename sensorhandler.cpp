@@ -42,6 +42,8 @@ using namespace phosphor::logging;
 using InternalFailure =
     sdbusplus::error::xyz::openbmc_project::common::InternalFailure;
 
+using SensorValue = sdbusplus::common::xyz::openbmc_project::sensor::Value;
+
 void registerNetFnSenFunctions() __attribute__((constructor));
 
 struct sensorTypemap_t
@@ -444,7 +446,7 @@ ipmi::RspType<uint8_t, // sensorType
 }
 
 const std::set<std::string> analogSensorInterfaces = {
-    "xyz.openbmc_project.Sensor.Value",
+    SensorValue::interface,
     "xyz.openbmc_project.Control.FanPwm",
 };
 
@@ -829,8 +831,6 @@ ipmi::RspType<uint8_t, // validMask
               >
     ipmiSensorGetSensorThresholds(ipmi::Context::ptr& ctx, uint8_t sensorNum)
 {
-    constexpr auto valueInterface = "xyz.openbmc_project.Sensor.Value";
-
     const auto iter = ipmi::sensor::sensors.find(sensorNum);
     if (iter == ipmi::sensor::sensors.end())
     {
@@ -840,7 +840,7 @@ ipmi::RspType<uint8_t, // validMask
     const auto info = iter->second;
 
     // Proceed only if the sensor value interface is implemented.
-    if (info.propertyInterfaces.find(valueInterface) ==
+    if (info.propertyInterfaces.find(SensorValue::interface) ==
         info.propertyInterfaces.end())
     {
         // return with valid mask as 0
@@ -911,8 +911,6 @@ ipmi::RspType<> ipmiSenSetSensorThresholds(
         return ipmi::responseSuccess();
     }
 
-    constexpr auto valueInterface = "xyz.openbmc_project.Sensor.Value";
-
     const auto iter = ipmi::sensor::sensors.find(sensorNum);
     if (iter == ipmi::sensor::sensors.end())
     {
@@ -922,7 +920,7 @@ ipmi::RspType<> ipmiSenSetSensorThresholds(
     const auto& info = iter->second;
 
     // Proceed only if the sensor value interface is implemented.
-    if (info.propertyInterfaces.find(valueInterface) ==
+    if (info.propertyInterfaces.find(SensorValue::interface) ==
         info.propertyInterfaces.end())
     {
         // return with valid mask as 0

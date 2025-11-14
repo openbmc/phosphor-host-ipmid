@@ -10,6 +10,7 @@
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/message/types.hpp>
+#include <xyz/openbmc_project/Sensor/Value/common.hpp>
 
 #include <cmath>
 
@@ -38,6 +39,8 @@ using ServicePath = std::pair<Path, Service>;
 using Interfaces = std::vector<Interface>;
 using MapperResponseType = std::map<Path, std::map<Service, Interfaces>>;
 using PropertyMap = ipmi::PropertyMap;
+
+using SensorValue = sdbusplus::common::xyz::openbmc_project::sensor::Value;
 
 using namespace phosphor::logging;
 
@@ -221,8 +224,7 @@ GetSensorResponse readingData(const Info& sensorInfo)
 
 #ifdef UPDATE_FUNCTIONAL_ON_FAIL
     // Check the OperationalStatus interface for functional property
-    if (sensorInfo.propertyInterfaces.begin()->first ==
-        "xyz.openbmc_project.Sensor.Value")
+    if (sensorInfo.propertyInterfaces.begin()->first == SensorValue::interface)
     {
         bool functional = true;
         try

@@ -12,6 +12,7 @@
 #include <sdbusplus/bus.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 #include <xyz/openbmc_project/Network/EthernetInterface/server.hpp>
+#include <xyz/openbmc_project/Sensor/Value/common.hpp>
 
 #include <bitset>
 #include <cmath>
@@ -23,6 +24,8 @@ using sdbusplus::server::xyz::openbmc_project::network::EthernetInterface;
 
 using InternalFailure =
     sdbusplus::error::xyz::openbmc_project::common::InternalFailure;
+
+using SensorValue = sdbusplus::common::xyz::openbmc_project::sensor::Value;
 
 void registerNetFnDcmiFunctions() __attribute__((constructor));
 
@@ -46,8 +49,6 @@ constexpr size_t maxCtrlIdStrLen = 63;
 constexpr uint8_t parameterRevision = 2;
 constexpr uint8_t specMajorVersion = 1;
 constexpr uint8_t specMinorVersion = 5;
-constexpr auto sensorValueIntf = "xyz.openbmc_project.Sensor.Value";
-constexpr auto sensorValueProp = "Value";
 constexpr uint8_t configParameterRevision = 1;
 constexpr auto option12Mask = 0x01;
 constexpr auto activateDhcpReply = 0x00;
@@ -1077,13 +1078,14 @@ std::tuple<bool, bool, uint8_t> readTemp(ipmi::Context::ptr& ctx,
 
     ipmi::PropertyMap result{};
     boost::system::error_code ec = ipmi::getAllDbusProperties(
-        ctx, dbusService, dbusPath, "xyz.openbmc_project.Sensor.Value", result);
+        ctx, dbusService, dbusPath, SensorValue::interface, result);
     if (ec.value())
     {
         return std::make_tuple(false, false, 0);
     }
     auto temperature =
-        std::visit(ipmi::VariantToDoubleVisitor(), result.at("Value"));
+        std::visit(ipmi::VariantToDoubleVisitor(),
+                   result.at(SensorValue::property_names::value));
     double absTemp = std::abs(temperature);
 
     auto findFactor = result.find("Scale");
@@ -1132,8 +1134,8 @@ std::tuple<std::vector<std::tuple<uint7_t, bool, uint8_t>>, uint8_t> read(
 
         std::string path = j.value("dbus", "");
         std::string service{};
-        boost::system::error_code ec = ipmi::getService(
-            ctx, "xyz.openbmc_project.Sensor.Value", path, service);
+        boost::system::error_code ec =
+            ipmi::getService(ctx, SensorValue::interface, path, service);
         if (ec.value())
         {
             // not found on dbus
@@ -1341,26 +1343,26 @@ static std::optional<uint16_t> readPower(ipmi::Context::ptr& ctx)
     // Return default value if failed to read from D-Bus object
     std::string service{};
     boost::system::error_code ec =
-        ipmi::getService(ctx, dcmi::sensorValueIntf, objectPath, service);
+        ipmi::getService(ctx, SensorValue::interface, objectPath, service);
     if (ec.value())
     {
         lg2::error("Failed to fetch service for D-Bus object, "
                    "object path: {OBJECT_PATH}, interface: {INTERFACE}",
                    "OBJECT_PATH", objectPath, "INTERFACE",
-                   dcmi::sensorValueIntf);
+                   SensorValue::interface);
         return std::nullopt;
     }
 
     // Read the sensor value and scale properties
     double value{};
-    ec = ipmi::getDbusProperty(ctx, service, objectPath, dcmi::sensorValueIntf,
-                               dcmi::sensorValueProp, value);
+    ec = ipmi::getDbusProperty(ctx, service, objectPath, SensorValue::interface,
+                               SensorValue::property_names::value, value);
     if (ec.value())
     {
         lg2::error("Failed to read power value from D-Bus object, "
                    "object path: {OBJECT_PATH}, interface: {INTERFACE}",
                    "OBJECT_PATH", objectPath, "INTERFACE",
-                   dcmi::sensorValueIntf);
+                   SensorValue::interface);
         return std::nullopt;
     }
     auto power = static_cast<uint16_t>(value);
