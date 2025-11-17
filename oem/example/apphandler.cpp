@@ -9,6 +9,7 @@
 #include <sdbusplus/message/types.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 #include <xyz/openbmc_project/Software/Activation/server.hpp>
+#include <xyz/openbmc_project/Software/RedundancyPriority/common.hpp>
 #include <xyz/openbmc_project/Software/Version/server.hpp>
 #include <xyz/openbmc_project/State/BMC/server.hpp>
 
@@ -26,13 +27,6 @@
 #include <tuple>
 #include <vector>
 
-static constexpr auto redundancyIntf =
-    "xyz.openbmc_project.Software.RedundancyPriority";
-static constexpr auto versionIntf = "xyz.openbmc_project.Software.Version";
-static constexpr auto activationIntf =
-    "xyz.openbmc_project.Software.Activation";
-static constexpr auto softwareRoot = "/xyz/openbmc_project/software";
-
 void registerNetFnAppFunctions() __attribute__((constructor));
 
 using namespace phosphor::logging;
@@ -41,6 +35,9 @@ using Version = sdbusplus::server::xyz::openbmc_project::software::Version;
 using Activation =
     sdbusplus::server::xyz::openbmc_project::software::Activation;
 using BMCState = sdbusplus::server::xyz::openbmc_project::state::BMC;
+using SoftwareRedundancyPriority =
+    sdbusplus::common::xyz::openbmc_project::software::RedundancyPriority;
+
 namespace fs = std::filesystem;
 
 /**
@@ -61,23 +58,25 @@ std::string getActiveSoftwareVersionInfo(ipmi::Context::ptr ctx)
     try
     {
         objectTree =
-            ipmi::getAllDbusObjects(*ctx->bus, softwareRoot, redundancyIntf);
+            ipmi::getAllDbusObjects(*ctx->bus, Version::namespace_path,
+                                    SoftwareRedundancyPriority::interface);
     }
     catch (const sdbusplus::exception_t& e)
     {
         lg2::error("Failed to fetch redundancy object from dbus, "
                    "interface: {INTERFACE},  error: {ERROR}",
-                   "INTERFACE", redundancyIntf, "ERROR", e);
+                   "INTERFACE", SoftwareRedundancyPriority::interface, "ERROR",
+                   e);
         elog<InternalFailure>();
     }
 
     auto objectFound = false;
     for (auto& softObject : objectTree)
     {
-        auto service =
-            ipmi::getService(*ctx->bus, redundancyIntf, softObject.first);
-        auto objValueTree =
-            ipmi::getManagedObjects(*ctx->bus, service, softwareRoot);
+        auto service = ipmi::getService(
+            *ctx->bus, SoftwareRedundancyPriority::interface, softObject.first);
+        auto objValueTree = ipmi::getManagedObjects(*ctx->bus, service,
+                                                    Version::namespace_path);
 
         auto minPriority = 0xFF;
         for (const auto& objIter : objValueTree)
@@ -85,17 +84,18 @@ std::string getActiveSoftwareVersionInfo(ipmi::Context::ptr ctx)
             try
             {
                 auto& intfMap = objIter.second;
-                auto& redundancyPriorityProps = intfMap.at(redundancyIntf);
-                auto& versionProps = intfMap.at(versionIntf);
-                auto& activationProps = intfMap.at(activationIntf);
-                auto priority =
-                    std::get<uint8_t>(redundancyPriorityProps.at("Priority"));
-                auto purpose =
-                    std::get<std::string>(versionProps.at("Purpose"));
-                auto activation =
-                    std::get<std::string>(activationProps.at("Activation"));
-                auto version =
-                    std::get<std::string>(versionProps.at("Version"));
+                auto& redundancyPriorityProps =
+                    intfMap.at(SoftwareRedundancyPriority::interface);
+                auto& versionProps = intfMap.at(Version::interface);
+                auto& activationProps = intfMap.at(Activation::interface);
+                auto priority = std::get<uint8_t>(redundancyPriorityProps.at(
+                    SoftwareRedundancyPriority::property_names::priority));
+                auto purpose = std::get<std::string>(
+                    versionProps.at(Version::property_names::purpose));
+                auto activation = std::get<std::string>(
+                    activationProps.at(Activation::property_names::activation));
+                auto version = std::get<std::string>(
+                    versionProps.at(Version::property_names::version));
                 if ((Version::convertVersionPurposeFromString(purpose) ==
                      Version::VersionPurpose::BMC) &&
                     (Activation::convertActivationsFromString(activation) ==
