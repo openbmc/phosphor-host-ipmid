@@ -660,7 +660,7 @@ ipmi::RspType<bool,    // chassis intrusion sensor
                         chassis_front_panel_lockout_enabled]);
     if (chassisFrontPanelFlag == nullptr)
     {
-        lg2::error("Error to get chassis intrusion flags");
+        lg2::error("Error to get chassis Front Panel Lockout flags");
         return ipmi::responseUnspecifiedError();
     }
     bool* chassisNMIFlag = std::get_if<bool>(
