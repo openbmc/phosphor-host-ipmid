@@ -16,6 +16,23 @@
       "message": "Hi George,\n\nFriendly ping.",
       "revId": "73cb914a1176b83d88f213e14fb30c6e7b754235",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0e92c783_25d8d2b4",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000992
+      },
+      "writtenOn": "2025-11-27T03:32:09Z",
+      "side": 1,
+      "message": "Hi, friendly ping.",
+      "revId": "73cb914a1176b83d88f213e14fb30c6e7b754235",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
