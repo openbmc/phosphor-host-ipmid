@@ -33,6 +33,24 @@
       "message": "Hi, friendly ping.",
       "revId": "73cb914a1176b83d88f213e14fb30c6e7b754235",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cbd41d66_2c3d0e17",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2025-11-29T01:07:11Z",
+      "side": 1,
+      "message": "I’m waiting for the progress on https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/82356 and for @vernon.mauery@gmail.com’s feedback.",
+      "parentUuid": "0e92c783_25d8d2b4",
+      "revId": "73cb914a1176b83d88f213e14fb30c6e7b754235",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
