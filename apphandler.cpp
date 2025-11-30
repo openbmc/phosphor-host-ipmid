@@ -1766,6 +1766,7 @@ ipmi::RspType<std::vector<uint8_t>> ipmiControllerWriteRead(
                    "bus: {BUS}, addr: {ADDR}",
                    "BUS", static_cast<uint8_t>(busId), "ADDR", lg2::hex,
                    static_cast<uint8_t>(targetAddr));
+        return ipmi::responseCommandDisabled();
     }
 #endif // ENABLE_I2C_WHITELIST_CHECK
     std::vector<uint8_t> readBuf(readCount);
