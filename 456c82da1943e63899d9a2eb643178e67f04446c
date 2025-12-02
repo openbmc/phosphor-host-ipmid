@@ -16,6 +16,24 @@
       "message": "Did you meant responseParmOutOfRange() instead of invalid command?",
       "revId": "456c82da1943e63899d9a2eb643178e67f04446c",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4acdd29a_facd19a0",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 921,
+      "author": {
+        "id": 1002071
+      },
+      "writtenOn": "2025-12-02T06:17:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f9f6053c_a557beb4",
+      "revId": "456c82da1943e63899d9a2eb643178e67f04446c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
