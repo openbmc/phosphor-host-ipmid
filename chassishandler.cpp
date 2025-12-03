@@ -412,9 +412,9 @@ ipmi::Cc setHostNetworkData(ipmi::message::Payload& data)
                 lg2::error("Error in cookie getting of setHostNetworkData");
                 return ipmi::ccReqDataLenInvalid;
             }
-            if (std::equal(msgPayloadStartingPos + cookieOffset,
-                           msgPayloadStartingPos + cookieOffset + cookieSize,
-                           (netConfInitialBytes + cookieOffset)) != 0)
+            if (!std::equal(msgPayloadStartingPos + cookieOffset,
+                            msgPayloadStartingPos + cookieOffset + cookieSize,
+                            (netConfInitialBytes + cookieOffset)))
             {
                 // all cookie == 0
                 if (std::all_of(msgPayloadStartingPos + cookieOffset,
