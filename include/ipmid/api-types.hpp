@@ -333,6 +333,7 @@ constexpr Cmd cmdGetDcmiConfigParameters = 0x13;
 #ifdef ARM_SBMR_SUPPORT
 namespace sbmr
 {
+constexpr Cmd cmdSendPlatformErrorRecord = 0x01;
 constexpr Cmd cmdSendBootProgressCode = 0x02;
 constexpr Cmd cmdGetBootProgressCode = 0x03;
 } // namespace sbmr

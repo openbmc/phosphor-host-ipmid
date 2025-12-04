@@ -1,3 +1,6 @@
+#include "ipmid/api-types.hpp"
+
+#include <boost/system/error_code.hpp>
 #include <ipmid/api.hpp>
 #include <ipmid/filter.hpp>
 #include <ipmid/utils.hpp>
@@ -149,6 +152,22 @@ bool updateBootProgressLastUpdateProperty(ipmi::Context::ptr& ctx,
     return true;
 }
 
+ipmi::RspType<> sendPlatformErrorRecord(ipmi::Context::ptr ctx,
+                                        std::vector<uint8_t> cperBytes)
+{
+    auto ec = ipmi::callDbusMethod(
+        ctx, "xyz.openbmc_project.CPERRepository1",
+        "/xyz/openbmc_project/CPERRepository1",
+        "xyz.openbmc_project.CPERRepository1", "StoreCPER", cperBytes);
+    if (ec)
+    {
+        lg2::error("StoreCPER failed: {ERROR}", "ERROR", ec.message());
+        return ipmi::responseUnspecifiedError();
+    }
+
+    return ipmi::responseSuccess();
+}
+
 ipmi::RspType<> sendBootProgressCode(
     ipmi::Context::ptr ctx, uint8_t codeType, uint8_t codeReserved1,
     uint8_t codeReserved2, uint8_t codeSeverity, uint8_t codeOperation1,
@@ -287,7 +306,12 @@ ipmi::Cc sbmrFilterCommands(ipmi::message::Request::ptr request)
         return ipmi::ccUnspecifiedError;
     }
 
-    if (request->ctx->cmd == ipmi::sbmr::cmdSendBootProgressCode &&
+    constexpr std::array<Cmd, 2> ssifOnlyCommands{
+        ipmi::sbmr::cmdSendBootProgressCode,
+        ipmi::sbmr::cmdSendPlatformErrorRecord,
+    };
+
+    if (std::ranges::contains(ssifOnlyCommands, request->ctx->cmd) &&
         !checkAllowedMediumType(chInfo.mediumType))
     {
         lg2::error("Error - Medium interface not supported, medium={TYPE}",
@@ -302,6 +326,10 @@ ipmi::Cc sbmrFilterCommands(ipmi::message::Request::ptr request)
 
 void registerNetfnSBMRFunctions()
 {
+    registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupSBMR,
+                         ipmi::sbmr::cmdSendPlatformErrorRecord,
+                         ipmi::Privilege::Admin, ipmi::sendPlatformErrorRecord);
+
     registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupSBMR,
                          ipmi::sbmr::cmdSendBootProgressCode,
                          ipmi::Privilege::Admin, ipmi::sendBootProgressCode);
