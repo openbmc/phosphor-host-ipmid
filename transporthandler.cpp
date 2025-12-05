@@ -251,6 +251,22 @@ void deleteObjectIfExists(sdbusplus::bus_t& bus, const std::string& service,
     }
 }
 
+bool isChannelObjectExists(sdbusplus::bus_t& bus, const ChannelParams& params)
+{
+    std::vector<std::string> interfaces = {INTF_VLAN, INTF_ETHERNET};
+    ipmi::ObjectTree objs =
+        ipmi::getSubTree(bus, interfaces, std::string{PATH_ROOT});
+
+    for (const auto& [path, impls] : objs)
+    {
+        if (path == params.logicalPath)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 /** @brief Sets the address info configured for the interface
  *         If a previous address path exists then it will be removed
  *         before the new address is added.
@@ -605,10 +621,13 @@ void reconfigureVLAN(sdbusplus::bus_t& bus, ChannelParams& params,
     deconfigureChannel(bus, params);
     createVLAN(bus, params, vlan);
 
-    // Re-establish the saved settings
-    setEthProp(bus, parentIntParams, "DHCP4", dhcp4);
-    setEthProp(bus, parentIntParams, "DHCP6", dhcp6);
-    setEthProp(bus, parentIntParams, "IPv6AcceptRA", ra);
+    if (isChannelObjectExists(bus, parentIntParams))
+    {
+        // Re-establish the saved settings
+        setEthProp(bus, parentIntParams, "DHCP4", dhcp4);
+        setEthProp(bus, parentIntParams, "DHCP6", dhcp6);
+        setEthProp(bus, parentIntParams, "IPv6AcceptRA", ra);
+    }
 
     setEthProp(bus, params, "DHCP4", dhcp4);
     setEthProp(bus, params, "DHCP6", dhcp6);
