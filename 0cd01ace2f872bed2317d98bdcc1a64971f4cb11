@@ -93,6 +93,30 @@
       },
       "revId": "0cd01ace2f872bed2317d98bdcc1a64971f4cb11",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "71741cf3_80defe5e",
+        "filename": "sensordatahandler.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 345,
+      "author": {
+        "id": 1001843
+      },
+      "writtenOn": "2025-12-05T23:13:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ccf2412c_c0b557ac",
+      "range": {
+        "startLine": 344,
+        "startChar": 0,
+        "endLine": 345,
+        "endChar": 51
+      },
+      "revId": "0cd01ace2f872bed2317d98bdcc1a64971f4cb11",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ],
   "submitRequirementResults": []
