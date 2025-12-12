@@ -1,5 +1,6 @@
 #include "ipmi_fru_info_area.hpp"
 
+#include <ipmid/utils.hpp>
 #include <phosphor-logging/elog.hpp>
 #include <phosphor-logging/lg2.hpp>
 
@@ -138,15 +139,10 @@ void appendChassisType(const PropertyMap& propMap, FruAreaData& data)
     if (iter != propMap.end())
     {
         auto value = iter->second;
-        try
+        if (!ipmi::fromString(value, chassisType))
         {
-            chassisType = std::stoi(value);
-        }
-        catch (const std::exception& e)
-        {
-            lg2::error("Could not parse chassis type, value: {VALUE}, "
-                       "error: {ERROR}",
-                       "VALUE", value, "ERROR", e);
+            lg2::error("Could not parse chassis type, value: {VALUE}", "VALUE",
+                       value);
             chassisType = 0;
         }
     }

@@ -461,4 +461,17 @@ ipmi::Cc i2cWriteRead(std::string i2cBus, const uint8_t targetAddr,
  */
 std::vector<std::string> split(const std::string& srcStr, char delim);
 
+template <typename T>
+inline bool fromString(std::string_view s, T& out)
+{
+    static_assert(std::is_integral_v<T>,
+                  "fromString only supports integral types");
+
+    const char* begin = s.data();
+    const char* end = s.data() + s.size();
+
+    auto result = std::from_chars(begin, end, out);
+
+    return result.ec == std::errc() && result.ptr == end;
+}
 } // namespace ipmi
