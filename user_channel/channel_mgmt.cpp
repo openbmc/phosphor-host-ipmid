@@ -1032,9 +1032,9 @@ int ChannelConfig::readChannelVolatileData()
         // Fill in global structure
         for (auto it = data.begin(); it != data.end(); ++it)
         {
+            uint8_t chNum;
             std::string chKey = it.key();
-            uint8_t chNum = std::stoi(chKey, nullptr, 10);
-            if (chNum >= maxIpmiChannels)
+            if (!fromString(chKey, chNum) || chNum >= maxIpmiChannels)
             {
                 lg2::debug("Invalid channel access entry in config file");
                 throw std::out_of_range("Out of range - channel number");
@@ -1099,9 +1099,9 @@ int ChannelConfig::readChannelPersistData()
         // Fill in global structure
         for (auto it = data.begin(); it != data.end(); ++it)
         {
+            uint8_t chNum;
             std::string chKey = it.key();
-            uint8_t chNum = std::stoi(chKey, nullptr, 10);
-            if (chNum >= maxIpmiChannels)
+            if (!fromString(chKey, chNum) || chNum >= maxIpmiChannels)
             {
                 lg2::debug("Invalid channel access entry in config file");
                 throw std::out_of_range("Out of range - channel number");
