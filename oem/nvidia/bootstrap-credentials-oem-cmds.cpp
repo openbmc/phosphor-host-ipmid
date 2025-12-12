@@ -175,8 +175,12 @@ ipmi::RspType<std::vector<uint8_t>> ipmiGetRedfishServiceUUID()
             {
                 std::swap(group[j], group[j + 1]);
             }
-            resBuf.push_back(static_cast<uint8_t>(
-                std::stoi(group.substr(j, 2), nullptr, 16)));
+
+            uint8_t value;
+            if (tryParse(group.substr(j, 2), value, 16))
+            {
+                resBuf.push_back(value);
+            }
         }
     }
     return ipmi::responseSuccess(resBuf);

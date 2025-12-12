@@ -461,4 +461,33 @@ ipmi::Cc i2cWriteRead(std::string i2cBus, const uint8_t targetAddr,
  */
 std::vector<std::string> split(const std::string& srcStr, char delim);
 
+/** @brief Parse an integral value from a string without throwing exceptions.
+ *  @param[in] s - Input string_view to parse.
+ *  @param[in,out] out - Output parameter that receives the parsed value on
+ *                       success.
+ *  @param[in] base - Number base (10 or 16). If 16, 0x/0X prefix is optional.
+ *  @return True if parsing succeeds and the entire string is consumed;
+ *          otherwise false.
+ */
+template <typename T>
+inline bool tryParse(std::string_view s, T& out, int base = 10)
+{
+    static_assert(std::is_integral_v<T>,
+                  "tryParse only supports integral types");
+
+    if (s.empty())
+    {
+        return false;
+    }
+
+    if (base == 16 && s.size() >= 2 && s[0] == '0' &&
+        (s[1] == 'x' || s[1] == 'X'))
+    {
+        s.remove_prefix(2);
+    }
+
+    auto result = std::from_chars(s.data(), s.data() + s.size(), out, base);
+
+    return result.ec == std::errc{} && result.ptr == s.data() + s.size();
+}
 } // namespace ipmi
