@@ -259,7 +259,11 @@ int getHostNetworkData(ipmi::message::Payload& payload)
 
         while (std::getline(ss, token, ':'))
         {
-            payload.pack(stoi(token, nullptr, 16));
+            uint8_t byte;
+            if (ipmi::tryParse(token, byte))
+            {
+                payload.pack(byte);
+            }
         }
 
         payload.pack(0x00);
