@@ -45,6 +45,9 @@ struct Objects
     /** @brief map of settings objects */
     std::map<Interface, std::vector<Path>> map;
 
+    /** @brief map of service objects */
+    std::map<Path, Service> serviceMap;
+
     /** @brief The Dbus bus object */
     sdbusplus::bus_t& bus;
 };

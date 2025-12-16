@@ -959,11 +959,11 @@ std::optional<uint2_t> getPowerRestorePolicy()
     {
         const auto& powerRestoreSetting =
             objects.map.at(powerRestoreIntf).front();
+        const auto& powerRestoreSettingService =
+            objects.serviceMap.at(powerRestoreSetting);
         ipmi::Value result = ipmi::getDbusProperty(
-            *getSdBus(),
-            objects.service(powerRestoreSetting, powerRestoreIntf).c_str(),
-            powerRestoreSetting.c_str(), powerRestoreIntf,
-            "PowerRestorePolicy");
+            *getSdBus(), powerRestoreSettingService, powerRestoreSetting,
+            powerRestoreIntf, "PowerRestorePolicy");
         auto powerRestore = RestorePolicy::convertPolicyFromString(
             std::get<std::string>(result));
         restorePolicy = dbusToIpmi.at(powerRestore);
@@ -2371,13 +2371,13 @@ ipmi::RspType<uint3_t, // policy support
         settings::Objects& objects = chassis::internal::cache::getObjects();
         const settings::Path& powerRestoreSetting =
             objects.map.at(chassis::internal::powerRestoreIntf).front();
+        const auto& powerRestoreSettingService =
+            objects.serviceMap.at(powerRestoreSetting);
 
         boost::system::error_code ec = ipmi::setDbusProperty(
-            ctx,
-            objects.service(powerRestoreSetting,
-                            chassis::internal::powerRestoreIntf),
-            powerRestoreSetting, chassis::internal::powerRestoreIntf,
-            "PowerRestorePolicy", convertForMessage(value));
+            ctx, powerRestoreSettingService, powerRestoreSetting,
+            chassis::internal::powerRestoreIntf, "PowerRestorePolicy",
+            convertForMessage(value));
         if (ec)
         {
             lg2::error("Unspecified Error");

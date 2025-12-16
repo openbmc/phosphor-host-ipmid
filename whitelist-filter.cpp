@@ -37,7 +37,9 @@ class AllowlistFilter
 
   private:
     void postInit();
-    void cacheRestrictedMode(const std::vector<std::string>& devices);
+    void cacheRestrictedMode(
+        const std::vector<std::string>& devices,
+        const std::map<std::string, std::string>& serviceMaps);
     void handleRestrictedModeChange(
         sdbusplus::message_t& m,
         const std::map<std::string, size_t>& deviceList);
@@ -73,7 +75,8 @@ AllowlistFilter::AllowlistFilter()
  */
 
 void AllowlistFilter::cacheRestrictedMode(
-    const std::vector<std::string>& devices)
+    const std::vector<std::string>& devices,
+    const std::map<std::string, std::string>& serviceMaps)
 {
     using namespace sdbusplus::server::xyz::openbmc_project::control::security;
     std::string restrictionModeSetting;
@@ -84,8 +87,7 @@ void AllowlistFilter::cacheRestrictedMode(
         try
         {
             restrictionModeSetting = dev;
-            restrictionModeService =
-                objects->service(restrictionModeSetting, restrictionModeIntf);
+            restrictionModeService = serviceMaps.at(dev);
         }
         catch (const std::out_of_range& e)
         {
@@ -193,7 +195,7 @@ void AllowlistFilter::postInit()
     }
 
     // Initialize restricted mode
-    cacheRestrictedMode(devices);
+    cacheRestrictedMode(devices, objects->serviceMap);
     // Wait for changes on Restricted mode
     std::map<std::string, size_t> deviceList;
 

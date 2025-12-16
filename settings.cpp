@@ -32,6 +32,11 @@ Objects::Objects(sdbusplus::bus_t& bus, const std::vector<Interface>& filter) :
     for (auto& iter : objectTree)
     {
         const auto& path = iter.first;
+        if (!serviceMap.contains(path))
+        {
+            serviceMap.emplace(path, iter.second.begin()->first);
+        }
+
         for (auto& interface : iter.second.begin()->second)
         {
             auto found = map.find(interface);
