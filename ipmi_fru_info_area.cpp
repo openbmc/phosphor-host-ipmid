@@ -201,8 +201,8 @@ std::time_t timeStringToRaw(const std::string& input)
     // TODO: For non-US region timestamps, pass in region information for the
     // FRU to avoid the month/day swap.
     // 2017-02-24 - 13:59:00, Tue Nov 20 23:08:00 2018
-    static const std::vector<std::string> patterns = {"%Y-%m-%d - %H:%M:%S",
-                                                      "%a %b %d %H:%M:%S %Y"};
+    static const std::vector<std::string> patterns = {
+        "%Y-%m-%d - %H:%M:%S", "%a %b %d %H:%M:%S %Y", "%Y%m%dT%H%M%SZ"};
 
     std::tm time = {};
 
