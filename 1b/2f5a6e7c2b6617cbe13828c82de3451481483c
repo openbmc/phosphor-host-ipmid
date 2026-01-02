@@ -1,0 +1,8 @@
+Code-Review+2: George Liu <liuxiwei@ieisystem.com>
+Code-Review+1: zhanghaicheng <zhanghch05@ieisystem.com>
+Verified+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Submitted-by: George Liu <liuxiwei@ieisystem.com>
+Submitted-at: Fri, 02 Jan 2026 05:55:41 +0000
+Reviewed-on: https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/86026
+Project: openbmc/phosphor-host-ipmid
+Branch: refs/heads/master
