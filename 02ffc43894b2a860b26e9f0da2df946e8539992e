@@ -3,6 +3,23 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "a52872aa_325bde5a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2026-01-05T03:05:00Z",
+      "side": 1,
+      "message": "This patch depends on https://gerrit.openbmc.org/c/openbmc/entity-manager/+/86145\n. We will continue after it is merged.",
+      "revId": "02ffc43894b2a860b26e9f0da2df946e8539992e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "b4fade63_f19917ed",
         "filename": "dbus-sdr/sensorcommands.cpp",
         "patchSetId": 2
