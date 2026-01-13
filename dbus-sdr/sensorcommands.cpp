@@ -1210,6 +1210,14 @@ ipmi::RspType<> ipmiSenSetSensorThresholds(
             {
                 return ipmi::responseInvalidFieldRequest();
             }
+            auto value = findLower->second;
+            // Convert the value to a double using std::visit
+            double doubleValue = std::visit(VariantToDoubleVisitor(), value);
+            if (std::isnan(doubleValue))
+            {
+                lg2::error("Lower Critical threshold not supported (NA)");
+                return ipmi::responseInvalidFieldRequest();
+            }
             thresholdsToSet.emplace_back(
                 SensorThresholdCritical::property_names::critical_low,
                 lowerCritical, findThreshold->first);
@@ -1220,6 +1228,14 @@ ipmi::RspType<> ipmiSenSetSensorThresholds(
                 SensorThresholdCritical::property_names::critical_high);
             if (findUpper == findThreshold->second.end())
             {
+                return ipmi::responseInvalidFieldRequest();
+            }
+            auto value = findUpper->second;
+            // Convert the value to a double using std::visit
+            double doubleValue = std::visit(VariantToDoubleVisitor(), value);
+            if (std::isnan(doubleValue))
+            {
+                lg2::error("Upper Critical threshold not supported (NA)");
                 return ipmi::responseInvalidFieldRequest();
             }
             thresholdsToSet.emplace_back(
@@ -1242,6 +1258,14 @@ ipmi::RspType<> ipmiSenSetSensorThresholds(
             {
                 return ipmi::responseInvalidFieldRequest();
             }
+            auto value = findLower->second;
+            // Convert the value to a double using std::visit
+            double doubleValue = std::visit(VariantToDoubleVisitor(), value);
+            if (std::isnan(doubleValue))
+            {
+                lg2::error("Lower Non-Critical threshold not supported (NA)");
+                return ipmi::responseInvalidFieldRequest();
+            }
             thresholdsToSet.emplace_back(
                 SensorThresholdWarning::property_names::warning_low,
                 lowerNonCritical, findThreshold->first);
@@ -1252,6 +1276,14 @@ ipmi::RspType<> ipmiSenSetSensorThresholds(
                 SensorThresholdWarning::property_names::warning_high);
             if (findUpper == findThreshold->second.end())
             {
+                return ipmi::responseInvalidFieldRequest();
+            }
+            auto value = findUpper->second;
+            // Convert the value to a double using std::visit
+            double doubleValue = std::visit(VariantToDoubleVisitor(), value);
+            if (std::isnan(doubleValue))
+            {
+                lg2::error("Upper Non-Critical threshold not supported (NA)");
                 return ipmi::responseInvalidFieldRequest();
             }
             thresholdsToSet.emplace_back(
