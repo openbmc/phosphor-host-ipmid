@@ -18,6 +18,23 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "3fb54c47_762a25e2",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2026-01-20T21:38:04Z",
+      "side": 1,
+      "message": "Thanks for the review @john.chung@arm.com!",
+      "revId": "6652c56672423c909c4b4464edb5d666073838b5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "ce84d5d8_73057d1d",
@@ -31,6 +48,30 @@
       "writtenOn": "2026-01-20T20:18:19Z",
       "side": 1,
       "message": "nit: MACRO variable.",
+      "range": {
+        "startLine": 159,
+        "startChar": 13,
+        "endLine": 159,
+        "endChar": 50
+      },
+      "revId": "6652c56672423c909c4b4464edb5d666073838b5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d2a2543e_222d5f12",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2026-01-20T21:38:04Z",
+      "side": 1,
+      "message": "I have added an API version to the service/path/interface, the goal being to provide API stability.  That means the API and its associated service/path/interface names should not change incompatibly, or, if they do, then we will need to fix up all the call sites just like we would if a c++ API (function, class, etc) changed names.\n\nGiven the API stability, a variable seems like an unnecessary indirection, does it not?",
+      "parentUuid": "ce84d5d8_73057d1d",
       "range": {
         "startLine": 159,
         "startChar": 13,
@@ -100,6 +141,24 @@
       "writtenOn": "2026-01-20T20:18:19Z",
       "side": 1,
       "message": "We should filter `sendPlatformErrorRecord` command that should only be available on Host system interface.",
+      "revId": "6652c56672423c909c4b4464edb5d666073838b5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f51af5ce_5dffe720",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 309,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2026-01-20T21:38:04Z",
+      "side": 1,
+      "message": "Ok, sure - is this something the SBMR says?  I don\u0027t remember seeing that but I probably missed it.",
+      "parentUuid": "f095b3ae_b8ec7cf8",
       "revId": "6652c56672423c909c4b4464edb5d666073838b5",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
