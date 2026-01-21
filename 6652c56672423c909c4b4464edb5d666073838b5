@@ -82,6 +82,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "9d2d5e49_845c938d",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2026-01-21T17:01:55Z",
+      "side": 1,
+      "message": "It’s fine. I just think some other functions might use those APIs, so keeping them for consistency by using macro could be beneficial.",
+      "parentUuid": "d2a2543e_222d5f12",
+      "range": {
+        "startLine": 159,
+        "startChar": 13,
+        "endLine": 159,
+        "endChar": 50
+      },
+      "revId": "6652c56672423c909c4b4464edb5d666073838b5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "82acf98b_afe6235e",
@@ -159,6 +183,24 @@
       "side": 1,
       "message": "Ok, sure - is this something the SBMR says?  I don\u0027t remember seeing that but I probably missed it.",
       "parentUuid": "f095b3ae_b8ec7cf8",
+      "revId": "6652c56672423c909c4b4464edb5d666073838b5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cc11bebc_511ce713",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 309,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2026-01-21T17:01:55Z",
+      "side": 1,
+      "message": "Yes, SBMR recommends using IPMI SSIF, which is used by the OS/firmware, as described in Section C.1.",
+      "parentUuid": "f51af5ce_5dffe720",
       "revId": "6652c56672423c909c4b4464edb5d666073838b5",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
