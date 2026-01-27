@@ -129,6 +129,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "4edfb0a8_474ad681",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2026-01-27T18:28:05Z",
+      "side": 1,
+      "message": "Leaving as is for now.",
+      "parentUuid": "82acf98b_afe6235e",
+      "range": {
+        "startLine": 160,
+        "startChar": 8,
+        "endLine": 160,
+        "endChar": 46
+      },
+      "revId": "6652c56672423c909c4b4464edb5d666073838b5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "5628fa2d_90ea719c",
@@ -142,6 +166,30 @@
       "writtenOn": "2026-01-20T20:18:19Z",
       "side": 1,
       "message": "nit: MACRO variable.",
+      "range": {
+        "startLine": 161,
+        "startChar": 9,
+        "endLine": 161,
+        "endChar": 44
+      },
+      "revId": "6652c56672423c909c4b4464edb5d666073838b5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f2c20f42_da8cb159",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2026-01-27T18:28:05Z",
+      "side": 1,
+      "message": "Leaving as is for now.",
+      "parentUuid": "5628fa2d_90ea719c",
       "range": {
         "startLine": 161,
         "startChar": 9,
@@ -201,6 +249,24 @@
       "side": 1,
       "message": "Yes, SBMR recommends using IPMI SSIF, which is used by the OS/firmware, as described in Section C.1.",
       "parentUuid": "f51af5ce_5dffe720",
+      "revId": "6652c56672423c909c4b4464edb5d666073838b5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "eb9c4984_57507aa7",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 309,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2026-01-27T18:28:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cc11bebc_511ce713",
       "revId": "6652c56672423c909c4b4464edb5d666073838b5",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
