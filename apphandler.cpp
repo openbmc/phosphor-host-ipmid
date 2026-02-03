@@ -171,7 +171,7 @@ std::string getActiveSoftwareVersionInfo(ipmi::Context::ptr ctx)
 
     if (!objectFound)
     {
-        lg2::error("Could not found an BMC software Object");
+        lg2::error("Could not find an BMC software Object");
         elog<InternalFailure>();
     }
 
@@ -574,7 +574,7 @@ int convertVersion(std::string s, Revision& rev)
             }
 
             if (i != 4)
-            { // something wrong durign converting aux bytes
+            { // something wrong during converting aux bytes
                 return -1;
             }
         }
@@ -700,7 +700,7 @@ ipmi::RspType<uint8_t,  // Device ID
                     }
                 }
 
-                // Set the availablitity of the BMC.
+                // Set the availability of the BMC.
                 defaultActivationSetting = data.value("availability", true);
 
                 // Don't read the file every time if successful
@@ -736,7 +736,7 @@ auto ipmiAppGetSelfTestResults() -> ipmi::RspType<uint8_t, uint8_t>
     // Byte 2:
     //  55h - No error.
     //  56h - Self Test function not implemented in this controller.
-    //  57h - Corrupted or inaccesssible data or devices.
+    //  57h - Corrupted or inaccessible data or devices.
     //  58h - Fatal hardware error.
     //  FFh - reserved.
     //  all other: Device-specific 'internal failure'.
@@ -1019,8 +1019,8 @@ uint8_t getTotalSessionCount()
  * @param[in] ctx - context of current session.
  * @param[in] sessionIndex - request session index
  * @param[in] payload - input payload
- * @param[in] reqSessionId - unpacked session Id will be asigned
- * @param[in] reqSessionHandle - unpacked session handle will be asigned
+ * @param[in] reqSessionId - unpacked session Id will be assigned
+ * @param[in] reqSessionHandle - unpacked session handle will be assigned
  *
  * @return success completion code if request data is valid
  * else return the correcponding error completion code.
