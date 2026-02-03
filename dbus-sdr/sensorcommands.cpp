@@ -391,7 +391,7 @@ static bool getSensorMap(ipmi::Context::ptr ctx, std::string sensorConnection,
 
         if (!found)
         {
-            lg2::error("GetMangagedObjects for getSensorMap failed, "
+            lg2::error("GetManagedObjects for getSensorMap failed, "
                        "service: {SERVICE}",
                        "SERVICE", sensorConnection);
 

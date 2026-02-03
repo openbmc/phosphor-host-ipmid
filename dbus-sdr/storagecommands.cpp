@@ -225,7 +225,7 @@ void replaceCacheFru(
         "org.freedesktop.DBus.ObjectManager", "GetManagedObjects");
     if (ec)
     {
-        lg2::error("GetMangagedObjects for replaceCacheFru failed: {ERROR}",
+        lg2::error("GetManagedObjects for replaceCacheFru failed: {ERROR}",
                    "ERROR", ec.message());
 
         return;
