@@ -201,21 +201,33 @@ ipmi::Cc CipherConfig::setCSPrivilegeLevels(
             "CHANNEL", chNum);
         return ccInvalidFieldRequest;
     }
+    
+    Json jsonData = readCSPrivilegeLevels(cipherSuiteDefaultPrivFileName);
+    if (jsonData == nullptr)
+    {
+        lg2::error("Failed to load CS privilege default file");
+        return ccUnspecifiedError;
+    }
 
-    Json jsonData;
-    if (!fs::exists(cipherSuitePrivFileName))
+    if (fs::exists(cipherSuitePrivFileName))
     {
-        lg2::info("CS privilege levels user settings file does not "
-                  "exist. Creating...");
-    }
-    else
-    {
-        jsonData = readCSPrivilegeLevels(cipherSuitePrivFileName);
-        if (jsonData == nullptr)
+        Json overrideData = readCSPrivilegeLevels(cipherSuitePrivFileName);
+        if (overrideData == nullptr)
         {
-            return ccUnspecifiedError;
+           return ccUnspecifiedError;
         }
-    }
+
+        lg2::info("Loaded CS privilege override file");
+
+        for (auto& [key, value] : overrideData.items())
+        {
+            jsonData[key] = value;
+        }
+     }
+     else
+     {
+        lg2::info("CS privilege override file not present; using defaults");
+     }
 
     Json privData;
     std::string csKey;
