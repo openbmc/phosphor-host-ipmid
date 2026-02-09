@@ -91,7 +91,7 @@ auto channelCall(uint8_t channel, Args&&... args)
     return std::invoke(func, bus, params, std::forward<Args>(args)...);
 }
 
-/** @brief Generic paramters for different address families */
+/** @brief Generic parameters for different address families */
 template <int family>
 struct AddrFamily
 {};
@@ -237,7 +237,7 @@ class ObjectLookupCache
 
 /** @brief Searches the ip object lookup cache for an address matching
  *         the input parameters. NOTE: The index lacks stability across address
- *         changes since the network daemon has no notion of stable indicies.
+ *         changes since the network daemon has no notion of stable indices.
  *
  *  @param[in] bus     - The bus object used for lookups
  *  @param[in] params  - The parameters for the channel

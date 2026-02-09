@@ -4,7 +4,7 @@
 
 // These are per skiboot ipmi-sel code
 
-// Minor command for soft shurdown
+// Minor command for soft shutdown
 #define SOFT_OFF 0x00
 // Major command for Any kind of power ops
 #define CMD_POWER 0x04

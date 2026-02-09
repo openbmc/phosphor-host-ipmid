@@ -642,7 +642,7 @@ static std::unordered_map<uint8_t, SetStatus> setStatus;
 static std::unordered_map<uint8_t, uint16_t> lastDisabledVlan;
 
 /** @brief Gets the set status for the channel if it exists
- *         Otherise populates and returns the default value.
+ *         Otherwise populates and returns the default value.
  *
  *  @param[in] channel - The channel id corresponding to an ethernet interface
  *  @return A reference to the SetStatus for the channel

@@ -217,7 +217,7 @@ void AllowlistFilter::postInit()
 }
 
 /** @brief Filter IPMI messages with RestrictedMode
- *  @param[in] request - IPMI messahe request
+ *  @param[in] request - IPMI message request
  *  @returns IPMI completion code success or error.
  */
 

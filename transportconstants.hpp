@@ -72,7 +72,7 @@ enum class SetStatus : uint8_t
     Commit = 2,
 };
 
-/** @brief IPMI Family Suport Bits */
+/** @brief IPMI Family Support Bits */
 namespace IPFamilySupportFlag
 {
 constexpr uint8_t IPv6Only = 0;
@@ -88,7 +88,7 @@ enum class IPFamilyEnables : uint8_t
     DualStack = 2,
 };
 
-/** @brief IPMI IPv6 Dyanmic Status Bits */
+/** @brief IPMI IPv6 Dynamic Status Bits */
 namespace IPv6StatusFlag
 {
 constexpr uint8_t DHCP = 0;
