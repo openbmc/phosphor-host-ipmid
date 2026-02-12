@@ -543,6 +543,34 @@ void deconfigureChannel(sdbusplus::bus_t& bus, ChannelParams& params)
     setEthProp(bus, params, "IPv6AcceptRA", false);
 }
 
+/** @brief Deletes all of the possible configuration parameters for VLAN
+ * interface
+ *
+ *  @param[in] bus    - The bus object used for lookups
+ *  @param[in] params - The parameters for the vlan interface
+ */
+void deconfigureVLAN(sdbusplus::bus_t& bus, ChannelParams& params)
+{
+    std::vector<std::string> interfaces = {INTF_VLAN};
+    ObjectTree objs = ipmi::getSubTree(bus, interfaces, std::string{PATH_ROOT});
+
+    for (const auto& [path, impls] : objs)
+    {
+        if (!ifnameInPath(params.ifname, path))
+        {
+            continue;
+        }
+        for (const auto& [service, intfs] : impls)
+        {
+            deleteObjectIfExists(bus, service, path);
+        }
+        if (path == params.logicalPath)
+        {
+            params.logicalPath = params.ifPath;
+        }
+    }
+}
+
 /** @brief Creates a new VLAN on the specified interface
  *
  *  @param[in] bus    - The bus object used for lookups
@@ -599,16 +627,12 @@ void reconfigureVLAN(sdbusplus::bus_t& bus, ChannelParams& params,
     ObjectLookupCache neighbors(bus, params, INTF_NEIGHBOR);
     auto neighbor4 = findGatewayNeighbor<AF_INET>(bus, params, neighbors);
     auto neighbor6 = findGatewayNeighbor<AF_INET6>(bus, params, neighbors);
-    // Make copy of params to retain the previous configs
-    ChannelParams parentIntParams = params;
 
-    deconfigureChannel(bus, params);
+    if (params.logicalPath != params.ifPath)
+    {
+        deconfigureVLAN(bus, params);
+    }
     createVLAN(bus, params, vlan);
-
-    // Re-establish the saved settings
-    setEthProp(bus, parentIntParams, "DHCP4", dhcp4);
-    setEthProp(bus, parentIntParams, "DHCP6", dhcp6);
-    setEthProp(bus, parentIntParams, "IPv6AcceptRA", ra);
 
     setEthProp(bus, params, "DHCP4", dhcp4);
     setEthProp(bus, params, "DHCP6", dhcp6);
