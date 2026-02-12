@@ -486,6 +486,11 @@ int PasswdMgr::updatePasswdSpecialFile(const std::string& userName,
 
     const EVP_MD* digest = EVP_sha256();
     size_t hashLen = EVP_MD_block_size(digest);
+    if (hashLenTmp <= 0)
+    {
+        lg2::debug("Error getting hash block size");
+        return -EIO;
+    }
     std::vector<uint8_t> hash(hashLen);
     size_t ivLen = EVP_CIPHER_iv_length(cipher);
     std::vector<uint8_t> iv(ivLen);
