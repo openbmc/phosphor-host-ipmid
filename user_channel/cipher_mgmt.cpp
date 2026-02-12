@@ -125,8 +125,6 @@ int CipherConfig::writeCSPrivilegeLevels(const Json& jsonData)
     strncpy(tmpRandomFile.data(), tmpFile.c_str(), tmpFile.length() + 1);
 
     int fd = mkstemp(tmpRandomFile.data());
-    fchmod(fd, 0644);
-
     if (fd < 0)
     {
         lg2::error("Error opening CS privilege level config file: {FILE_NAME}",
@@ -140,6 +138,15 @@ int CipherConfig::writeCSPrivilegeLevels(const Json& jsonData)
         close(fd);
         lg2::error("Error writing CS privilege level config file: {FILE_NAME}",
                    "FILE_NAME", tmpFile);
+        unlink(tmpRandomFile.data());
+        return -EIO;
+    }
+    if (fchmod(fd, 0644) < 0)
+    {
+        close(fd);
+        lg2::error(
+            "Error setting permissions on CS privilege level config file: {FILE_NAME}",
+            "FILE_NAME", tmpFile);
         unlink(tmpRandomFile.data());
         return -EIO;
     }
