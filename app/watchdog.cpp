@@ -88,6 +88,7 @@ ipmi::RspType<> ipmiAppResetWatchdogTimer()
 }
 
 static constexpr uint8_t wdTimeoutActionMask = 0x3;
+static constexpr uint8_t wdPreTimeoutInterruptMask = 0x3;
 
 static constexpr uint8_t wdTimerUseResTimer1 = 0x0;
 static constexpr uint8_t wdTimerUseResTimer2 = 0x6;
@@ -131,6 +132,45 @@ WatchdogService::Action ipmiActionToWdAction(IpmiAction ipmiAction)
         default:
         {
             throw std::domain_error("IPMI Action is invalid");
+        }
+    }
+}
+
+enum class IpmiPreTimeoutInterrupt : uint8_t
+{
+    None = 0x0,
+    SMI = 0x1,
+    NMI = 0x2,
+    MI = 0x3,
+};
+/** @brief Converts an IPMI Watchdog PreTimeoutInterrupt to DBUS defined action
+ *  @param[in] ipmi_action The IPMI Watchdog PreTimeoutInterrupt
+ *  @return The Watchdog PreTimeoutInterrupt that the ipmi_action maps to
+ */
+WatchdogService::PreTimeoutInterruptAction ipmiPreTimeoutInterruptToWdAction(
+    IpmiPreTimeoutInterrupt ipmiPreTimeOutInterrupt)
+{
+    switch (ipmiPreTimeOutInterrupt)
+    {
+        case IpmiPreTimeoutInterrupt::None:
+        {
+            return WatchdogService::PreTimeoutInterruptAction::None;
+        }
+	case IpmiPreTimeoutInterrupt::SMI:
+	{
+            return WatchdogService::PreTimeoutInterruptAction::SMI;
+        }
+        case IpmiPreTimeoutInterrupt::NMI:
+        {
+            return WatchdogService::PreTimeoutInterruptAction::NMI;
+        }
+        case IpmiPreTimeoutInterrupt::MI:
+        {
+            return WatchdogService::PreTimeoutInterruptAction::MI;
+        }
+        default:
+        {
+            throw std::domain_error("IPMI PreTimeoutInterrupt is invalid");
         }
     }
 }
@@ -256,6 +296,13 @@ ipmi::RspType<> ipmiSetWatchdogTimer(
         // Mark as initialized so that future resets behave correctly
         wdService.setInitialized(true);
         wdService.setLogTimeout(!dontLog);
+
+	// pretimeOutAction
+        const auto ipmiPreTimeoutInterrupt =
+            static_cast<IpmiPreTimeoutInterrupt>(wdPreTimeoutInterruptMask &
+                (static_cast<uint8_t>(preTimeoutInterrupt)));
+        wd_service.setPreTimeoutInterrupt(
+            ipmiPreTimeoutInterruptToWdAction(ipmiPreTimeoutInterrupt));
 
         lastCallSuccessful = true;
         return ipmi::responseSuccess();
