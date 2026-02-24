@@ -208,7 +208,7 @@ ipmi::RspType<uint6_t, // max channel users
         static_cast<uint1_t>(privAccess.reserved));
 }
 
-/** @brief implementes the get user name command
+/** @brief implements the get user name command
  *  @param[in] ctx - ipmi command context
  *  @param[in] userId - 6-bit user ID
  *  @param[in] reserved - 2-bits reserved
@@ -240,7 +240,7 @@ ipmi::RspType<> ipmiSetUserName(
     return ipmi::response(res);
 }
 
-/** @brief implementes the get user name command
+/** @brief implements the get user name command
  *  @param[in] ctx - ipmi command context
  *  @param[in] userId - 6-bit user ID
  *  @param[in] reserved - 2-bits reserved
@@ -275,7 +275,7 @@ ipmi::RspType<std::array<uint8_t, ipmi::ipmiMaxUserName>> // user name
     return ipmi::responseSuccess(std::move(userNameFixed));
 }
 
-/** @brief implementes the get user name command
+/** @brief implements the get user name command
  *  @param[in] ctx - ipmi command context
  *  @param[in] userId - 6-bit user ID
  *  @param[in] reserved - 2-bits reserved

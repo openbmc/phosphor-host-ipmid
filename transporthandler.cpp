@@ -574,7 +574,7 @@ void createVLAN(sdbusplus::bus_t& bus, ChannelParams& params, uint16_t vlan)
 void reconfigureVLAN(sdbusplus::bus_t& bus, ChannelParams& params,
                      uint16_t vlan)
 {
-    // Unfortunatetly we don't have built-in functions to migrate our interface
+    // Unfortunately we don't have built-in functions to migrate our interface
     // customizations to new VLAN interfaces, or have some kind of decoupling.
     // We therefore must retain all of our old information, setup the new VLAN
     // configuration, then restore the old info.

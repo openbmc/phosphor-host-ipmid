@@ -1144,7 +1144,7 @@ ipmi::RspType<> ipmiSenSetSensorThresholds(
         return ipmi::responseInvalidFieldRequest();
     }
 
-    // lower nc and upper nc not suppported on any sensor
+    // lower nc and upper nc not supported on any sensor
     if (lowerNonRecovThreshMask || upperNonRecovThreshMask)
     {
         return ipmi::responseInvalidFieldRequest();
@@ -1302,7 +1302,7 @@ IPMIThresholds getIPMIThresholds(const DbusInterfaceMap& sensorMap)
 
         if (!getSensorAttributes(max, min, mValue, rExp, bValue, bExp, bSigned))
         {
-            throw std::runtime_error("Invalid sensor atrributes");
+            throw std::runtime_error("Invalid sensor attributes");
         }
         if (warningInterface != sensorMap.end())
         {
@@ -2268,7 +2268,7 @@ static int getSensorDataRecord(
     }
 #endif
 
-    // Contruct SDR type 3 record for VR sensor (daemon)
+    // Construct SDR type 3 record for VR sensor (daemon)
     if (std::find(interfaces.begin(), interfaces.end(), sensor::vrInterface) !=
         interfaces.end())
     {
@@ -2723,7 +2723,7 @@ ipmi::RspType<uint8_t,              // No of instances for requested id
 
     /*
      * As DCMI specification, the maximum number of Record Ids of response data
-     * is 1 if Entity Instance paramter is not 0. Else the maximum number of
+     * is 1 if Entity Instance parameter is not 0. Else the maximum number of
      * Record Ids of response data is 8. Therefore, not all of sensors are shown
      * in response data.
      */
@@ -2780,7 +2780,7 @@ ipmi::RspType<uint8_t,                // No of instances for requested id
 
     /*
      * As DCMI specification, the maximum number of Record Ids of response data
-     * is 1 if Entity Instance paramter is not 0. Else the maximum number of
+     * is 1 if Entity Instance parameter is not 0. Else the maximum number of
      * Record Ids of response data is 8. Therefore, not all of sensors are shown
      * in response data.
      */

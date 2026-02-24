@@ -7,7 +7,7 @@
 /**
  * @brief parse session input payload.
  *
- * This function retrives the session id and session handle from the session
+ * This function retrieves the session id and session handle from the session
  * object path.
  * A valid object path will be in the form
  * "/xyz/openbmc_project/ipmi/session/channel/sessionId_sessionHandle"
@@ -17,10 +17,10 @@
  * SessionHandle: 0X8a
 
  * @param[in] objectPath - session object path
- * @param[in] sessionId - retrived session id will be asigned.
- * @param[in] sessionHandle - retrived session handle will be asigned.
+ * @param[in] sessionId - retrieved session id will be assigned.
+ * @param[in] sessionHandle - retrieved session handle will be assigned.
  *
- * @return true if session id and session handle are retrived else returns
+ * @return true if session id and session handle are retrieved else returns
  * false.
  */
 bool parseCloseSessionInputPayload(const std::string& objectPath,

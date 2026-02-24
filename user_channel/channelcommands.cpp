@@ -42,7 +42,7 @@ static inline auto responsePayloadTypeNotSupported()
  *  @ param chanAccess - channel access
  *  @ param channelPrivLimit - channel privilege limit
  *  @ param reserved - skip 3 bits
- *  @ param channelPrivMode - channel priviledge mode
+ *  @ param channelPrivMode - channel privilege mode
  *
  *  @ returns IPMI completion code
  **/

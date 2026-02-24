@@ -295,7 +295,7 @@ void userUpdatedSignalHandler(UserAccess& usrAccess, sdbusplus::message_t& msg)
                     }
                     catch (const sdbusplus::exception_t& e)
                     {
-                        lg2::debug("Failed to excute {METHOD}, path: {PATH}",
+                        lg2::debug("Failed to execute {METHOD}, path: {PATH}",
                                    "METHOD", getAllPropertiesMethod, "PATH",
                                    msg.get_path());
                         return;
@@ -468,7 +468,7 @@ bool UserAccess::isValidUserName(const std::string& userName)
     }
     catch (const sdbusplus::exception_t& e)
     {
-        lg2::error("Failed to excute {METHOD}, path: {PATH}", "METHOD",
+        lg2::error("Failed to execute {METHOD}, path: {PATH}", "METHOD",
                    getManagedObjectsMethod, "PATH", userMgrObjBasePath);
         return false;
     }
@@ -923,7 +923,7 @@ Cc UserAccess::setUserName(const uint8_t userId, const std::string& userName)
         }
         catch (const sdbusplus::exception_t& e)
         {
-            lg2::debug("Failed to excute {METHOD}, path:{PATH}", "METHOD",
+            lg2::debug("Failed to execute {METHOD}, path:{PATH}", "METHOD",
                        deleteUserMethod, "PATH", userPath);
             return ccUnspecifiedError;
         }
@@ -947,7 +947,7 @@ Cc UserAccess::setUserName(const uint8_t userId, const std::string& userName)
         }
         catch (const sdbusplus::exception_t& e)
         {
-            lg2::debug("Failed to excute {METHOD}, path: {PATH}", "METHOD",
+            lg2::debug("Failed to execute {METHOD}, path: {PATH}", "METHOD",
                        createUserMethod, "PATH", userMgrObjBasePath);
             return ccUnspecifiedError;
         }
@@ -975,7 +975,7 @@ Cc UserAccess::setUserName(const uint8_t userId, const std::string& userName)
         }
         catch (const sdbusplus::exception_t& e)
         {
-            lg2::debug("Failed to excute {METHOD}, path: {PATH}", "METHOD",
+            lg2::debug("Failed to execute {METHOD}, path: {PATH}", "METHOD",
                        renameUserMethod, "PATH", userMgrObjBasePath);
             return ccUnspecifiedError;
         }
@@ -1418,7 +1418,7 @@ void UserAccess::getSystemPrivAndGroups()
     }
     catch (const sdbusplus::exception_t& e)
     {
-        lg2::debug("Failed to excute {METHOD}, path: {PATH}", "METHOD",
+        lg2::debug("Failed to execute {METHOD}, path: {PATH}", "METHOD",
                    getAllPropertiesMethod, "PATH", userMgrObjBasePath);
         return;
     }
@@ -1569,7 +1569,7 @@ void UserAccess::cacheUserDataFile()
     }
     catch (const sdbusplus::exception_t& e)
     {
-        lg2::debug("Failed to excute {METHOD}, path: {PATH}", "METHOD",
+        lg2::debug("Failed to execute {METHOD}, path: {PATH}", "METHOD",
                    getManagedObjectsMethod, "PATH", userMgrObjBasePath);
         return;
     }
@@ -1595,7 +1595,7 @@ void UserAccess::cacheUserDataFile()
             {
                 bool usrEnabled = false;
 
-                // User exist. Lets check and update other fileds
+                // User exist. Lets check and update other fields
                 getUserObjProperties(usrObj->second, usrGrps, usrPriv,
                                      usrEnabled);
                 if (std::find(usrGrps.begin(), usrGrps.end(), ipmiGrpName) ==

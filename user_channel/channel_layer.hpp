@@ -251,7 +251,7 @@ EChannelSessSupported getChannelSessionSupport(const uint8_t chNum);
  *
  *  @param[in] chNum - channel number
  *
- *  @return numer of active sessions
+ *  @return number of active sessions
  */
 int getChannelActiveSessions(const uint8_t chNum);
 

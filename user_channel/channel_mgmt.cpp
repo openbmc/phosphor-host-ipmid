@@ -657,7 +657,7 @@ Cc ChannelConfig::setChannelAccessPersistData(const uint8_t chNum,
     // Write persistent data to file
     if (writeChannelPersistData() != 0)
     {
-        lg2::debug("Failed to update the presist data file");
+        lg2::debug("Failed to update the persist data file");
         return ccUnspecifiedError;
     }
     return ccSuccess;

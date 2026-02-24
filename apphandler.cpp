@@ -975,7 +975,7 @@ ipmi::RspType<> ipmiAppCloseSession(ipmi::Context::ptr ctx,
         if (isSessionObjectMatched(obj, reqSessionId, reqSessionHandle))
         {
             // Session id and session handle are unique for each session.
-            // Session id and handler are retrived from the object path and
+            // Session id and handler are retrieved from the object path and
             // object path will be unique for each session. Checking if
             // multiple objects exist with same object path under multiple
             // services.
@@ -1015,7 +1015,7 @@ uint8_t getTotalSessionCount()
 /**
  * @brief get session info request data.
  *
- * This function validates the request data and retrive request session id,
+ * This function validates the request data and retrieve request session id,
  * session handle.
  *
  * @param[in] ctx - context of current session.

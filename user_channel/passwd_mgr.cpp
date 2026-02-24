@@ -51,7 +51,7 @@ constexpr mode_t modeMask =
 struct MetaPassStruct
 {
     char signature[10];
-    unsigned char reseved[2];
+    unsigned char reserved[2];
     size_t hashSize;
     size_t ivSize;
     size_t dataSize;
@@ -109,7 +109,7 @@ int PasswdMgr::updateUserEntry(const std::string& userName,
     std::time_t updatedTime = getUpdatedFileTime();
     // Check file time stamp to know passwdMapList is up-to-date.
     // If not up-to-date, then updatePasswdSpecialFile will read and
-    // check the user entry existance.
+    // check the user entry existence.
     if (fileLastUpdatedTime == updatedTime && updatedTime != -EIO)
     {
         if (passwdMapList.find(userName) == passwdMapList.end())
@@ -372,7 +372,7 @@ int PasswdMgr::updatePasswdSpecialFile(const std::string& userName,
     SecureString dataBuf;
 
     // Read the encrypted file and get the file data
-    // Check user existance and return if not exist.
+    // Check user existence and return if not exist.
     if (readPasswdFileData(dataBuf) != 0)
     {
         lg2::debug("Error in reading the encrypted pass file");
@@ -498,7 +498,7 @@ int PasswdMgr::updatePasswdSpecialFile(const std::string& userName,
     // encryption.
     if (RAND_bytes(hash.data(), hashLen) != 1)
     {
-        lg2::debug("Hash genertion failed, bailing out");
+        lg2::debug("Hash generation failed, bailing out");
         return -EIO;
     }
     if (nullptr ==
@@ -512,7 +512,7 @@ int PasswdMgr::updatePasswdSpecialFile(const std::string& userName,
     // Generate IV values
     if (RAND_bytes(iv.data(), ivLen) != 1)
     {
-        lg2::debug("UV genertion failed, bailing out");
+        lg2::debug("UV generation failed, bailing out");
         return -EIO;
     }
 

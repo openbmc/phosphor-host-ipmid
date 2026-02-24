@@ -36,7 +36,7 @@ The above json is identical to the original YAML documented below:
   # Entity Id and entity Instance for the container entity
   containerEntityId: 0x13
   containerEntityInstance: 0x81
-  # A record can have contained entities as a four entry list or as upto
+  # A record can have contained entities as a four entry list or as up to
   # two ranges of entity instances; this record has contained entities
   # as a four entry list
   isList: "true"

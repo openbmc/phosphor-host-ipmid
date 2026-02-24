@@ -566,7 +566,7 @@ bool registerOemHandler(int prio, Iana iana, Cmd cmd, Privilege priv,
  * @param prio - priority at which to register; see api.hpp
  * @param netFn - the IPMI net function number to register
  * @param cmd - the IPMI command number to register
- * @param priv - the IPMI user privilige required for this command
+ * @param priv - the IPMI user privilege required for this command
  * @param handler - the callback function that will handle this request
  *
  * @return bool - success of registering the handler
@@ -604,7 +604,7 @@ bool registerHandler(int prio, NetFn netFn, Cmd cmd, Privilege priv,
  * @param prio - priority at which to register; see api.hpp
  * @param netFn - the IPMI net function number to register
  * @param cmd - the IPMI command number to register
- * @param priv - the IPMI user privilige required for this command
+ * @param priv - the IPMI user privilege required for this command
  * @param handler - the callback function that will handle this request
  *
  * @return bool - success of registering the handler
@@ -639,7 +639,7 @@ void registerGroupHandler(int prio, Group group, Cmd cmd, Privilege priv,
  * @param prio - priority at which to register; see api.hpp
  * @param netFn - the IPMI net function number to register
  * @param cmd - the IPMI command number to register
- * @param priv - the IPMI user privilige required for this command
+ * @param priv - the IPMI user privilege required for this command
  * @param handler - the callback function that will handle this request
  *
  * @return bool - success of registering the handler
@@ -667,7 +667,7 @@ void registerOemHandler(int prio, Iana iana, Cmd cmd, Privilege priv,
  * @param cmd - the IPMI command number to register
  * @param context - ignored
  * @param handler - the callback function that will handle this request
- * @param priv - the IPMI user privilige required for this command
+ * @param priv - the IPMI user privilege required for this command
  */
 // [[deprecated("Use ipmi::registerHandler() instead")]]
 void ipmi_register_callback(ipmi_netfn_t netFn, ipmi_cmd_t cmd,

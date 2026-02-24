@@ -388,7 +388,7 @@ bool setPcapCorrectTime(ipmi::Context::ptr& ctx, uint32_t pcapCorrectTime)
 
     /*
      * Dbus is storing Correction time in microseconds unit.
-     * Therefore, we have to convert it from milisecond to microseconds.
+     * Therefore, we have to convert it from millisecond to microseconds.
      */
     uint64_t pcapCorrectTimeUs =
         (uint64_t)(std::chrono::duration_cast<std::chrono::microseconds>(

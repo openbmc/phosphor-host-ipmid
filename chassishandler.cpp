@@ -189,7 +189,7 @@ int getHostNetworkData(ipmi::message::Payload& payload)
         // TODO There may be cases where an interface is implemented by multiple
         // objects,to handle such cases we are interested on that object
         //  which are on interested busname.
-        //  Currenlty mapper doesn't give the readable busname(gives busid)
+        //  Currently mapper doesn't give the readable busname(gives busid)
         //  so we can't match with bus name so giving some object specific info
         //  as SETTINGS_MATCH.
         //  Later SETTINGS_MATCH will be replaced with busname.
@@ -434,7 +434,7 @@ ipmi::Cc setHostNetworkData(ipmi::message::Payload& data)
                 elog<InternalFailure>();
             }
 
-            // vesion == 0x00 0x01
+            // version == 0x00 0x01
             if (msgLen < versionOffset + sizeVersion)
             {
                 lg2::error("Error in version getting of setHostNetworkData");
@@ -1466,7 +1466,7 @@ ipmi::RspType<> ipmiChassisControl(ipmi::Context::ptr& ctx,
              * As define in the Chapter 28.3 - Chassis Control Command of IPMI
              * specification: It is recommended that no action occur if system
              * power is off (S4/S5) when this action is selected, and that a D5
-             * "Requiest parameter(s) not supported in this presenst state."
+             * "Request parameter(s) not supported in this presenst state."
              * error completion code be returned.
              */
             if (powerState.value() == false)

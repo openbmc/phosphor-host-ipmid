@@ -307,7 +307,7 @@ int updateSensorRecordFromSSRAESC(const void* record)
     stype = find_type_for_sensor_number(pRec->sensor_number);
 
     // 0xC3 types use the assertion7_0 for the value to be set
-    // so skip the reseach and call the correct event reporting
+    // so skip the research and call the correct event reporting
     // function
     if (stype == 0xC3)
     {

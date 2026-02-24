@@ -903,7 +903,7 @@ ipmi::RspType<> ipmiSenSetSensorThresholds(
         return ipmi::responseInvalidFieldRequest();
     }
 
-    // lower nc and upper nc not suppported on any sensor
+    // lower nc and upper nc not supported on any sensor
     if (lowerNonRecovThreshMask || upperNonRecovThreshMask)
     {
         return ipmi::responseInvalidFieldRequest();
@@ -1506,7 +1506,7 @@ ipmi::RspType<> ipmicmdPlatformEvent(ipmi::Context::ptr& ctx,
 void registerNetFnSenFunctions()
 {
     // Handlers with dbus-sdr handler implementation.
-    // Do not register the hander if it dynamic sensors stack is used.
+    // Do not register the handler if it dynamic sensors stack is used.
 
 #ifndef FEATURE_DYNAMIC_SENSORS
 

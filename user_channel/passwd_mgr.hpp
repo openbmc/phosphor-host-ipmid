@@ -114,7 +114,7 @@ class PasswdMgr
      *  @param[in] mac - message authentication code - to figure out corruption
      *  @param[in] macLen - size of MAC
      *  @param[in] outBytes - ptr to store output bytes
-     *  @param[in] outBytesLen - outbut data length.
+     *  @param[in] outBytesLen - output data length.
      *
      * @return error response
      */
