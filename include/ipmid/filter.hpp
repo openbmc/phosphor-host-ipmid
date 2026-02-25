@@ -54,7 +54,7 @@ class FilterBase
  *
  * Filters are called with a ipmi::message::Request shared_ptr on all IPMI
  * commands in priority order and each filter has the opportunity to reject the
- * command (by returning an IPMI error competion code.) If all the filters
+ * command (by returning an IPMI error completion code.) If all the filters
  * return success, the actual IPMI command will be executed. Filters can reject
  * the command for any reason, based on system state, the context, the command
  * payload, etc.
@@ -109,7 +109,7 @@ void registerFilter(int prio, ::ipmi::FilterBase::ptr filter);
  *
  * Filters are called with a ipmi::message::Request shared_ptr on all IPMI
  * commands in priority order and each filter has the opportunity to reject the
- * command (by returning an IPMI error competion code.) If all the filters
+ * command (by returning an IPMI error completion code.) If all the filters
  * return success, the actual IPMI command will be executed. Filters can reject
  * the command for any reason, based on system state, the context, the command
  * payload, etc.

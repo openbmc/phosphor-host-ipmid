@@ -277,7 +277,7 @@ struct Payload
      *
      * @param p - The payload to prepend
      *
-     * @retunr int - non-zero on prepend errors
+     * @return int - non-zero on prepend errors
      */
     int prepend(const ipmi::message::Payload& p)
     {
@@ -558,7 +558,7 @@ struct Response
      *
      * @param p - The payload to prepend
      *
-     * @retunr int - non-zero on prepend errors
+     * @return int - non-zero on prepend errors
      */
     int prepend(const ipmi::message::Payload& p)
     {
