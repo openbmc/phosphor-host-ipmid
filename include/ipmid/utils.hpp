@@ -360,10 +360,10 @@ boost::system::error_code callDbusMethod(
  *         type of the value does not match the expected type
  *
  *  @tparam T - type of expected value to return
- *  @param[in] props - D-Bus propery map (Map of variants)
+ *  @param[in] props - D-Bus property map (Map of variants)
  *  @param[in] name - key name of property to fetch
  *  @param[in] defaultValue - default value to return on error
- *  @return - value from propery map at name, or defaultValue
+ *  @return - value from property map at name, or defaultValue
  */
 template <typename T>
 T mappedVariant(const ipmi::PropertyMap& props, const std::string& name,
