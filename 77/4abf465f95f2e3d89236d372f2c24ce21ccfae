@@ -1,0 +1,8 @@
+Code-Review+1: Florian Breska <florian.breska@intel.com>
+Verified+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Code-Review+2: George Liu <liuxiwei@ieisystem.com>
+Submitted-by: George Liu <liuxiwei@ieisystem.com>
+Submitted-at: Fri, 27 Feb 2026 01:57:06 +0000
+Reviewed-on: https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/87655
+Project: openbmc/phosphor-host-ipmid
+Branch: refs/heads/master
