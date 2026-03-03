@@ -180,7 +180,7 @@ void initSensorMatches()
                 type::signal() + path(s.second.sensorPath) +
                     member("PropertiesChanged"s) +
                     interface("org.freedesktop.DBus.Properties"s),
-                [&s](auto& msg) {
+                [&s](sdbusplus::message_t& msg) {
                     fillSensorIdServiceMap(
                         s.second.sensorPath,
                         s.second.propertyInterfaces.begin()->first, s.first);
@@ -200,7 +200,7 @@ void initSensorMatches()
                 }));
     }
     sensorsOwnerMatch = std::make_unique<sdbusplus::bus::match_t>(
-        bus, nameOwnerChanged(), [](auto& msg) {
+        bus, nameOwnerChanged(), [](sdbusplus::message_t& msg) {
             std::string name;
             std::string oldOwner;
             std::string newOwner;
