@@ -21,6 +21,7 @@
 #include <bitset>
 #include <cmath>
 #include <cstring>
+#include <map>
 #include <set>
 
 static constexpr uint8_t fruInventoryDevice = 0x10;
@@ -96,6 +97,23 @@ SensorThresholdMap sensorThresholdMap __attribute__((init_priority(101)));
 
 static const std::vector<std::string> thresholdNames{"Warning", "Critical",
                                                      "NonRecoverable"};
+
+static std::map<uint8_t, std::unique_ptr<sdbusplus::match>> thresholdMatches;
+
+static std::map<uint8_t, std::unique_ptr<sdbusplus::match>>
+    thresholdAddedMatches;
+static std::map<uint8_t, std::unique_ptr<sdbusplus::match>>
+    thresholdRemovedMatches;
+static std::unique_ptr<sdbusplus::match> thresholdOwnerMatch;
+
+// Track which D-Bus services own threshold sensor objects so the threshold
+// cache can be invalidated when a service exits without emitting
+// InterfacesRemoved (e.g. crashed).
+using thresholdIdToServiceMap = std::unordered_map<uint8_t, std::string>;
+static thresholdIdToServiceMap thresholdServiceMap;
+using thresholdServiceToIdMap =
+    std::unordered_map<std::string, std::set<uint8_t>>;
+static thresholdServiceToIdMap thresholdServiceIds;
 
 #ifdef FEATURE_SENSORS_CACHE
 std::map<uint8_t, std::unique_ptr<sdbusplus::match>> sensorAddedMatches
@@ -825,6 +843,149 @@ get_sdr::GetSensorThresholdsResponse getSensorThresholds(
     return resp;
 }
 
+// Record the D-Bus service that owns a threshold sensor object so the
+// threshold cache can be invalidated if that service exits.
+static void fillThresholdServiceMap(uint8_t sensorNum, const std::string& obj,
+                                    const std::string& intf)
+{
+    if (thresholdServiceMap.find(sensorNum) != thresholdServiceMap.end())
+    {
+        return;
+    }
+    try
+    {
+        sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
+        auto service = ipmi::getService(bus, intf, obj);
+        thresholdServiceMap[sensorNum] = service;
+        thresholdServiceIds[service].insert(sensorNum);
+    }
+    catch (...)
+    {
+        // Ignore - best effort service tracking
+    }
+}
+
+// Remove the service mapping for a threshold sensor.
+static void clearThresholdServiceMap(uint8_t sensorNum)
+{
+    auto it = thresholdServiceMap.find(sensorNum);
+    if (it == thresholdServiceMap.end())
+    {
+        return;
+    }
+    auto& ids = thresholdServiceIds[it->second];
+    ids.erase(sensorNum);
+    if (ids.empty())
+    {
+        thresholdServiceIds.erase(it->second);
+    }
+    thresholdServiceMap.erase(it);
+}
+
+void initThresholdMatches()
+{
+    using namespace sdbusplus::match_rules;
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
+
+    if (!thresholdMatches.empty())
+    {
+        return;
+    }
+
+    for (const auto& [sensorNum, info] : ipmi::sensor::sensors)
+    {
+        if (info.sensorReadingType != 0x01 || info.sensorPath.empty())
+        {
+            continue;
+        }
+
+        // Match for PropertiesChanged on threshold interfaces to keep
+        // sensorThresholdMap up to date in real time.
+        thresholdMatches.emplace(
+            sensorNum,
+            std::make_unique<sdbusplus::match>(
+                bus,
+                propertiesChangedNamespace(
+                    info.sensorPath, "xyz.openbmc_project.Sensor.Threshold"),
+                [sensorNum, info](auto& msg) {
+                    std::string interface;
+                    ipmi::PropertyMap thresholds;
+                    msg.read(interface, thresholds);
+
+                    auto& resp = sensorThresholdMap[sensorNum];
+                    std::string thresholdName =
+                        interface.substr(interface.find_last_of('.') + 1);
+
+                    int32_t minClamp;
+                    int32_t maxClamp;
+                    getClamp(info.sensorUnits1, minClamp, maxClamp);
+                    updateThresholds(info, thresholds, thresholdName, minClamp,
+                                     maxClamp, resp);
+
+                    // Record the service that owns this sensor so the
+                    // cache can be invalidated if the service exits.
+                    fillThresholdServiceMap(sensorNum, info.sensorPath,
+                                            info.sensorInterface);
+                }));
+
+        // Match for InterfacesAdded to invalidate any stale cache entry
+        // when a threshold interface (re)appears on D-Bus.  Sensors can
+        // be added and removed during the lifetime of ipmid, so cached
+        // threshold data may no longer be valid.
+        thresholdAddedMatches.emplace(
+            sensorNum,
+            std::make_unique<sdbusplus::match>(
+                bus, interfacesAdded() + argNpath(0, info.sensorPath),
+                [sensorNum, info](auto& /*msg*/) {
+                    sensorThresholdMap.erase(sensorNum);
+                    // Re-discover the owning service since it may have changed.
+                    clearThresholdServiceMap(sensorNum);
+                    fillThresholdServiceMap(sensorNum, info.sensorPath,
+                                            info.sensorInterface);
+                }));
+
+        // Match for InterfacesRemoved to invalidate the cache when a
+        // threshold interface disappears from D-Bus.
+        thresholdRemovedMatches.emplace(
+            sensorNum,
+            std::make_unique<sdbusplus::match>(
+                bus, interfacesRemoved() + argNpath(0, info.sensorPath),
+                [sensorNum](auto& /*msg*/) {
+                    sensorThresholdMap.erase(sensorNum);
+                    clearThresholdServiceMap(sensorNum);
+                }));
+    }
+
+    // Match for NameOwnerChanged to handle the case where a service exits
+    // without emitting InterfacesRemoved (e.g. crashed or killed).  When a
+    // service exits, invalidate the threshold cache for all sensors that
+    // were owned by that service.
+    thresholdOwnerMatch = std::make_unique<sdbusplus::match>(
+        bus, nameOwnerChanged(), [](auto& msg) {
+            std::string name;
+            std::string oldOwner;
+            std::string newOwner;
+            msg.read(name, oldOwner, newOwner);
+
+            if (!name.empty() && newOwner.empty())
+            {
+                // The service has exited.  Invalidate threshold cache
+                // for all sensors owned by this service.
+                const auto it = thresholdServiceIds.find(name);
+                if (it == thresholdServiceIds.end())
+                {
+                    return;
+                }
+                for (const auto id : it->second)
+                {
+                    sensorThresholdMap.erase(id);
+                    thresholdServiceMap.erase(id);
+                }
+                thresholdServiceIds.erase(it);
+            }
+        });
+}
+
 /** @brief implements the get sensor thresholds command
  *  @param ctx - IPMI context pointer
  *  @param sensorNum - sensor number
@@ -1041,8 +1202,6 @@ ipmi::RspType<> ipmiSenSetSensorThresholds(
             std::get<propertyName>(property), ipmi::Value(valueToSet));
     }
 
-    // Invalidate the cache
-    sensorThresholdMap.erase(sensorNum);
     return ipmi::responseSuccess();
 }
 
@@ -1609,6 +1768,9 @@ void registerNetFnSenFunctions()
     // Initialize the sensor matches
     initSensorMatches();
 #endif
+
+    // Initialize the threshold Asserted/DeAsserted matches
+    initThresholdMatches();
 
     // <Set Sensor Reading and Event Status>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
