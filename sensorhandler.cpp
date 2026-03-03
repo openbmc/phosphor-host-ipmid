@@ -97,6 +97,8 @@ SensorThresholdMap sensorThresholdMap __attribute__((init_priority(101)));
 static const std::vector<std::string> thresholdNames{"Warning", "Critical",
                                                      "NonRecoverable"};
 
+static std::vector<std::unique_ptr<sdbusplus::bus::match_t>> thresholdMatches;
+
 #ifdef FEATURE_SENSORS_CACHE
 std::map<uint8_t, std::unique_ptr<sdbusplus::bus::match_t>> sensorAddedMatches
     __attribute__((init_priority(101)));
@@ -825,6 +827,46 @@ get_sdr::GetSensorThresholdsResponse getSensorThresholds(
     return resp;
 }
 
+void initThresholdMatches()
+{
+    using namespace sdbusplus::bus::match::rules;
+    sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
+
+    if (!thresholdMatches.empty())
+    {
+        return;
+    }
+
+    for (const auto& [sensorNum, info] : ipmi::sensor::sensors)
+    {
+        if (info.sensorReadingType != 0x01 || info.sensorPath.empty())
+        {
+            continue;
+        }
+
+        auto match = std::make_unique<sdbusplus::bus::match_t>(
+            bus,
+            propertiesChangedNamespace(info.sensorPath,
+                                       "xyz.openbmc_project.Sensor.Threshold"),
+            [sensorNum, info](auto& msg) {
+                std::string interface;
+                ipmi::PropertyMap thresholds;
+                msg.read(interface, thresholds);
+
+                auto& resp = sensorThresholdMap[sensorNum];
+                std::string thresholdName =
+                    interface.substr(interface.find_last_of('.') + 1);
+
+                int32_t minClamp;
+                int32_t maxClamp;
+                getClamp(info.sensorUnits1, minClamp, maxClamp);
+                updateThresholds(info, thresholds, thresholdName, minClamp,
+                                 maxClamp, resp);
+            });
+        thresholdMatches.push_back(std::move(match));
+    }
+}
+
 /** @brief implements the get sensor thresholds command
  *  @param ctx - IPMI context pointer
  *  @param sensorNum - sensor number
@@ -1041,8 +1083,6 @@ ipmi::RspType<> ipmiSenSetSensorThresholds(
             std::get<propertyName>(property), ipmi::Value(valueToSet));
     }
 
-    // Invalidate the cache
-    sensorThresholdMap.erase(sensorNum);
     return ipmi::responseSuccess();
 }
 
@@ -1609,6 +1649,9 @@ void registerNetFnSenFunctions()
     // Initialize the sensor matches
     initSensorMatches();
 #endif
+
+    // Initialze the threshold Asserted/DeAsserted matches
+    initThresholdMatches();
 
     // <Set Sensor Reading and Event Status>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
