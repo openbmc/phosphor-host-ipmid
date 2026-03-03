@@ -94,6 +94,9 @@ using SensorThresholdMap =
     std::unordered_map<uint8_t, get_sdr::GetSensorThresholdsResponse>;
 SensorThresholdMap sensorThresholdMap __attribute__((init_priority(101)));
 
+static const std::vector<std::string> thresholdNames{"Warning", "Critical",
+                                                     "NonRecoverable"};
+
 #ifdef FEATURE_SENSORS_CACHE
 std::map<uint8_t, std::unique_ptr<sdbusplus::bus::match_t>> sensorAddedMatches
     __attribute__((init_priority(101)));
@@ -723,6 +726,66 @@ void updateNonRecoverableThreshold(uint8_t lowerValue, uint8_t upperValue,
     }
 }
 
+void getClamp(uint8_t sensorUnits1, int32_t& minClamp, int32_t& maxClamp)
+{
+    minClamp = std::numeric_limits<uint8_t>::lowest();
+    maxClamp = std::numeric_limits<uint8_t>::max();
+
+    constexpr uint8_t signedDataFormat = 0x80;
+    if (sensorUnits1 & signedDataFormat)
+    {
+        minClamp = std::numeric_limits<int8_t>::lowest();
+        maxClamp = std::numeric_limits<int8_t>::max();
+    }
+}
+
+void updateThresholds(
+    const ipmi::sensor::Info& info, const ipmi::PropertyMap& thresholds,
+    const std::string& thresholdName, int32_t minClamp, int32_t maxClamp,
+    get_sdr::GetSensorThresholdsResponse& resp)
+{
+    std::string thresholdLow = thresholdName + "Low";
+    std::string thresholdHigh = thresholdName + "High";
+
+    double lowValue = ipmi::mappedVariant<double>(
+        thresholds, thresholdLow, std::numeric_limits<double>::quiet_NaN());
+    double highValue = ipmi::mappedVariant<double>(
+        thresholds, thresholdHigh, std::numeric_limits<double>::quiet_NaN());
+
+    uint8_t lowerValue = 0;
+    uint8_t upperValue = 0;
+    if (std::isfinite(lowValue))
+    {
+        lowValue *= std::pow(10, info.scale - info.exponentR);
+        int32_t rawData =
+            round((lowValue - info.scaledOffset) / info.coefficientM);
+        lowerValue =
+            static_cast<uint8_t>(std::clamp(rawData, minClamp, maxClamp));
+    }
+
+    if (std::isfinite(highValue))
+    {
+        highValue *= std::pow(10, info.scale - info.exponentR);
+        int32_t rawData =
+            round((highValue - info.scaledOffset) / info.coefficientM);
+        upperValue =
+            static_cast<uint8_t>(std::clamp(rawData, minClamp, maxClamp));
+    }
+
+    if (thresholdName == "Warning")
+    {
+        updateWarningThreshold(lowerValue, upperValue, resp);
+    }
+    else if (thresholdName == "Critical")
+    {
+        updateCriticalThreshold(lowerValue, upperValue, resp);
+    }
+    else if (thresholdName == "NonRecoverable")
+    {
+        updateNonRecoverableThreshold(lowerValue, upperValue, resp);
+    }
+}
+
 get_sdr::GetSensorThresholdsResponse getSensorThresholds(
     ipmi::Context::ptr& ctx, uint8_t sensorNum)
 {
@@ -740,29 +803,12 @@ get_sdr::GetSensorThresholdsResponse getSensorThresholds(
 
     int32_t minClamp;
     int32_t maxClamp;
-    int32_t rawData;
-    constexpr uint8_t sensorUnitsSignedBits = 2 << 6;
-    constexpr uint8_t signedDataFormat = 0x80;
-    if ((info.sensorUnits1 & sensorUnitsSignedBits) == signedDataFormat)
-    {
-        minClamp = std::numeric_limits<int8_t>::lowest();
-        maxClamp = std::numeric_limits<int8_t>::max();
-    }
-    else
-    {
-        minClamp = std::numeric_limits<uint8_t>::lowest();
-        maxClamp = std::numeric_limits<uint8_t>::max();
-    }
-
-    static std::vector<std::string> thresholdNames{"Warning", "Critical",
-                                                   "NonRecoverable"};
+    getClamp(info.sensorUnits1, minClamp, maxClamp);
 
     for (const auto& thresholdName : thresholdNames)
     {
         std::string thresholdInterface =
             "xyz.openbmc_project.Sensor.Threshold." + thresholdName;
-        std::string thresholdLow = thresholdName + "Low";
-        std::string thresholdHigh = thresholdName + "High";
 
         ipmi::PropertyMap thresholds;
         ec = ipmi::getAllDbusProperties(ctx, service, info.sensorPath,
@@ -772,43 +818,8 @@ get_sdr::GetSensorThresholdsResponse getSensorThresholds(
             continue;
         }
 
-        double lowValue = ipmi::mappedVariant<double>(
-            thresholds, thresholdLow, std::numeric_limits<double>::quiet_NaN());
-        double highValue = ipmi::mappedVariant<double>(
-            thresholds, thresholdHigh,
-            std::numeric_limits<double>::quiet_NaN());
-
-        uint8_t lowerValue = 0;
-        uint8_t upperValue = 0;
-        if (std::isfinite(lowValue))
-        {
-            lowValue *= std::pow(10, info.scale - info.exponentR);
-            rawData = round((lowValue - info.scaledOffset) / info.coefficientM);
-            lowerValue =
-                static_cast<uint8_t>(std::clamp(rawData, minClamp, maxClamp));
-        }
-
-        if (std::isfinite(highValue))
-        {
-            highValue *= std::pow(10, info.scale - info.exponentR);
-            rawData =
-                round((highValue - info.scaledOffset) / info.coefficientM);
-            upperValue =
-                static_cast<uint8_t>(std::clamp(rawData, minClamp, maxClamp));
-        }
-
-        if (thresholdName == "Warning")
-        {
-            updateWarningThreshold(lowerValue, upperValue, resp);
-        }
-        else if (thresholdName == "Critical")
-        {
-            updateCriticalThreshold(lowerValue, upperValue, resp);
-        }
-        else if (thresholdName == "NonRecoverable")
-        {
-            updateNonRecoverableThreshold(lowerValue, upperValue, resp);
-        }
+        updateThresholds(info, thresholds, thresholdName, minClamp, maxClamp,
+                         resp);
     }
 
     return resp;
