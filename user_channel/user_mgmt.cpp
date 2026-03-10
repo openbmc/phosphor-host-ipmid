@@ -447,7 +447,7 @@ bool UserAccess::isValidUserName(const std::string& userName)
         return false;
     }
     if (!std::regex_match(userName.c_str(),
-                          std::regex("[a-zA-Z_][a-zA-Z_0-9]*")))
+                          std::regex("^[a-zA-Z_][a-zA-Z0-9_.]{0,15}$")))
     {
         lg2::error("Unsupported characters in user name");
         return false;
