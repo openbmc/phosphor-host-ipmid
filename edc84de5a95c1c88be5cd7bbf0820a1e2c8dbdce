@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cfe98a58_ece5aec3",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1253,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2026-03-11T03:21:38Z",
+      "side": 1,
+      "message": "Seems to require `option12` to always be 1 in order to proceed.\n\nThat would mean sending option12 \u003d 0 (to disable DHCP Option 12) would always return CommandNotAvailable, and setDHCPOption() would never be called with false.\n\nIs this intentional, or should disabling DHCP Option 12 also be supported?",
+      "range": {
+        "startLine": 1253,
+        "startChar": 16,
+        "endLine": 1253,
+        "endChar": 48
+      },
+      "revId": "edc84de5a95c1c88be5cd7bbf0820a1e2c8dbdce",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
