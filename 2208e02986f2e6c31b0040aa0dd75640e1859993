@@ -22,6 +22,30 @@
       },
       "revId": "2208e02986f2e6c31b0040aa0dd75640e1859993",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a9b5620c_8f0458c1",
+        "filename": "user_channel/passwd_mgr.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 489,
+      "author": {
+        "id": 1002827
+      },
+      "writtenOn": "2026-03-12T09:32:08Z",
+      "side": 1,
+      "message": "Thanks. I Changed hashLen \u003c\u003d 0 to hashLen \u003d\u003d 0 since hashLen is size_t (unsigned) and can never be negative.",
+      "parentUuid": "5d0008fe_cb6eee6c",
+      "range": {
+        "startLine": 489,
+        "startChar": 8,
+        "endLine": 489,
+        "endChar": 15
+      },
+      "revId": "2208e02986f2e6c31b0040aa0dd75640e1859993",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
