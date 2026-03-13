@@ -46,6 +46,53 @@
       },
       "revId": "c445b00dc83143a0a365eff54051a44262152d4f",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "838b92d7_cb20351e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2026-03-13T07:06:17Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "97467e4f_e59ab58c",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 10,
+        "endChar": 46
+      },
+      "revId": "c445b00dc83143a0a365eff54051a44262152d4f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2a4761cd_3f3d82af",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2026-03-13T07:06:17Z",
+      "side": 1,
+      "message": "Test results with out this patch:\n```\nroot@nf5280m7:~# ipmitool user set name 3 1admin\nSet User Name command failed (user 3, name 1admin): Invalid data field in request\nroot@nf5280m7:~# ipmitool user set name 3 admin\n```\nDid I misunderstand?",
+      "range": {
+        "startLine": 15,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 12
+      },
+      "revId": "c445b00dc83143a0a365eff54051a44262152d4f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
