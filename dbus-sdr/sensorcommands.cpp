@@ -256,6 +256,11 @@ namespace sensor
 {
 static constexpr const char* vrInterface =
     "xyz.openbmc_project.Control.VoltageRegulatorMode";
+static constexpr const char* operationalStatusInterface =
+    "xyz.openbmc_project.State.Decorator.OperationalStatus";
+
+// IPMI sensor type codes per specification table 42-3
+static constexpr const uint8_t sensorTypePowerSupply = 0x08;
 } // namespace sensor
 
 static void getSensorMaxMin(const DbusInterfaceMap& sensorMap, double& max,
@@ -968,8 +973,32 @@ ipmi::RspType<uint8_t, uint8_t, uint8_t, std::optional<uint8_t>>
     {
         return ipmi::responseResponseError();
     }
-    auto sensorObject = sensorMap.find(SensorValue::interface);
+    // Handle PSU OperationalStatus discrete sensor
+    auto operationalObject = sensorMap.find(
+        "xyz.openbmc_project.State.Decorator.OperationalStatus");
+    if (operationalObject != sensorMap.end())
+    {
+        auto findFunctional = operationalObject->second.find("Functional");
+        if (findFunctional == operationalObject->second.end())
+        {
+            return ipmi::responseResponseError();
+        }
+        bool functional = std::get<bool>(findFunctional->second);
+        uint8_t operation =
+            static_cast<uint8_t>(
+                IPMISensorReadingByte2::sensorScanningEnable) |
+            static_cast<uint8_t>(
+                IPMISensorReadingByte2::eventMessagesEnable);
+        // IPMI spec table 42-3, Power Supply sensor type 0x08:
+        // bit 0 = Presence detected
+        // bit 1 = Failure detected
+        uint8_t discreteState = functional ? 0x01   // present, healthy
+                                           : 0x03;  // present, failed
+        return ipmi::responseSuccess(0, operation, discreteState,
+                                     std::nullopt);
+    }
 
+    auto sensorObject = sensorMap.find(SensorValue::interface);
     if (sensorObject == sensorMap.end() ||
         sensorObject->second.find(SensorValue::property_names::value) ==
             sensorObject->second.end())
@@ -2126,6 +2155,45 @@ bool constructVrSdr(ipmi::Context::ptr ctx,
     return true;
 }
 
+bool constructDiscreteSdr(ipmi::Context::ptr ctx,
+                     const std::unordered_set<std::string>& ipmiDecoratorPaths,
+                     uint16_t sensorNum, uint16_t recordID,
+                     const std::string& service, const std::string& path,
+                     uint8_t sensorType,
+                     get_sdr::SensorDataEventRecord& record)
+{
+    constructEventSdrHeaderKey(sensorNum, recordID, record);
+    DbusInterfaceMap sensorMap;
+    if (!getSensorMap(ctx, service, path, sensorMap, sensorMapSdrUpdatePeriod))
+    {
+        lg2::error("Failed to update sensor map for discrete sensor, "
+                   "service: {SERVICE}, path: {PATH}",
+                   "SERVICE", service, "PATH", path);
+        return false;
+    }
+    // follow the association chain to get the parent board's entityId and
+    // entityInstance
+    updateIpmiFromAssociation(path, ipmiDecoratorPaths, sensorMap,
+                              record.body.entityId, record.body.entityInstance);
+    // sensorType is caller-defined per IPMI spec table 42-3
+    record.body.sensorType = sensorType;
+    // 0x6F = sensor-specific discrete, bits interpreted per sensor type
+    record.body.eventReadingType = 0x6F;
+    record.body.sensorRecordSharing1 = 0x00;
+    record.body.sensorRecordSharing2 = 0x00;
+    // populate sensor name from path
+    auto name = sensor::parseSdrIdFromPath(path);
+    int nameSize = std::min(name.size(), sizeof(record.body.idString));
+    get_sdr::body::setIdStrLen(nameSize, record.body);
+    get_sdr::body::setIdType(3, record.body); // "8-bit ASCII + Latin 1"
+    std::memset(record.body.idString, 0x00, sizeof(record.body.idString));
+    std::memcpy(record.body.idString, name.c_str(), nameSize);
+    // Remember the sensor name, as determined for this sensor number
+    details::sdrStatsTable.updateName(sensorNum, name);
+
+    return true;
+}
+
 uint16_t getNumberOfSensors()
 {
     return std::min(getSensorTree().size(), maxIPMISensors);
@@ -2282,6 +2350,26 @@ static int getSensorDataRecord(
         }
         else if (!constructVrSdr(ctx, ipmiDecoratorPaths, sensorNum, recordID,
                                  connection, path, record))
+        {
+            return GENERAL_ERROR;
+        }
+        recordData.insert(recordData.end(), reinterpret_cast<uint8_t*>(&record),
+                          reinterpret_cast<uint8_t*>(&record) + sizeof(record));
+    }
+
+    // Construct SDR type 3 record for PSU OperationalStatus sensor
+    if (std::find(interfaces.begin(), interfaces.end(),
+                  sensor::operationalStatusInterface) != interfaces.end())
+    {
+        get_sdr::SensorDataEventRecord record = {};
+        // If the request doesn't read SDR body, construct only header and key
+        // part to avoid additional DBus transaction.
+        if (readBytes <= sizeof(record.header) + sizeof(record.key))
+        {
+            constructEventSdrHeaderKey(sensorNum, recordID, record);
+        }
+        else if (!constructDiscreteSdr(ctx, ipmiDecoratorPaths, sensorNum, recordID,
+                                  connection, path, sensor::sensorTypePowerSupply, record))
         {
             return GENERAL_ERROR;
         }
