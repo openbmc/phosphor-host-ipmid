@@ -139,6 +139,19 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
         "openbmc_project/sensors/'",
         [](sdbusplus::message_t&) { sensorTreePtr.reset(); });
 
+    // Watch for PSU OperationalStatus objects appearing/disappearing
+    static sdbusplus::bus::match_t operationalStatusAdded(
+        *dbus,
+        "type='signal',member='InterfacesAdded',arg0path='/xyz/"
+        "openbmc_project/State/Decorator/'",
+        [](sdbusplus::message_t&) { sensorTreePtr.reset(); });
+
+    static sdbusplus::bus::match_t operationalStatusRemoved(
+        *dbus,
+        "type='signal',member='InterfacesRemoved',arg0path='/xyz/"
+        "openbmc_project/State/Decorator/'",
+        [](sdbusplus::message_t&) { sensorTreePtr.reset(); });
+
     if (sensorTreePtr)
     {
         subtree = sensorTreePtr;
@@ -222,6 +235,12 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
     filterSensors(*sensorTreePtr);
     // Add VR control as optional search path.
     (void)lbdUpdateSensorTree("/xyz/openbmc_project/vr", vrInterfaces);
+
+    // Add PSU OperationalStatus as optional search path.
+    static constexpr const std::array operationalStatusInterfaces = {
+        "xyz.openbmc_project.State.Decorator.OperationalStatus"};
+    (void)lbdUpdateSensorTree("/xyz/openbmc_project/State/Decorator",
+                              operationalStatusInterfaces);
 
     subtree = sensorTreePtr;
     sensorUpdatedIndex++;
