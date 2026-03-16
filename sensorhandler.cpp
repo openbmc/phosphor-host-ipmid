@@ -12,6 +12,7 @@
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/lg2.hpp>
+#include <sdbusplus/asio/object_server.hpp>
 #include <sdbusplus/message/types.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 #include <xyz/openbmc_project/Sensor/Threshold/Critical/common.hpp>
@@ -223,6 +224,29 @@ void initSensorMatches()
         });
 }
 #endif
+
+static void registerSensorListInterface()
+{
+    auto sdbusp = getSdBus();
+    if (!sdbusp)
+    {
+        return;
+    }
+    static sdbusplus::asio::object_server server(sdbusp);
+    static auto iface = server.add_interface(
+        "/xyz/openbmc_project/Ipmi", "xyz.openbmc_project.Ipmi.SensorList");
+    iface->register_method("getSensorList", []() {
+        std::unordered_map<std::string, std::string> pathName;
+        for (const auto& [id, info] : ipmi::sensor::sensors)
+        {
+            pathName[info.sensorPath] = info.sensorName;
+        }
+        lg2::error("IPMI getSensorList called, returning {NUM_SENSORS} sensors",
+                   "NUM_SENSORS", pathName.size());
+        return pathName;
+    });
+    iface->initialize();
+}
 
 // Use a lookup table to find the interface name of a specific sensor
 // This will be used until an alternative is found.  this is the first
@@ -1521,6 +1545,8 @@ void registerNetFnSenFunctions()
     // Initialize the sensor matches
     initSensorMatches();
 #endif
+
+    registerSensorListInterface();
 
     // <Set Sensor Reading and Event Status>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
