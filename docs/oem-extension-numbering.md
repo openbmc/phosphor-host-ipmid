@@ -14,7 +14,7 @@ Number.
 
 This table and the next briefly recap OEM Extension messages as described in the
 [IPMI Specification](http://www.intel.com/content/www/us/en/servers/ipmi/ipmi-second-gen-interface-spec-v2-rev1-1.html).
-To keep it both simple and concrete, only BT Tansport is described. Please
+To keep it both simple and concrete, only BT Transport is described. Please
 consult that specification for the full story.
 
 ### OEM Request
