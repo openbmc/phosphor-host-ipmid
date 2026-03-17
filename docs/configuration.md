@@ -41,11 +41,11 @@ have a fixed limit on the number of sensors that can be reported.
 IPMI supports a smaller number of sensors than are available via Redfish. The
 limit being the number of Sensor Data Records (SDR) supported in the IPMI
 specification. Enabling IPMI to use D-Bus may cause the number of sensors
-retrieved to exceed the number SDRs IPMI can support. Even if the number of
+retrieved to exceed the number of SDRs IPMI can support. Even if the number of
 sensors retrieved is within the SDR limit IPMI can support, it may be desirable
 to filter entries that are uninteresting.
 
-Meson uses the _dyanmic-sensors_ configuration option to enable retrieving the
+Meson uses the _dynamic-sensors_ configuration option to enable retrieving the
 sensors via D-Bus. When dynamic sensors are active all of the sensors placed on
 D-Bus by a service are added to the IPMI sensor list. In the event that too many
 sensors are exposed on D-Bus, the list can be filtered by adding a list of

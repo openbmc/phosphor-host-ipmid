@@ -41,7 +41,7 @@ churn from the rebase operations.
 
 Commits which include changes that can be tested by a unit test should also
 include a unit test to exercise that change, within the same commit. Unit tests
-should be clearly written - even moreso than production code, unit tests are
+should be clearly written - even more than production code, unit tests are
 meant primarily to be read by humans - and should test both good and bad
 behaviors. Refer to the
 [testing documentation](https://github.com/openbmc/phosphor-host-ipmid/blob/master/docs/testing.md)
