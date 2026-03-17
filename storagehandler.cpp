@@ -863,7 +863,7 @@ void registerNetFnStorageFunctions()
     selCacheMapInitialized = false;
     initSELCache();
     // Handlers with dbus-sdr handler implementation.
-    // Do not register the hander if it dynamic sensors stack is used.
+    // Do not register the handler if it dynamic sensors stack is used.
 
 #ifndef FEATURE_DYNAMIC_SENSORS
 
@@ -928,7 +928,7 @@ void registerNetFnStorageFunctions()
 
 #endif
 
-    // Common Handers used by both implementation.
+    // Common Handlers used by both implementation.
 
     // <Reserve SEL>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,

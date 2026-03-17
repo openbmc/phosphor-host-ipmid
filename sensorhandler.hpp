@@ -27,7 +27,7 @@ enum ipmi_sensor_types
     IPMI_SENSOR_TPM = 0xCC,
 };
 
-/** @brief Custom exception for reading sensors that are not funcitonal.
+/** @brief Custom exception for reading sensors that are not functional.
  */
 struct SensorFunctionalError : public std::exception
 {

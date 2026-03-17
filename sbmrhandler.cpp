@@ -192,7 +192,7 @@ ipmi::RspType<> sendBootProgressCode(
         return ipmi::responseUnspecifiedError();
     }
 
-    /* Chek for BootProgressTypes */
+    /* Check for BootProgressTypes */
     uint16_t codeOperation =
         static_cast<uint16_t>(codeOperation1) << 8 | codeOperation2;
 

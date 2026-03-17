@@ -574,7 +574,7 @@ void createVLAN(sdbusplus::bus_t& bus, ChannelParams& params, uint16_t vlan)
 void reconfigureVLAN(sdbusplus::bus_t& bus, ChannelParams& params,
                      uint16_t vlan)
 {
-    // Unfortunatetly we don't have built-in functions to migrate our interface
+    // Unfortunately we don't have built-in functions to migrate our interface
     // customizations to new VLAN interfaces, or have some kind of decoupling.
     // We therefore must retain all of our old information, setup the new VLAN
     // configuration, then restore the old info.
@@ -642,7 +642,7 @@ static std::unordered_map<uint8_t, SetStatus> setStatus;
 static std::unordered_map<uint8_t, uint16_t> lastDisabledVlan;
 
 /** @brief Gets the set status for the channel if it exists
- *         Otherise populates and returns the default value.
+ *         Otherwise populates and returns the default value.
  *
  *  @param[in] channel - The channel id corresponding to an ethernet interface
  *  @return A reference to the SetStatus for the channel

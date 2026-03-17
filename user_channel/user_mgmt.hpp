@@ -69,7 +69,7 @@ static constexpr const char* deleteUserInterface =
 static constexpr const char* createUserMethod = "CreateUser";
 static constexpr const char* deleteUserMethod = "Delete";
 static constexpr const char* renameUserMethod = "RenameUser";
-// User manager signal memebers
+// User manager signal members
 static constexpr const char* userRenamedSignal = "UserRenamed";
 // Mgr interface properties
 static constexpr const char* allPrivProperty = "AllPrivileges";
@@ -403,7 +403,7 @@ class UserAccess
      */
     void writeUserData();
 
-    /** @brief Funtion which checks and reload configuration file data if
+    /** @brief Function which checks and reload configuration file data if
      * needed.
      *
      */

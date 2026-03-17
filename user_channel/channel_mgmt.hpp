@@ -132,7 +132,7 @@ class ChannelConfig
      *
      *  @param[in] chNum - channel number
      *
-     *  @return numer of active sessions
+     *  @return number of active sessions
      */
     int getChannelActiveSessions(const uint8_t chNum);
 
@@ -217,7 +217,7 @@ class ChannelConfig
     Cc getChannelEnabledAuthType(const uint8_t chNum, const uint8_t priv,
                                  EAuthType& authType);
 
-    /** @brief conver to channel privilege from system privilege
+    /** @brief convert to channel privilege from system privilege
      *
      *  @param[in] value - privilege value
      *
@@ -350,7 +350,7 @@ class ChannelConfig
 
     /** @brief function to convert access mode value to string
      *
-     *  @param[in] value - acess mode value
+     *  @param[in] value - access mode value
      *
      *  @return access mode in string
      */

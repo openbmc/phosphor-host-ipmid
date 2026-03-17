@@ -1,5 +1,6 @@
 #include "ipmi_fru_info_area.hpp"
 
+#include <ipmid/utils.hpp>
 #include <phosphor-logging/elog.hpp>
 #include <phosphor-logging/lg2.hpp>
 
@@ -138,15 +139,10 @@ void appendChassisType(const PropertyMap& propMap, FruAreaData& data)
     if (iter != propMap.end())
     {
         auto value = iter->second;
-        try
+        if (!ipmi::tryParse(value, chassisType))
         {
-            chassisType = std::stoi(value);
-        }
-        catch (const std::exception& e)
-        {
-            lg2::error("Could not parse chassis type, value: {VALUE}, "
-                       "error: {ERROR}",
-                       "VALUE", value, "ERROR", e);
+            lg2::error("Could not parse chassis type, value: {VALUE}", "VALUE",
+                       value);
             chassisType = 0;
         }
     }
@@ -200,9 +196,9 @@ std::time_t timeStringToRaw(const std::string& input)
 {
     // TODO: For non-US region timestamps, pass in region information for the
     // FRU to avoid the month/day swap.
-    // 2017-02-24 - 13:59:00, Tue Nov 20 23:08:00 2018
-    static const std::vector<std::string> patterns = {"%Y-%m-%d - %H:%M:%S",
-                                                      "%a %b %d %H:%M:%S %Y"};
+    // 2017-02-24 - 13:59:00, Tue Nov 20 23:08:00 2018, 20251224T064200Z
+    static const std::vector<std::string> patterns = {
+        "%Y-%m-%d - %H:%M:%S", "%a %b %d %H:%M:%S %Y", "%Y%m%dT%H%M%SZ"};
 
     std::tm time = {};
 
