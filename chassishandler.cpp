@@ -22,6 +22,7 @@
 #include <xyz/openbmc_project/Chassis/Control/Power/common.hpp>
 #include <xyz/openbmc_project/Chassis/Intrusion/client.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
+#include <xyz/openbmc_project/Control/Boot/Flags/server.hpp>
 #include <xyz/openbmc_project/Control/Boot/Mode/server.hpp>
 #include <xyz/openbmc_project/Control/Boot/Source/server.hpp>
 #include <xyz/openbmc_project/Control/Boot/Type/server.hpp>
@@ -115,6 +116,8 @@ using HostState = sdbusplus::common::xyz::openbmc_project::state::Host;
 using ChassisState = sdbusplus::common::xyz::openbmc_project::state::Chassis;
 using NetworkIP = sdbusplus::common::xyz::openbmc_project::network::IP;
 using MACAddress = sdbusplus::common::xyz::openbmc_project::network::MACAddress;
+using ControlBootFlags =
+    sdbusplus::common::xyz::openbmc_project::control::boot::Flags;
 using ControlBootSource =
     sdbusplus::common::xyz::openbmc_project::control::boot::Source;
 using ControlBootMode =
@@ -1935,6 +1938,59 @@ static ipmi::Cc setBootOneTime(ipmi::Context::ptr& ctx, const bool& onetime)
     return ipmi::ccUnspecifiedError;
 }
 
+/** @brief Get the property value for cmos clear
+ *  @param[in] ctx - context pointer
+ *  @param[out] value - cmos clear value
+ *  @return On failure return IPMI error.
+ */
+static ipmi::Cc getBootFlagsCMOSClear(ipmi::Context::ptr& ctx, bool& value)
+{
+    using namespace chassis::internal;
+    std::string service;
+    boost::system::error_code ec =
+        getService(ctx, ControlBootFlags::interface, bootSettingsPath, service);
+    if (!ec)
+    {
+        ec = ipmi::getDbusProperty(
+            ctx, service, bootSettingsPath, ControlBootFlags::interface,
+            ControlBootFlags::property_names::cmos_clear, value);
+        if (!ec)
+        {
+            return ipmi::ccSuccess;
+        }
+    }
+    lg2::error("Error in Boot Flags CMOSClear Get: {ERROR}", "ERROR",
+               ec.message());
+    return ipmi::ccUnspecifiedError;
+}
+
+/** @brief Set the property value for cmos clear
+ *  @param[in] ctx - context pointer
+ *  @param[in] value - cmos clear value
+ *  @return On failure return IPMI error.
+ */
+static ipmi::Cc setBootFlagsCMOSClear(ipmi::Context::ptr& ctx,
+                                      const bool& value)
+{
+    using namespace chassis::internal;
+    std::string service;
+    boost::system::error_code ec =
+        getService(ctx, ControlBootFlags::interface, bootSettingsPath, service);
+    if (!ec)
+    {
+        ec = ipmi::setDbusProperty(
+            ctx, service, bootSettingsPath, ControlBootFlags::interface,
+            ControlBootFlags::property_names::cmos_clear, value);
+        if (!ec)
+        {
+            return ipmi::ccSuccess;
+        }
+    }
+    lg2::error("Error in Boot Flags CMOSClear Set: {ERROR}", "ERROR",
+               ec.message());
+    return ipmi::ccUnspecifiedError;
+}
+
 static constexpr uint8_t setComplete = 0x0;
 static constexpr uint8_t setInProgress = 0x1;
 static uint8_t transferStatus = setComplete;
@@ -2066,6 +2122,12 @@ ipmi::RspType<ipmi::message::Payload> ipmiChassisGetSysBootOptions(
             }
 
             uint1_t validFlag = valid ? 1 : 0;
+
+            rc = getBootFlagsCMOSClear(ctx, cmosClear);
+            if (rc != ipmi::ccSuccess)
+            {
+                return ipmi::response(rc);
+            }
 
             response.pack(
                 bootOptionParameter, reserved1, uint5_t{},
@@ -2270,6 +2332,12 @@ ipmi::RspType<> ipmiChassisSetSysBootOptions(ipmi::Context::ptr ctx,
                 lg2::error(
                     "ipmiChassisSetSysBootOptions: Boot option not supported");
                 return ipmi::responseInvalidFieldRequest();
+            }
+
+            rc = setBootFlagsCMOSClear(ctx, cmosClear);
+            if (rc != ipmi::ccSuccess)
+            {
+                return ipmi::response(rc);
             }
         }
         catch (const sdbusplus::exception_t& e)
