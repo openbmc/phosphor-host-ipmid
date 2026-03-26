@@ -118,7 +118,7 @@ enum class EAuthType : uint8_t
     none = (1 << 0x0),
     md2 = (1 << 0x1),
     md5 = (1 << 0x2),
-    reserved = (1 << 0x3),
+    reserved = (1 << 0x3) | (1 << 0x6) | (1 << 0x7),
     straightPasswd = (1 << 0x4),
     oem = (1 << 0x5),
 };
