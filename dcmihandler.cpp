@@ -51,6 +51,8 @@ constexpr uint8_t specMajorVersion = 1;
 constexpr uint8_t specMinorVersion = 5;
 constexpr uint8_t configParameterRevision = 1;
 constexpr auto option12Mask = 0x01;
+constexpr auto option60Mask = 0x02;
+constexpr auto option60And12Mask = 0x03;
 constexpr auto activateDhcpReply = 0x00;
 constexpr uint8_t dhcpTiming1 = 0x04;  // 4 sec
 constexpr uint16_t dhcpTiming2 = 0x78; // 120 sec
@@ -59,6 +61,8 @@ constexpr uint16_t dhcpTiming3 = 0x40; // 60 sec
 // added into n/w configuration file and the parameter
 // SendHostNameEnabled will set to true.
 constexpr auto dhcpOpt12Enabled = "SendHostNameEnabled";
+constexpr auto dhcpOption60Enabled = "VendorClassIdentifier";
+constexpr auto dhcpOption43Enabled = "SetVendorOption";
 
 enum class DCMIConfigParameters : uint8_t
 {
@@ -594,6 +598,161 @@ bool setDHCPOption(ipmi::Context::ptr& ctx, std::string prop, bool value)
                                       value))
             {
                 return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+/** @brief To get the value of a specified DHCP vendor option from the D-Bus
+ * object tree
+ *  @param[in] ctx - context pointer
+ *  @param[in] prop - DHCP vendor option property
+ *  @returns - std::nullopt if no D-Bus objects
+ *           - true if the value is present and non-empty.
+ *           - false if the value is present but empty.
+ */
+std::optional<bool> getDHCPVendorOption(ipmi::Context::ptr& ctx,
+                                        const std::string& prop)
+{
+    ipmi::ObjectTree objectTree;
+    if (ipmi::getAllDbusObjects(ctx, networkRoot, dhcpIntf, objectTree))
+    {
+        return std::nullopt;
+    }
+
+    for (const auto& [path, serviceMap] : objectTree)
+    {
+        for (const auto& [service, object] : serviceMap)
+        {
+            std::string value;
+            if (ipmi::getDbusProperty(ctx, service, path, dhcpIntf, prop,
+                                      value))
+            {
+                return std::nullopt;
+            }
+
+            if (!value.empty())
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+/** @brief To delete the value of a specified DHCP vendor option string from the
+ * D-Bus object tree
+ *  @param[in] ctx - context pointer
+ *  @param[in] option - DHCP vendor option ID
+ *  @returns - true if the deletion is successful
+ *           - false if no D-Bus objects
+ */
+bool delVendorOption(ipmi::Context::ptr& ctx, uint32_t option)
+{
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+
+    ipmi::ObjectTree objectTree;
+    if (ipmi::getAllDbusObjects(ctx, networkRoot, dhcpIntf, objectTree))
+    {
+        return false;
+    }
+
+    for (const auto& [path, serviceMap] : objectTree)
+    {
+        for (const auto& [service, object] : serviceMap)
+        {
+            try
+            {
+                auto method = bus.new_method_call(service.c_str(), path.c_str(),
+                                                  dhcpIntf, "DelVendorOption");
+                method.append(option);
+                bus.call_noreply(method);
+            }
+            catch (const sdbusplus::exception::SdBusError& ex)
+            {
+                log<level::ERR>("Failed to invoke SetVendorOption method",
+                                entry("ERR=%s", ex.what()));
+                elog<InternalFailure>();
+            }
+        }
+    }
+    return true;
+}
+
+/** @brief To set the value of a specified DHCP vendor option from the D-Bus
+ * object tree
+ *  @param[in] ctx - context pointer
+ *  @param[in] option - DHCP vendor option ID
+ *  @param[in] value - DHCP vendor option Value
+ *  @returns - true if the setVendorOption is successful
+ *           - false if no D-Bus objects
+ */
+bool setVendorOption(ipmi::Context::ptr& ctx, uint32_t option,
+                     std::string value)
+{
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+
+    ipmi::ObjectTree objectTree;
+    if (ipmi::getAllDbusObjects(ctx, networkRoot, dhcpIntf, objectTree))
+    {
+        return false;
+    }
+
+    for (const auto& [path, serviceMap] : objectTree)
+    {
+        for (const auto& [service, object] : serviceMap)
+        {
+            try
+            {
+                auto method =
+                    bus.new_method_call(service.c_str(), path.c_str(), dhcpIntf,
+                                        dcmi::dhcpOption43Enabled);
+                method.append(option, value);
+                bus.call_noreply(method);
+            }
+            catch (const sdbusplus::exception::SdBusError& ex)
+            {
+                log<level::ERR>("Failed to invoke SetVendorOption method",
+                                entry("ERR=%s", ex.what()));
+                elog<InternalFailure>();
+            }
+        }
+    }
+    return true;
+}
+
+/** @brief To set the value of a specified DHCP vendor class identifier from the
+ * D-Bus object tree
+ *  @param[in] ctx - context pointer
+ *  @param[in] prop - DHCP vendor class identifier property
+ *  @param[in] value - DHCP vendor class identifier string
+ *  @returns - true if the setVendorClassIdentifier is successful
+ *           - false if no D-Bus objects
+ */
+bool setVendorClassIdentifier(ipmi::Context::ptr& ctx, std::string prop,
+                              std::string value)
+{
+    ipmi::ObjectTree objectTree;
+    if (ipmi::getAllDbusObjects(ctx, networkRoot, dhcpIntf, objectTree))
+    {
+        return false;
+    }
+
+    for (const auto& [path, serviceMap] : objectTree)
+    {
+        size_t pos = path.find_last_of('/');
+        if (pos != std::string::npos && path.substr(pos + 1) == "dhcp4")
+        {
+            for (const auto& [service, object] : serviceMap)
+            {
+                if (ipmi::setDbusProperty(ctx, service, path, dhcpIntf, prop,
+                                          value))
+                {
+                    return false;
+                }
             }
         }
     }
@@ -1236,9 +1395,19 @@ ipmi::RspType<> setDCMIConfParams(ipmi::Context::ptr& ctx, uint8_t parameter,
         case dcmi::DCMIConfigParameters::DiscoveryConfig:
         {
             bool option12{};
-            uint6_t reserved1{};
+            bool option60{};
+            uint5_t reserved1{};
             bool randBackOff{};
-            if (payload.unpack(option12, reserved1, randBackOff) ||
+            constexpr const char* vendorClassID = "DCMI36465:1.5";
+            constexpr uint8_t vendorOption1ID = 1;
+            constexpr const char* vendorOption1Value = "DCMI";
+            constexpr uint8_t vendorOption2ID = 2;
+            constexpr const char* vendorOption2Value = "1000";
+            constexpr uint8_t vendorOption3ID = 3;
+            constexpr const char* vendorOption3Value = "DCMI1.5";
+            constexpr uint8_t vendorOption242ID = 242;
+            constexpr const char* vendorOption242Value = "BMC";
+            if (payload.unpack(option12, option60, reserved1, randBackOff) ||
                 !payload.fullyUnpacked())
             {
                 return ipmi::responseReqDataLenInvalid();
@@ -1248,6 +1417,26 @@ ipmi::RspType<> setDCMIConfParams(ipmi::Context::ptr& ctx, uint8_t parameter,
             {
                 return ipmi::responseInvalidFieldRequest();
             }
+            if (option60)
+            {
+                dcmi::setVendorClassIdentifier(ctx, dcmi::dhcpOption60Enabled,
+                                               vendorClassID);
+                dcmi::setVendorOption(ctx, vendorOption1ID, vendorOption1Value);
+                dcmi::setVendorOption(ctx, vendorOption2ID, vendorOption2Value);
+                dcmi::setVendorOption(ctx, vendorOption3ID, vendorOption3Value);
+                dcmi::setVendorOption(ctx, vendorOption242ID,
+                                      vendorOption242Value);
+            }
+            else
+            {
+                dcmi::setVendorClassIdentifier(ctx, dcmi::dhcpOption60Enabled,
+                                               "");
+                dcmi::delVendorOption(ctx, vendorOption1ID);
+                dcmi::delVendorOption(ctx, vendorOption2ID);
+                dcmi::delVendorOption(ctx, vendorOption3ID);
+                dcmi::delVendorOption(ctx, vendorOption242ID);
+            }
+
             dcmi::setDHCPOption(ctx, dcmi::dhcpOpt12Enabled, option12);
             break;
         }
@@ -1283,14 +1472,38 @@ ipmi::RspType<ipmi::message::Payload> getDCMIConfParams(
             uint8_t discovery{};
             std::optional<bool> enabled =
                 dcmi::getDHCPOption(ctx, dcmi::dhcpOpt12Enabled);
-            if (!enabled.has_value())
+            std::optional<bool> enabledOption =
+                dcmi::getDHCPVendorOption(ctx, dcmi::dhcpOption60Enabled);
+
+            if (!enabled.has_value() && !enabledOption.has_value())
             {
                 return ipmi::responseUnspecifiedError();
             }
-            if (enabled.value())
+
+            if (enabled.has_value() && enabledOption.has_value())
+            {
+                if (*enabled && *enabledOption)
+                {
+                    discovery = dcmi::option60And12Mask;
+                }
+                else if (*enabled)
+                {
+                    discovery = dcmi::option12Mask;
+                }
+                else if (*enabledOption)
+                {
+                    discovery = dcmi::option60Mask;
+                }
+            }
+            else if (enabled.has_value() && *enabled)
             {
                 discovery = dcmi::option12Mask;
             }
+            else if (enabledOption.has_value() && *enabledOption)
+            {
+                discovery = dcmi::option60Mask;
+            }
+
             payload.pack(discovery);
             break;
         }
