@@ -20,8 +20,10 @@
 #include <boost/callable_traits.hpp>
 #include <ipmid/api-types.hpp>
 #include <ipmid/message.hpp>
+#include <phosphor-logging/audit/audit.hpp>
 #include <phosphor-logging/lg2.hpp>
 #include <phosphor-logging/log.hpp>
+#include <sdbusplus/server.hpp>
 #include <user_channel/channel_layer.hpp>
 
 #include <algorithm>
@@ -41,6 +43,10 @@
 
 namespace ipmi
 {
+
+static std::optional<std::vector<std::tuple<uint8_t, uint8_t, uint32_t>>>
+    ipmiAllowList;
+static std::optional<bool> ipmiAuditEnabled;
 
 template <typename... Args>
 static inline message::Response::ptr errorResponse(
@@ -302,7 +308,94 @@ class IpmiHandler final : public HandlerBase
         {
             response->pack(*payload);
         }
+
+        // if ipmi enabled:
+        //   if cmd/netfn in AllowList:
+        //     put msg into iovec;
+        //     audit_event();
+        ipmiAuEvent(response->cc, request->ctx->netFn, request->ctx->cmd);
         return response;
+    }
+
+    /**
+     * @brief Audit Event
+     * This is for debug purpose with lazy initialization, trying to get minimal
+     * overhead to handler calls. Possible way to schedule it with asyncio.
+     */
+    void ipmiAuEvent(int32_t rc, uint8_t netFn, uint8_t cmd)
+    {
+        if (ipmiAuditEnabled == std::nullopt)
+        {
+            // TODO: pack it in ipmi::getDbusProperty
+            // std::get<bool>(ipmi::getDbusProperty(bus,
+            // "xyz.openbmc_project.Logging.Audit",
+            //                        "/xyz/openbmc_project/logging/audit/manager",
+            //                        "xyz.openbmc_project.Logging.Audit.AuditIPMI",
+            //                        "Enabled"));
+
+            sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
+
+            constexpr auto objectName = "xyz.openbmc_project.Logging.Audit";
+            constexpr auto objectPath =
+                "/xyz/openbmc_project/logging/audit/manager";
+
+            auto method =
+                bus.new_method_call(objectName, objectPath,
+                                    "org.freedesktop.DBus.Properties", "Get");
+
+            constexpr auto propertyIntf =
+                "xyz.openbmc_project.Logging.Audit.AuditIPMI";
+            constexpr auto propertyName = "Enabled";
+
+            method.append(propertyIntf, propertyName);
+            auto reply = bus.call(method);
+            bool prop;
+            reply.read(prop);
+            ipmiAuditEnabled = prop;
+        }
+
+        if (ipmiAuditEnabled)
+        {
+            if (ipmiAllowList == std::nullopt)
+            {
+                // TODO: pack it in ipmi::getDbusProperty
+                // auto var = ipmi::getDbusProperty(bus,
+                // "xyz.openbmc_project.Logging.Audit",
+                //                    "/xyz/openbmc_project/logging/audit/manager",
+                //                    "xyz.openbmc_project.Logging.Audit.AuditIPMI",
+                //                    "AllowList");
+                sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
+                constexpr auto objectName = "xyz.openbmc_project.Logging.Audit";
+                constexpr auto objectPath =
+                    "/xyz/openbmc_project/logging/audit/manager";
+
+                auto method = bus.new_method_call(
+                    objectName, objectPath, "org.freedesktop.DBus.Properties",
+                    "Get");
+
+                constexpr auto propertyIntf =
+                    "xyz.openbmc_project.Logging.Audit.AuditIPMI";
+                constexpr auto propertyName = "AllowList";
+
+                method.append(propertyIntf, propertyName);
+                auto reply = bus.call(method);
+                std::vector<std::tuple<uint8_t, uint8_t, uint32_t>> prop;
+                reply.read(prop);
+                ipmiAllowList = std::move(prop);
+            }
+
+            for (auto& ialEntry : ipmiAllowList.value())
+            {
+                if ((cmd == std::get<0>(ialEntry)) &&
+                    (netFn == std::get<1>(ialEntry)))
+                {
+                    // TODO: change user string to UID/uint16_t
+                    phosphor::logging::audit::audit_event(
+                        phosphor::logging::audit::HOSTIPMI,
+                        std::get<2>(ialEntry), rc, std::string("root"));
+                }
+            }
+        }
     }
 };
 
