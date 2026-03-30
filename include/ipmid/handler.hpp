@@ -20,8 +20,10 @@
 #include <boost/callable_traits.hpp>
 #include <ipmid/api-types.hpp>
 #include <ipmid/message.hpp>
+#include <phosphor-logging/audit/audit.hpp>
 #include <phosphor-logging/lg2.hpp>
 #include <phosphor-logging/log.hpp>
+#include <sdbusplus/server.hpp>
 #include <user_channel/channel_layer.hpp>
 
 #include <algorithm>
@@ -41,6 +43,10 @@
 
 namespace ipmi
 {
+
+static std::optional<std::vector<std::tuple<uint8_t, uint8_t, uint32_t>>>
+    ipmiAllowList;
+static std::optional<bool> ipmiAuditEnabled;
 
 template <typename... Args>
 static inline message::Response::ptr errorResponse(
@@ -302,8 +308,19 @@ class IpmiHandler final : public HandlerBase
         {
             response->pack(*payload);
         }
+
+        // if ipmi enabled:
+        //   if cmd/netfn in AllowList:
+        //     put msg into iovec;
+        //     auditEevent();
+        hostIpmiAuEvent(response->cc, request->ctx->netFn, request->ctx->cmd);
         return response;
     }
+
+    void hostIpmiAuEvent(int32_t rc, uint8_t netFn, uint8_t cmd) {
+         phosphor::logging::audit::hostIpmiAuditEvent(rc, netFn, cmd, ipmiAuditEnabled, ipmiAllowList);
+    }
+
 };
 
 #ifdef ALLOW_DEPRECATED_API
