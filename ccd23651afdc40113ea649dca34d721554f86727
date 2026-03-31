@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1d22ec22_1e06d5bd",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 854,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-03-31T05:50:38Z",
+      "side": 1,
+      "message": "Is it possible that msg.read() could receive a malformed D-Bus message? If so, would adding exception handling here be appropriate to handle that case gracefully?",
+      "range": {
+        "startLine": 854,
+        "startChar": 25,
+        "endLine": 854,
+        "endChar": 34
+      },
+      "revId": "ccd23651afdc40113ea649dca34d721554f86727",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "78d66eb2_b2f71848",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 864,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-03-31T05:50:38Z",
+      "side": 1,
+      "message": "There is no debug/trace logging when a threshold update is received and applied. Adding a log statement would greatly help in diagnosing threshold sync issues ?",
+      "range": {
+        "startLine": 864,
+        "startChar": 33,
+        "endLine": 864,
+        "endChar": 41
+      },
+      "revId": "ccd23651afdc40113ea649dca34d721554f86727",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "70c79acc_d47079dd",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1653,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-03-31T05:50:38Z",
+      "side": 1,
+      "message": "Two issues:\n\nTypo: Initialze → Initialize\nThe comment says \"Asserted/DeAsserted\" but this function monitors threshold value changes via PropertiesChanged, not assertion events. Please correct the comment to accurately reflect the behavior.",
+      "range": {
+        "startLine": 1653,
+        "startChar": 17,
+        "endLine": 1653,
+        "endChar": 21
+      },
+      "revId": "ccd23651afdc40113ea649dca34d721554f86727",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
