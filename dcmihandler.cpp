@@ -44,7 +44,7 @@ namespace dcmi
 constexpr auto assetTagMaxOffset = 62;
 constexpr auto assetTagMaxSize = 63;
 constexpr auto maxBytes = 16;
-constexpr size_t maxCtrlIdStrLen = 63;
+constexpr size_t maxCtrlIdStrLen = 64;
 
 constexpr uint8_t parameterRevision = 2;
 constexpr uint8_t specMajorVersion = 1;
@@ -924,6 +924,10 @@ ipmi::RspType<uint8_t> setMgmntCtrlIdStr(ipmi::Context::ptr& ctx,
     {
         // remove the null termination from the data (no need with std::string)
         data.resize(count - 1);
+    }
+    else if ((offset + count) == dcmi::maxCtrlIdStrLen)
+    {
+        return ipmi::responseParmOutOfRange();
     }
 
     static std::string hostname{};
