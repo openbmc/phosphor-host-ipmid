@@ -106,7 +106,7 @@ std::optional<std::pair<uint16_t, SELEntry>> parseLoggingEntry(
 
 static void selAddedCallback(sdbusplus::message_t& m)
 {
-    sdbusplus::message::object_path objPath;
+    sdbusplus::object_path objPath;
     try
     {
         m.read(objPath);
@@ -126,7 +126,7 @@ static void selAddedCallback(sdbusplus::message_t& m)
 
 static void selRemovedCallback(sdbusplus::message_t& m)
 {
-    sdbusplus::message::object_path objPath;
+    sdbusplus::object_path objPath;
     try
     {
         m.read(objPath);

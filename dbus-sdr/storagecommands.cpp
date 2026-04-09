@@ -80,8 +80,8 @@ using ObjectType =
     boost::container::flat_map<std::string,
                                boost::container::flat_map<std::string, Value>>;
 using ManagedObjectType =
-    boost::container::flat_map<sdbusplus::message::object_path, ObjectType>;
-using ManagedEntry = std::pair<sdbusplus::message::object_path, ObjectType>;
+    boost::container::flat_map<sdbusplus::object_path, ObjectType>;
+using ManagedEntry = std::pair<sdbusplus::object_path, ObjectType>;
 using Paths = std::vector<std::string>;
 
 constexpr static const char* fruDeviceServiceName =
@@ -297,7 +297,7 @@ void startMatch(void)
         "type='signal',arg0path='/xyz/openbmc_project/"
         "FruDevice/',member='InterfacesAdded'",
         [](sdbusplus::message_t& message) {
-            sdbusplus::message::object_path path;
+            sdbusplus::object_path path;
             ObjectType object;
             try
             {
@@ -323,7 +323,7 @@ void startMatch(void)
         "type='signal',arg0path='/xyz/openbmc_project/"
         "FruDevice/',member='InterfacesRemoved'",
         [](sdbusplus::message_t& message) {
-            sdbusplus::message::object_path path;
+            sdbusplus::object_path path;
             std::set<std::string> interfaces;
             try
             {

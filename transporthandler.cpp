@@ -560,7 +560,7 @@ void createVLAN(sdbusplus::bus_t& bus, ChannelParams& params, uint16_t vlan)
                                    INTF_VLAN_CREATE, "VLAN");
     req.append(params.ifname, static_cast<uint32_t>(vlan));
     auto reply = bus.call(req);
-    auto newPath = reply.unpack<sdbusplus::message::object_path>();
+    auto newPath = reply.unpack<sdbusplus::object_path>();
 
     params.logicalPath = std::move(newPath);
 }

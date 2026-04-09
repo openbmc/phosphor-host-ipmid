@@ -117,7 +117,7 @@ inline void safeUsernameCopyToBuffer(uint8_t* buf, size_t bufSize,
 using DbusUserPropVariant =
     std::variant<std::vector<std::string>, std::string, bool>;
 
-using DbusUserObjPath = sdbusplus::message::object_path;
+using DbusUserObjPath = sdbusplus::object_path;
 
 using DbusUserObjProperties =
     std::vector<std::pair<std::string, DbusUserPropVariant>>;

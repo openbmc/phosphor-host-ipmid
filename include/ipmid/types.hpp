@@ -36,8 +36,7 @@ using InterfaceList = std::vector<std::string>;
 
 using DbusInterfaceMap = std::map<DbusInterface, PropertyMap>;
 
-using ObjectValueTree =
-    std::map<sdbusplus::message::object_path, DbusInterfaceMap>;
+using ObjectValueTree = std::map<sdbusplus::object_path, DbusInterfaceMap>;
 
 namespace sensor
 {
@@ -196,7 +195,7 @@ using PropertyMap = ipmi::PropertyMap;
 
 using InterfaceMap = std::map<DbusInterface, PropertyMap>;
 
-using Object = sdbusplus::message::object_path;
+using Object = sdbusplus::object_path;
 using ObjectMap = std::map<Object, InterfaceMap>;
 
 using IpmiUpdateData = sdbusplus::message_t;

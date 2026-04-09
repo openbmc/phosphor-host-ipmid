@@ -92,7 +92,7 @@ UserAccess& getUserAccessObject()
 
 int getUserNameFromPath(const std::string& path, std::string& userName)
 {
-    sdbusplus::message::object_path objPath(path);
+    sdbusplus::object_path objPath(path);
     userName.assign(objPath.filename());
     return 0;
 }
@@ -473,7 +473,7 @@ bool UserAccess::isValidUserName(const std::string& userName)
         return false;
     }
 
-    sdbusplus::message::object_path tempUserPath(userObjBasePath);
+    sdbusplus::object_path tempUserPath(userObjBasePath);
     tempUserPath /= userName;
     std::string usersPath(tempUserPath);
 
@@ -698,7 +698,7 @@ Cc UserAccess::setUserEnabledState(const uint8_t userId,
     }
     if (userInfo->userEnabled != enabledState)
     {
-        sdbusplus::message::object_path tempUserPath(userObjBasePath);
+        sdbusplus::object_path tempUserPath(userObjBasePath);
         tempUserPath /= userName;
         std::string userPath(tempUserPath);
         setDbusProperty(bus, userMgrService, userPath, usersInterface,
@@ -804,7 +804,7 @@ Cc UserAccess::setUserPrivilegeAccess(const uint8_t userId, const uint8_t chNum,
     if (chNum == syncIndex &&
         privAccess.privilege != userInfo->userPrivAccess[syncIndex].privilege)
     {
-        sdbusplus::message::object_path tempUserPath(userObjBasePath);
+        sdbusplus::object_path tempUserPath(userObjBasePath);
         tempUserPath /= userName;
         std::string userPath(tempUserPath);
         setDbusProperty(bus, userMgrService, userPath, usersInterface,
@@ -911,7 +911,7 @@ Cc UserAccess::setUserName(const uint8_t userId, const std::string& userName)
     if (userName.empty() && !oldUser.empty())
     {
         // Delete existing user
-        sdbusplus::message::object_path tempUserPath(userObjBasePath);
+        sdbusplus::object_path tempUserPath(userObjBasePath);
         tempUserPath /= oldUser;
         std::string userPath(tempUserPath);
         try
@@ -1586,7 +1586,7 @@ void UserAccess::cacheUserDataFile()
 
             std::string userName =
                 safeUsernameString(userData->user[usrIdx].userName);
-            sdbusplus::message::object_path tempUserPath(userObjBasePath);
+            sdbusplus::object_path tempUserPath(userObjBasePath);
             tempUserPath /= userName;
             std::string usersPath(tempUserPath);
 
