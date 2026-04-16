@@ -40,6 +40,13 @@ static constexpr auto gDCMIPowerMgmtCapability = "PowerManagement";
 static constexpr auto gDCMIPowerMgmtSupported = 0x1;
 static constexpr auto gMaxSELEntriesMask = 0xFFF;
 static constexpr auto gByteBitSize = 8;
+// DCMI SET/GET THERMAL LIMIT
+static constexpr auto settingsBus = "xyz.openbmc_project.Settings";
+static constexpr auto thermalLimitObjpath =
+    "/xyz/openbmc_project/control/thermal_limit";
+static constexpr uint8_t inletTemp1 = 0x37;
+static constexpr uint8_t inletTemp2 = 0x40;
+static constexpr uint8_t entyInstance = 0x01;
 
 /** @brief Check whether DCMI power management is supported
  *         in the DCMI Capabilities config file.
