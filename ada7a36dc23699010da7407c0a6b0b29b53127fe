@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "061f77e4_6b3ab2ca",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 833,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-04-16T14:46:55Z",
+      "side": 1,
+      "message": "bus is a local variable and will be destroyed when the function returns, but the match_t objects in thresholdMatches still hold a reference to it. This will cause a use-after-free crash when a D-Bus signal arrives.\n\nCould you Tell me if my understanding is wrong ?",
+      "range": {
+        "startLine": 833,
+        "startChar": 54,
+        "endLine": 833,
+        "endChar": 55
+      },
+      "revId": "ada7a36dc23699010da7407c0a6b0b29b53127fe",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
