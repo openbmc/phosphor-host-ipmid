@@ -11,9 +11,11 @@
 #include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/bus.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
+#include <xyz/openbmc_project/Control/ThermalLimit/common.hpp>
 #include <xyz/openbmc_project/Network/EthernetInterface/server.hpp>
 #include <xyz/openbmc_project/Sensor/Value/common.hpp>
 
+#include <algorithm>
 #include <bitset>
 #include <cmath>
 #include <fstream>
@@ -26,6 +28,16 @@ using InternalFailure =
     sdbusplus::error::xyz::openbmc_project::common::InternalFailure;
 
 using SensorValue = sdbusplus::common::xyz::openbmc_project::sensor::Value;
+using ThermalLimit =
+    sdbusplus::common::xyz::openbmc_project::control::ThermalLimit;
+
+static const std::map<ThermalLimit::ExceptionActions, uint8_t>
+    exceptionActionToIpmi = {
+        {ThermalLimit::ExceptionActions::NoAction, 0x00},
+        {ThermalLimit::ExceptionActions::LoggingSEL, 0x20},
+        {ThermalLimit::ExceptionActions::HardPowerOff, 0x40},
+        {ThermalLimit::ExceptionActions::HardPowerOffAndLoggingSEL, 0x60},
+    };
 
 void registerNetFnDcmiFunctions() __attribute__((constructor));
 
@@ -1432,6 +1444,123 @@ ipmi::RspType<uint16_t, // current power
                                  reserved2);
 }
 
+ipmi::RspType<uint8_t, uint8_t, uint16_t> getThermalLimit(
+    ipmi::Context::ptr& ctx, uint8_t getThermalEntityID,
+    uint8_t getThermalEntityInstance)
+{
+    if ((getThermalEntityID != dcmi::inletTemp1) &&
+        (getThermalEntityID != dcmi::inletTemp2))
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+
+    if (getThermalEntityInstance != dcmi::entyInstance)
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+
+    ipmi::PropertyMap properties{};
+    boost::system::error_code ec = ipmi::getAllDbusProperties(
+        ctx, dcmi::settingsBus, dcmi::thermalLimitObjpath,
+        ThermalLimit::interface, properties);
+    if (ec)
+    {
+        lg2::error("Failed to get ThermalLimit properties: {ERROR}", "ERROR",
+                   ec.message());
+        return ipmi::responseUnspecifiedError();
+    }
+
+    auto actionStr = std::get<std::string>(
+        properties.at(ThermalLimit::property_names::exception_action));
+    auto actionOpt =
+        sdbusplus::message::convert_from_string<ThermalLimit::ExceptionActions>(
+            actionStr);
+    uint8_t getExceptAct = 0;
+    if (actionOpt)
+    {
+        auto itr = exceptionActionToIpmi.find(*actionOpt);
+        if (itr != exceptionActionToIpmi.end())
+        {
+            getExceptAct = itr->second;
+        }
+    }
+
+    auto getTempLimit = std::get<uint8_t>(
+        properties.at(ThermalLimit::property_names::temparature_limit));
+    auto getExceptTime = std::get<uint16_t>(
+        properties.at(ThermalLimit::property_names::exception_time));
+
+    return ipmi::responseSuccess(getExceptAct, getTempLimit, getExceptTime);
+}
+
+ipmi::RspType<> setThermalLimit(
+    ipmi::Context::ptr& ctx, uint8_t thermalEntityID,
+    uint8_t thermalEntityInstance, uint8_t thermalExceptionAction,
+    uint8_t tempLimit, uint16_t exceptionTime)
+{
+    if ((thermalEntityID != dcmi::inletTemp1) &&
+        (thermalEntityID != dcmi::inletTemp2))
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+
+    if (thermalEntityInstance != dcmi::entyInstance)
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+
+    if (thermalExceptionAction == 0x00)
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+
+    auto actionItr = std::find_if(
+        exceptionActionToIpmi.begin(), exceptionActionToIpmi.end(),
+        [thermalExceptionAction](const auto& action) {
+            return action.second == thermalExceptionAction;
+        });
+    if (actionItr == exceptionActionToIpmi.end())
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+
+    boost::system::error_code ec;
+    ec = ipmi::setDbusProperty(
+        ctx, dcmi::settingsBus, dcmi::thermalLimitObjpath,
+        ThermalLimit::interface, ThermalLimit::property_names::exception_action,
+        convertForMessage(actionItr->first));
+    if (ec)
+    {
+        lg2::error("Failed to set Thermal ExceptionAction: {ERROR}", "ERROR",
+                   ec.message());
+        return ipmi::responseUnspecifiedError();
+    }
+
+    ec = ipmi::setDbusProperty(
+        ctx, dcmi::settingsBus, dcmi::thermalLimitObjpath,
+        ThermalLimit::interface,
+        ThermalLimit::property_names::temparature_limit, tempLimit);
+    if (ec)
+    {
+        lg2::error("Failed to set Thermal TemparatureLimit: {ERROR}", "ERROR",
+                   ec.message());
+        return ipmi::responseUnspecifiedError();
+    }
+
+    ec = ipmi::setDbusProperty(
+        ctx, dcmi::settingsBus, dcmi::thermalLimitObjpath,
+        ThermalLimit::interface, ThermalLimit::property_names::exception_time,
+        exceptionTime);
+    if (ec)
+    {
+        lg2::error("Failed to set Thermal ExceptionTime: {ERROR}", "ERROR",
+                   ec.message());
+        return ipmi::responseUnspecifiedError();
+    }
+
+    return ipmi::responseSuccess();
+}
+
 namespace dcmi
 {
 namespace sensor_info
@@ -1509,6 +1638,15 @@ void registerNetFnDcmiFunctions()
     registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupDCMI,
                          ipmi::dcmi::cmdGetPowerLimit, ipmi::Privilege::User,
                          getPowerLimit);
+
+    // <Set Thermal Limit>
+    registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupDCMI,
+                         ipmi::dcmi::cmdSetThermalLimit, ipmi::Privilege::User,
+                         setThermalLimit);
+    // <Get Thermal Limit>
+    registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupDCMI,
+                         ipmi::dcmi::cmdGetThermalLimit, ipmi::Privilege::User,
+                         getThermalLimit);
 
     // <Set Power Limit>
     registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupDCMI,
