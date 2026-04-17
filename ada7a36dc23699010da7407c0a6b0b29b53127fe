@@ -22,6 +22,30 @@
       },
       "revId": "ada7a36dc23699010da7407c0a6b0b29b53127fe",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "304dbeca_7013c777",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 833,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2026-04-17T00:46:59Z",
+      "side": 1,
+      "message": "bus is just a wrapper created from ipmid_get_sd_bus_connection(), which returns a process-wide shared sd_bus. When the local bus goes out of scope, it does not destroy the underlying D-Bus connection.\nThe match_t objects are effectively tied to that shared global bus, which remains valid for the lifetime of the process. So although it looks like a lifetime issue, it doesn’t lead to a real use-after-free here.",
+      "parentUuid": "061f77e4_6b3ab2ca",
+      "range": {
+        "startLine": 833,
+        "startChar": 54,
+        "endLine": 833,
+        "endChar": 55
+      },
+      "revId": "ada7a36dc23699010da7407c0a6b0b29b53127fe",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
