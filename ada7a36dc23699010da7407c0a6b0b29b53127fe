@@ -46,6 +46,30 @@
       },
       "revId": "ada7a36dc23699010da7407c0a6b0b29b53127fe",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "38a49daa_b9158675",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 833,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-04-17T04:54:23Z",
+      "side": 1,
+      "message": "Good change. Caching threshold values via D-Bus signals avoids a live D-Bus call on every IPMI request, which should reduce latency by around 10–15ms per call.",
+      "parentUuid": "304dbeca_7013c777",
+      "range": {
+        "startLine": 833,
+        "startChar": 54,
+        "endLine": 833,
+        "endChar": 55
+      },
+      "revId": "ada7a36dc23699010da7407c0a6b0b29b53127fe",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
