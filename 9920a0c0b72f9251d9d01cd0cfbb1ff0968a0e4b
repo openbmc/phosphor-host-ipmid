@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3a7476c2_1fc79973",
+        "filename": "sensorhandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1631,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-04-20T07:53:17Z",
+      "side": 1,
+      "message": "Alarm states are dynamic — they change whenever a reading crosses a threshold. This means the first response is correct, but all subsequent responses for the same sensor return stale data.\n\nEX:\n\n1. Sensor 0x10 reads 28°C, upper warning threshold is 45°C → alarm is `false`. Cached.\n2. Threshold is later changed to 20°C → 28°C now exceeds it → alarm should be `true`.\n3. Next call returns cached `false` — incorrect.\n\nBetter If may fetch fresh data",
+      "range": {
+        "startLine": 1631,
+        "startChar": 0,
+        "endLine": 1631,
+        "endChar": 50
+      },
+      "revId": "9920a0c0b72f9251d9d01cd0cfbb1ff0968a0e4b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
