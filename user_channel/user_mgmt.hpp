@@ -403,6 +403,11 @@ class UserAccess
      */
     void writeUserData();
 
+    /** @brief initializes user data file with default values
+     *
+     */
+    void initializeUserDataFile();
+
     /** @brief Function which checks and reload configuration file data if
      * needed.
      *
