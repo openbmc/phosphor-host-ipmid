@@ -1117,6 +1117,13 @@ void UserAccess::readUserData()
     Json jsonUsersTbl = Json::array();
     jsonUsersTbl = Json::parse(iUsrData, nullptr, false);
 
+    if (jsonUsersTbl.is_discarded())
+    {
+        lg2::error("Corrupted IPMI user data file - invalid JSON");
+        throw std::runtime_error(
+            "Corrupted IPMI user data file - invalid JSON");
+    }
+
     if (jsonUsersTbl.size() != ipmiMaxUsers)
     {
         lg2::error("Error in reading IPMI user data file - User count issues");
@@ -1485,6 +1492,26 @@ int UserAccess::getUserObjProperties(const DbusUserObjValue& userObjs,
     return -EIO;
 }
 
+void UserAccess::initializeUserDataFile()
+{
+    std::fill(reinterpret_cast<uint8_t*>(&usersTbl),
+              reinterpret_cast<uint8_t*>(&usersTbl) + sizeof(usersTbl), 0);
+    // user index 0 is reserved, starts with 1
+    for (size_t userIndex = 1; userIndex <= ipmiMaxUsers; ++userIndex)
+    {
+        for (size_t chIndex = 0; chIndex < ipmiMaxChannels; ++chIndex)
+        {
+            usersTbl.user[userIndex].userPrivAccess[chIndex].privilege =
+                privNoAccess;
+            usersTbl.user[userIndex]
+                .payloadAccess[chIndex]
+                .stdPayloadEnables1[static_cast<uint8_t>(
+                    ipmi::PayloadType::SOL)] = true;
+        }
+    }
+    writeUserData();
+}
+
 void UserAccess::cacheUserDataFile()
 {
     boost::interprocess::scoped_lock<boost::interprocess::named_recursive_mutex>
@@ -1494,23 +1521,17 @@ void UserAccess::cacheUserDataFile()
         readUserData();
     }
     catch (const std::ios_base::failure& e)
-    { // File is empty, create it for the first time
-        std::fill(reinterpret_cast<uint8_t*>(&usersTbl),
-                  reinterpret_cast<uint8_t*>(&usersTbl) + sizeof(usersTbl), 0);
-        // user index 0 is reserved, starts with 1
-        for (size_t userIndex = 1; userIndex <= ipmiMaxUsers; ++userIndex)
-        {
-            for (size_t chIndex = 0; chIndex < ipmiMaxChannels; ++chIndex)
-            {
-                usersTbl.user[userIndex].userPrivAccess[chIndex].privilege =
-                    privNoAccess;
-                usersTbl.user[userIndex]
-                    .payloadAccess[chIndex]
-                    .stdPayloadEnables1[static_cast<uint8_t>(
-                        ipmi::PayloadType::SOL)] = true;
-            }
-        }
-        writeUserData();
+    { // File is empty or missing, create it for the first time
+        lg2::error("User data file not found or not readable, "
+                   "initializing: {ERROR}",
+                   "ERROR", e);
+        initializeUserDataFile();
+    }
+    catch (const std::runtime_error& e)
+    { // File is corrupted, reinitialize it
+        lg2::error("User data file corrupted, reinitializing: {ERROR}",
+                   "ERROR", e);
+        initializeUserDataFile();
     }
     // Create lock file if it does not exist
     int fd = open(ipmiUserSignalLockFile, O_CREAT | O_TRUNC | O_SYNC,
