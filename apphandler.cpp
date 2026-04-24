@@ -62,6 +62,37 @@ using Activation =
 using BMCState = sdbusplus::server::xyz::openbmc_project::state::BMC;
 namespace fs = std::filesystem;
 
+/* Get Self Test Result dbus sources */
+constexpr auto ipmiLoggingService = "xyz.openbmc_project.Logging.IPMI";
+constexpr auto ipmiLoggingObject = "/xyz/openbmc_project/Logging/IPMI";
+constexpr auto ipmiLoggingIntf = "xyz.openbmc_project.Logging.IPMI";
+constexpr auto fruService = "xyz.openbmc_project.FruDevice";
+constexpr auto fruObjectPath = "/xyz/openbmc_project/FruDevice";
+constexpr auto fruIntf = "xyz.openbmc_project.FruDeviceManager";
+constexpr auto propIntf = "org.freedesktop.DBus.Properties";
+
+/* Get Self Test Result response */
+#define GST_NO_ERROR 0x55
+#define GST_CORRUPTED_DEVICES 0x57
+#define GST_SEL_FAIL_OFFSET 0x80
+#define GST_FRU_FAIL_OFFSET 0x20
+
+/*Set Channel Security Keys*/
+
+constexpr auto MAXCH = 15;
+constexpr auto KR = 0x00;
+constexpr auto KG = 0x01;
+constexpr auto READ_KEY = 0x00;
+constexpr auto SET_KEY = 0x01;
+constexpr auto LOCKKEY = 0x02;
+constexpr auto NULLSTR = "00000000000000000000";
+constexpr auto KEYSIZE = 20;
+constexpr auto KR_FILE = "/etc/ipmi_kr";
+constexpr auto KG_FILE = "/etc/ipmi_kg";
+constexpr auto KR_LOCK_FILE = "/etc/ipmi_kr_locked";
+constexpr auto KEYLOCKED = 0x01;
+constexpr auto KEYUNLOCKED = 0x02;
+
 #ifdef ENABLE_I2C_WHITELIST_CHECK
 typedef struct
 {
@@ -760,9 +791,52 @@ auto ipmiAppGetSelfTestResults() -> ipmi::RspType<uint8_t, uint8_t>
     //      [2] 1b = Internal Use Area of BMC FRU corrupted.
     //      [1] 1b = controller update 'boot block' firmware corrupted.
     //      [0] 1b = controller operational firmware corrupted.
-    constexpr uint8_t notImplemented = 0x56;
-    constexpr uint8_t zero = 0;
-    return ipmi::responseSuccess(notImplemented, zero);
+    uint8_t testResultByte2 = 0x00, testResultByte1 = 0x00;
+
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+
+    /* Get the status of SEL device (bit[7]) */
+    auto selAvailableCall = bus.new_method_call(
+        ipmiLoggingService, ipmiLoggingObject, propIntf, "GetAll");
+    selAvailableCall.append(ipmiLoggingIntf);
+
+    try
+    {
+        auto selAvaiableReply = bus.call(selAvailableCall);
+        testResultByte2 &= ~(GST_SEL_FAIL_OFFSET);
+    }
+    catch (const std::exception& e)
+    {
+        lg2::error("SEL Repository update or self-initialization in progress. "
+                   "Interface: {INTERFACE}, Error: {ERROR}",
+                   "INTERFACE", ipmiLoggingIntf, "ERROR", e);
+        testResultByte2 |= GST_SEL_FAIL_OFFSET;
+    }
+
+    // TBD - sdr related information need to be implemented.
+
+    /* Get the status of FRU device (bit[5]) */
+    auto fruAvailableCall =
+        bus.new_method_call(fruService, fruObjectPath, propIntf, "GetAll");
+    fruAvailableCall.append(fruIntf);
+    try
+    {
+        auto fruAvailableReply = bus.call(fruAvailableCall);
+        testResultByte2 &= ~(GST_FRU_FAIL_OFFSET);
+    }
+    catch (const std::exception& e)
+    {
+        lg2::error("FRU Repository update or self-initialization in progress. "
+                   "Interface: {INTERFACE}, Error: {ERROR}",
+                   "INTERFACE", fruIntf, "ERROR", e);
+        testResultByte2 |= GST_FRU_FAIL_OFFSET;
+    }
+    // bit[4], bit[3], bit[2], bit[1], bit[0] are not support.
+
+    testResultByte1 =
+        (0 == testResultByte2) ? GST_NO_ERROR : GST_CORRUPTED_DEVICES;
+
+    return ipmi::responseSuccess(testResultByte1, testResultByte2);
 }
 
 static constexpr size_t uuidBinaryLength = 16;
@@ -1366,6 +1440,13 @@ static uint8_t transferStatus = setComplete;
 
 static constexpr uint8_t configDataOverhead = 2;
 
+struct GlobalEncoding
+{
+    uint8_t globalencoding;
+};
+
+static GlobalEncoding globalEncoding = {0};
+
 namespace ipmi
 {
 constexpr Cc ccParmNotSupported = 0x80;
@@ -1450,9 +1531,9 @@ ipmi::RspType<uint8_t,                // Parameter revision
     std::vector<uint8_t> configData;
     size_t count = 0;
     if (setSelector == 0)
-    {                               // First chunk has only 14 bytes.
-        configData.emplace_back(0); // encoding
-        configData.emplace_back(paramString.length()); // string length
+    { // First chunk has only 14 bytes.
+        configData.emplace_back(globalEncoding.globalencoding); // encoding
+        configData.emplace_back(paramString.length());          // string length
         count = std::min(paramString.length(), smallChunkSize);
         configData.resize(count + configDataOverhead);
         std::copy_n(paramString.begin(), count,
@@ -1551,6 +1632,7 @@ ipmi::RspType<> ipmiAppSetSystemInfo(uint8_t paramSelector, uint8_t data1,
         {
             return ipmi::responseInvalidFieldRequest();
         }
+        globalEncoding.globalencoding = encoding;
 
         size_t stringLen = configData.at(1); // string length
         count = std::min(stringLen, smallChunkSize);
@@ -1784,6 +1866,103 @@ ipmi::RspType<std::vector<uint8_t>> ipmiControllerWriteRead(
     return ipmi::responseSuccess(readBuf);
 }
 
+ipmi::RspType<uint8_t, std::array<uint8_t, KEYSIZE>> ipmiSetChannelSecurityKeys(
+    uint8_t channelNum, uint8_t operation, uint8_t keyID,
+    std::vector<uint8_t> keyData)
+{
+    std::array<uint8_t, KEYSIZE> keys{};
+    uint8_t lockStatus = KEYUNLOCKED;
+
+    if (channelNum > MAXCH)
+    {
+        return ipmi::responseInvalidFieldRequest();
+    }
+
+    if (operation == READ_KEY)
+    {
+        if (keyID != KR && keyID != KG)
+        {
+            return ipmi::responseInvalidFieldRequest();
+        }
+
+        if (keyID == KR && fs::exists(KR_LOCK_FILE))
+        {
+            return ipmi::responseReqCannotPerformKeyLocked();
+        }
+
+        std::string keyFile = (keyID == KR) ? KR_FILE : KG_FILE;
+        std::ifstream readKey(keyFile, std::ios::in | std::ios::binary);
+        if (readKey.is_open())
+        {
+            readKey.read(reinterpret_cast<char*>(keys.data()), KEYSIZE);
+            readKey.close();
+        }
+
+        return ipmi::responseSuccess(lockStatus, keys);
+    }
+    else if (operation == SET_KEY)
+    {
+        if (keyData.size() != KEYSIZE)
+        {
+            if (keyData.size() > KEYSIZE)
+            {
+                return ipmi::responseReqToManyKeyBytes();
+            }
+            else
+            {
+                return ipmi::responseReqInsufficientKeyBytes();
+            }
+        }
+
+        if (keyID != KR && keyID != KG)
+        {
+            return ipmi::responseInvalidFieldRequest();
+        }
+
+        if (keyID == KR && fs::exists(KR_LOCK_FILE))
+        {
+            return ipmi::responseReqCannotPerformKeyLocked();
+        }
+
+        std::string keyFile = (keyID == KR) ? KR_FILE : KG_FILE;
+
+        if (std::all_of(keyData.begin(), keyData.end(),
+                        [](uint8_t b) { return b == 0; }))
+        {
+            fs::remove(keyFile);
+            return ipmi::responseSuccess();
+        }
+
+        std::ofstream writeKey(keyFile, std::ios::out | std::ios::trunc |
+                                            std::ios::binary);
+        if (writeKey.is_open())
+        {
+            writeKey.write(reinterpret_cast<const char*>(keyData.data()),
+                           KEYSIZE);
+            writeKey.close();
+        }
+        return ipmi::responseSuccess();
+    }
+    else if (operation == LOCKKEY)
+    {
+        if (keyID != KR)
+        {
+            return ipmi::responseReqKeyDoesNotMeetCriteria();
+        }
+
+        std::ofstream lockFile(KR_LOCK_FILE, std::ios::out | std::ios::trunc);
+        if (lockFile.is_open())
+        {
+            lockFile.close();
+        }
+
+        lockStatus = KEYLOCKED;
+        return ipmi::responseSuccess(lockStatus, keys);
+    }
+
+    return ipmi::responseInvalidFieldRequest();
+}
+
 void registerNetFnAppFunctions()
 {
     // <Get Device ID>
@@ -1868,5 +2047,9 @@ void registerNetFnAppFunctions()
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
                           ipmi::app::cmdSetSystemInfoParameters,
                           ipmi::Privilege::Admin, ipmiAppSetSystemInfo);
+    // <Set Channel Security Keys>
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdSetChannelSecurityKeys,
+                          ipmi::Privilege::Admin, ipmiSetChannelSecurityKeys);
     return;
 }
