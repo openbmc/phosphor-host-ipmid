@@ -24,6 +24,9 @@
 namespace ipmi
 {
 
+constexpr auto ID_KR = 0;
+constexpr auto ID_KG = 1;
+
 // TODO: Has to be replaced with proper channel number assignment logic
 /**
  * @enum Channel Id
@@ -266,5 +269,11 @@ Cc ipmiUserSetUserPayloadAccess(const uint8_t chNum, const uint8_t operation,
  */
 Cc ipmiUserGetUserPayloadAccess(const uint8_t chNum, const uint8_t userId,
                                 PayloadAccess& payloadAccess);
+
+/** @brief The ipmi get security keys
+ *
+ *  @return 20 byte security
+ */
+std::string ipmiGetChannelSecurityKeys(const uint8_t keyId);
 
 } // namespace ipmi

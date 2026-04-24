@@ -19,6 +19,14 @@
 #include "passwd_mgr.hpp"
 #include "user_mgmt.hpp"
 
+#include <fstream>
+#include <iostream>
+
+constexpr auto KEYSIZE = 20;
+
+constexpr auto KR_FILE = "/etc/ipmi_kr";
+constexpr auto KG_FILE = "/etc/ipmi_kg";
+
 namespace
 {
 ipmi::PasswdMgr passwdMgr;
@@ -232,6 +240,28 @@ Cc ipmiUserGetUserPayloadAccess(const uint8_t chNum, const uint8_t userId,
         userInfo->payloadAccess[chNum].oemPayloadEnables2Reserved;
 
     return ccSuccess;
+}
+
+std::string ipmiGetChannelSecurityKeys(const uint8_t keyId)
+{
+    std::array<uint8_t, KEYSIZE> keys{};
+    std::string keyfile;
+
+    if (keyId == ID_KR)
+        keyfile = KR_FILE;
+    else if (keyId == ID_KG)
+        keyfile = KG_FILE;
+    else
+        return "";
+
+    std::ifstream chsecuritykey(keyfile, std::ios::in | std::ios::binary);
+    if (!chsecuritykey.is_open())
+    {
+        return "";
+    }
+    chsecuritykey.read(reinterpret_cast<char*>(keys.data()), KEYSIZE);
+    chsecuritykey.close();
+    return std::string(reinterpret_cast<const char*>(keys.data()), KEYSIZE);
 }
 
 } // namespace ipmi
