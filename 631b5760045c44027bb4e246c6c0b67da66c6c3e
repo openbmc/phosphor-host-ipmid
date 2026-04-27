@@ -16,6 +16,24 @@
       "message": "Security channel keys are insecure. In short, they open up a pathway for privilege escalation by hijacking sessions. We do not want to support this in openbmc. If it is not present, it cannot be exploited.",
       "revId": "631b5760045c44027bb4e246c6c0b67da66c6c3e",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9388a413_2e8ef699",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-04-27T15:51:48Z",
+      "side": 1,
+      "message": "Thank you for the review. I understand the security concern regarding session hijacking and privilege escalation through Set Channel Security Keys.\n\nSince this command is defined in the IPMI v2.0 specification (Table 22-30), are there any OpenBMC guidelines or precedents for excluding optional but spec-defined commands on security grounds? Understanding this would help me align future contributions accordingly.",
+      "parentUuid": "99c9b5bf_f9436bb5",
+      "revId": "631b5760045c44027bb4e246c6c0b67da66c6c3e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
