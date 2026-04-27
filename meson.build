@@ -365,6 +365,15 @@ install_subdir(
     exclude_files: '*.cpp',
 )
 
+systemd_system_unit_dir = dependency('systemd').get_variable(
+    'systemd_system_unit_dir',
+)
+
+install_data(
+    'phosphor-ipmi-warm-reset.target',
+    install_dir: systemd_system_unit_dir,
+)
+
 # HW Transport
 subdir('transport')
 
