@@ -3,7 +3,13 @@
 #include <phosphor-logging/lg2.hpp>
 #include <xyz/openbmc_project/State/BMC/server.hpp>
 
+#include <atomic>
 #include <string>
+
+static constexpr auto systemdService = "org.freedesktop.systemd1";
+static constexpr auto systemdObjPath = "/org/freedesktop/systemd1";
+static constexpr auto systemdInterface = "org.freedesktop.systemd1.Manager";
+static constexpr auto warmResetTarget = "phosphor-ipmi-warm-reset.target";
 
 using BMCState = sdbusplus::server::xyz::openbmc_project::state::BMC;
 
@@ -42,11 +48,70 @@ ipmi::RspType<> ipmiGlobalReset(ipmi::Context::ptr ctx)
     return ipmi::responseSuccess();
 }
 
+static bool warmResetBMC()
+{
+    static std::atomic_flag resetQueued = ATOMIC_FLAG_INIT;
+    if (resetQueued.test_and_set())
+    {
+        return false;
+    }
+
+    std::shared_ptr<sdbusplus::asio::connection> busp = getSdBus();
+    // Reset the failed units so systemd properly restarts
+    // if the command is sent repeatedly.
+    busp->async_method_call(
+        [busp](boost::system::error_code ec) {
+            if (ec)
+            {
+                lg2::error("Error in warm reset ResetFailed: {ERROR}", "ERROR",
+                           ec.message());
+                resetQueued.clear();
+                return;
+            }
+
+            // Restart the target (restart will propagate to units).
+            busp->async_method_call(
+                [](boost::system::error_code ec2) {
+                    resetQueued.clear();
+                    if (ec2)
+                    {
+                        lg2::error("Error in warm reset RestartUnit: {ERROR}",
+                                   "ERROR", ec2.message());
+                    }
+                },
+                systemdService, systemdObjPath, systemdInterface, "RestartUnit",
+                warmResetTarget, "replace");
+        },
+        systemdService, systemdObjPath, systemdInterface, "ResetFailed");
+    return true;
+}
+
+/** @brief implements warm reset command
+ *  @param - None
+ *  @returns IPMI completion code.
+ */
+ipmi::RspType<> ipmiWarmReset()
+{
+    post_work([]() {
+        if (!warmResetBMC())
+        {
+            lg2::error("Warm reset already in progress");
+        }
+    });
+
+    return ipmi::responseSuccess();
+}
+
 void registerNetFnGlobalFunctions()
 {
     // Cold Reset
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
                           ipmi::app::cmdColdReset, ipmi::Privilege::Admin,
                           ipmiGlobalReset);
+
+    // Warm Reset
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
+                          ipmi::app::cmdWarmReset, ipmi::Privilege::Admin,
+                          ipmiWarmReset);
     return;
 }
