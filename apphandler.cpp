@@ -62,6 +62,18 @@ using Activation =
 using BMCState = sdbusplus::server::xyz::openbmc_project::state::BMC;
 namespace fs = std::filesystem;
 
+/* Get Self Test Result dbus sources */
+constexpr auto ipmiLoggingService = "xyz.openbmc_project.Logging.IPMI";
+constexpr auto ipmiLoggingObject = "/xyz/openbmc_project/Logging/IPMI";
+constexpr auto ipmiLoggingIntf = "xyz.openbmc_project.Logging.IPMI";
+constexpr auto fruService = "xyz.openbmc_project.FruDevice";
+constexpr auto fruObjectPath = "/xyz/openbmc_project/FruDevice";
+constexpr auto fruIntf = "xyz.openbmc_project.FruDeviceManager";
+
+/* Get Self Test Result codes */
+constexpr uint8_t gstNoError = 0x55;
+constexpr uint8_t gstCorruptedDevices = 0x57;
+
 #ifdef ENABLE_I2C_WHITELIST_CHECK
 typedef struct
 {
@@ -738,31 +750,87 @@ ipmi::RspType<uint8_t,  // Device ID
         devId.addnDevSupport, devId.manufId, devId.prodId, devId.aux);
 }
 
-auto ipmiAppGetSelfTestResults() -> ipmi::RspType<uint8_t, uint8_t>
+/**
+ * @brief Get Self Test Results (IPMI cmd 0x04, NetFn App)
+ *
+ * Response Byte 1 (result code):
+ *   55h - No error. All self tests passed.
+ *   56h - Self Test function not implemented in this controller.
+ *   57h - Corrupted or inaccessible data or devices.
+ *   58h - Fatal hardware error.
+ *   FFh - Reserved.
+ *   All other - Device-specific internal failure.
+ *
+ * Response Byte 2 (error bitfield when Byte 1 = 57h):
+ *   For Byte 1 = 55h, 56h, FFh: 00h
+ *   For Byte 1 = 58h, all other: Device-specific
+ *   For Byte 1 = 57h: self-test error bitfield:
+ *     [7] Cannot access SEL device.
+ *     [6] Cannot access SDR Repository.
+ *     [5] Cannot access BMC FRU device.
+ *     [4] IPMB signal lines do not respond.
+ *     [3] SDR Repository empty.
+ *     [2] Internal Use Area of BMC FRU corrupted.
+ *     [1] Controller update 'boot block' firmware corrupted.
+ *     [0] Controller operational firmware corrupted.
+ *
+ * Note: Returning 57h does not imply that all tests were run.
+ */
+auto ipmiAppGetSelfTestResults(ipmi::Context::ptr ctx)
+    -> ipmi::RspType<uint8_t, // result code
+                     bool,    // [0] controller operational fw corrupted
+                     bool,    // [1] controller update boot block fw corrupted
+                     bool,    // [2] Internal Use Area of BMC FRU corrupted
+                     bool,    // [3] SDR Repository empty
+                     bool,    // [4] IPMB signal lines do not respond
+                     bool,    // [5] Cannot access BMC FRU device
+                     bool,    // [6] Cannot access SDR Repository
+                     bool>    // [7] Cannot access SEL device
 {
-    // Byte 2:
-    //  55h - No error.
-    //  56h - Self Test function not implemented in this controller.
-    //  57h - Corrupted or inaccessible data or devices.
-    //  58h - Fatal hardware error.
-    //  FFh - reserved.
-    //  all other: Device-specific 'internal failure'.
-    //  Byte 3:
-    //      For byte 2 = 55h, 56h, FFh:     00h
-    //      For byte 2 = 58h, all other:    Device-specific
-    //      For byte 2 = 57h:   self-test error bitfield.
-    //      Note: returning 57h does not imply that all test were run.
-    //      [7] 1b = Cannot access SEL device.
-    //      [6] 1b = Cannot access SDR Repository.
-    //      [5] 1b = Cannot access BMC FRU device.
-    //      [4] 1b = IPMB signal lines do not respond.
-    //      [3] 1b = SDR Repository empty.
-    //      [2] 1b = Internal Use Area of BMC FRU corrupted.
-    //      [1] 1b = controller update 'boot block' firmware corrupted.
-    //      [0] 1b = controller operational firmware corrupted.
-    constexpr uint8_t notImplemented = 0x56;
-    constexpr uint8_t zero = 0;
-    return ipmi::responseSuccess(notImplemented, zero);
+    bool fwCorrupt = false;
+    bool bootBlockCorrupt = false;
+    bool fruCorrupt = false;
+    bool sdrEmpty = false;
+    bool ipmbFail = false;
+    bool fruFail = false;
+    bool sdrRepoFail = false;
+    bool selFail = false;
+
+    /* Check SEL device availability (bit[7]) */
+    ipmi::PropertyMap selProps;
+    boost::system::error_code ec = ipmi::getAllDbusProperties(
+        ctx, ipmiLoggingService, ipmiLoggingObject, ipmiLoggingIntf, selProps);
+    if (ec)
+    {
+        lg2::error("SEL Repository update or self-initialization in progress. "
+                   "Interface: {INTERFACE}, Error: {ERROR}",
+                   "INTERFACE", ipmiLoggingIntf, "ERROR", ec.message());
+        selFail = true;
+    }
+
+    // TBD - SDR related information need to be implemented.
+
+    /* Check FRU device availability (bit[5]) */
+    ipmi::PropertyMap fruProps;
+    ec = ipmi::getAllDbusProperties(ctx, fruService, fruObjectPath, fruIntf,
+                                   fruProps);
+    if (ec)
+    {
+        lg2::error("FRU Repository update or self-initialization in progress. "
+                   "Interface: {INTERFACE}, Error: {ERROR}",
+                   "INTERFACE", fruIntf, "ERROR", ec.message());
+        fruFail = true;
+    }
+
+    uint8_t resultCode =
+        (selFail || sdrRepoFail || fruFail || ipmbFail || sdrEmpty ||
+         fruCorrupt || bootBlockCorrupt || fwCorrupt)
+            ? gstCorruptedDevices
+            : gstNoError;
+
+    return ipmi::responseSuccess(resultCode, fwCorrupt, bootBlockCorrupt,
+                                 fruCorrupt, sdrEmpty, ipmbFail, fruFail,
+                                 sdrRepoFail, selFail);
 }
 
 static constexpr size_t uuidBinaryLength = 16;
