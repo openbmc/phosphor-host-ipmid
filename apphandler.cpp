@@ -62,6 +62,21 @@ using Activation =
 using BMCState = sdbusplus::server::xyz::openbmc_project::state::BMC;
 namespace fs = std::filesystem;
 
+/* Get Self Test Result dbus sources */
+constexpr auto ipmiLoggingService = "xyz.openbmc_project.Logging.IPMI";
+constexpr auto ipmiLoggingObject = "/xyz/openbmc_project/Logging/IPMI";
+constexpr auto ipmiLoggingIntf = "xyz.openbmc_project.Logging.IPMI";
+constexpr auto fruService = "xyz.openbmc_project.FruDevice";
+constexpr auto fruObjectPath = "/xyz/openbmc_project/FruDevice";
+constexpr auto fruIntf = "xyz.openbmc_project.FruDeviceManager";
+constexpr auto propIntf = "org.freedesktop.DBus.Properties";
+
+/* Get Self Test Result response */
+#define GST_NO_ERROR 0x55
+#define GST_CORRUPTED_DEVICES 0x57
+#define GST_SEL_FAIL_OFFSET 0x80
+#define GST_FRU_FAIL_OFFSET 0x20
+
 #ifdef ENABLE_I2C_WHITELIST_CHECK
 typedef struct
 {
@@ -760,9 +775,52 @@ auto ipmiAppGetSelfTestResults() -> ipmi::RspType<uint8_t, uint8_t>
     //      [2] 1b = Internal Use Area of BMC FRU corrupted.
     //      [1] 1b = controller update 'boot block' firmware corrupted.
     //      [0] 1b = controller operational firmware corrupted.
-    constexpr uint8_t notImplemented = 0x56;
-    constexpr uint8_t zero = 0;
-    return ipmi::responseSuccess(notImplemented, zero);
+    uint8_t testResultByte2 = 0x00, testResultByte1 = 0x00;
+
+    sdbusplus::bus::bus bus{ipmid_get_sd_bus_connection()};
+
+    /* Get the status of SEL device (bit[7]) */
+    auto selAvailableCall = bus.new_method_call(
+        ipmiLoggingService, ipmiLoggingObject, propIntf, "GetAll");
+    selAvailableCall.append(ipmiLoggingIntf);
+
+    try
+    {
+        auto selAvaiableReply = bus.call(selAvailableCall);
+        testResultByte2 &= ~(GST_SEL_FAIL_OFFSET);
+    }
+    catch (const std::exception& e)
+    {
+        lg2::error("SEL Repository update or self-initialization in progress. "
+                   "Interface: {INTERFACE}, Error: {ERROR}",
+                   "INTERFACE", ipmiLoggingIntf, "ERROR", e);
+        testResultByte2 |= GST_SEL_FAIL_OFFSET;
+    }
+
+    // TBD - sdr related information need to be implemented.
+
+    /* Get the status of FRU device (bit[5]) */
+    auto fruAvailableCall =
+        bus.new_method_call(fruService, fruObjectPath, propIntf, "GetAll");
+    fruAvailableCall.append(fruIntf);
+    try
+    {
+        auto fruAvailableReply = bus.call(fruAvailableCall);
+        testResultByte2 &= ~(GST_FRU_FAIL_OFFSET);
+    }
+    catch (const std::exception& e)
+    {
+        lg2::error("FRU Repository update or self-initialization in progress. "
+                   "Interface: {INTERFACE}, Error: {ERROR}",
+                   "INTERFACE", fruIntf, "ERROR", e);
+        testResultByte2 |= GST_FRU_FAIL_OFFSET;
+    }
+    // bit[4], bit[3], bit[2], bit[1], bit[0] are not support.
+
+    testResultByte1 =
+        (0 == testResultByte2) ? GST_NO_ERROR : GST_CORRUPTED_DEVICES;
+
+    return ipmi::responseSuccess(testResultByte1, testResultByte2);
 }
 
 static constexpr size_t uuidBinaryLength = 16;
