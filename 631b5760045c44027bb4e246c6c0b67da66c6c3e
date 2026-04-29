@@ -34,6 +34,24 @@
       "parentUuid": "99c9b5bf_f9436bb5",
       "revId": "631b5760045c44027bb4e246c6c0b67da66c6c3e",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2fcfc19e_a6a5fdd3",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-04-29T17:13:28Z",
+      "side": 1,
+      "message": "Sure. The IPMI spec is pretty dated at this point, with the last update being 12 years ago. At this point, the priorities are:\n1) Security. Security wins any argument. In some cases, like channel keys, the IPMI spec got it wrong. Same with RMCP 1.5, or even most of the RMCP 2.0 cipher suites. If possible, we just don\u0027t implement those insecure features.\n2) General community consensus. Because of the age of the spec, I am not opposed to implementing new standards, as long as they are vetted, documented, and supported by other tools. This is a rare exception though, for the most part, new features head over to the Redfish camp.\n3) Common sense. There are places where the IPMI spec just doesn\u0027t make sense and we interpret it the best we can to make sense of it. Sometimes this means being more flexible because other BMC implementations have done it this way or that. Or working hard to make sure that ipmitool\u0027s implementation works, even though it has a different take on one point in the spec. We want it to work.\n4) The spec. This is the lowest one. We use it as a guideline, as you can see. If possible and reasonable, we follow it.\n\nI really am sorry you went through all the work to implement the channel keys feature just to have it NACKed. If the guidelines above are too ambiguous, please ask a question in the ipmi channel on the openbmc discord server. I generally pay attention to what is going on there.",
+      "parentUuid": "9388a413_2e8ef699",
+      "revId": "631b5760045c44027bb4e246c6c0b67da66c6c3e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
