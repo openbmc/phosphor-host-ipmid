@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "23e06479_fd548a71",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 1435,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-05-04T23:05:38Z",
+      "side": 1,
+      "message": "make the first parameter ipmi::Context::ptr \u0026ctx so you can pass it on to the various dbus utilities later in the function to use the yielding APIs instead of the blocking APIs. There are plenty of examples of this in the repo already.",
+      "revId": "41b8d5ae68e63277b3268803648f0fe8a1a5ea89",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5d9644df_38b8ec9a",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 1458,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-05-04T23:05:38Z",
+      "side": 1,
+      "message": "use the yielding API here and below.",
+      "revId": "41b8d5ae68e63277b3268803648f0fe8a1a5ea89",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
