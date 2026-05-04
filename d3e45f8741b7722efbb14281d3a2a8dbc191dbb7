@@ -1,0 +1,113 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cfcf26fe_746ad11f",
+        "filename": "apphandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 756,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-05-04T23:19:18Z",
+      "side": 1,
+      "message": "set the first argument to the function as ipmi::Context::ptr \u0026ctx so you can use the yielding dbus APIs.",
+      "range": {
+        "startLine": 756,
+        "startChar": 30,
+        "endLine": 756,
+        "endChar": 32
+      },
+      "revId": "d3e45f8741b7722efbb14281d3a2a8dbc191dbb7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ab7e9e9f_09c2f3dd",
+        "filename": "apphandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 756,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-05-04T23:19:18Z",
+      "side": 1,
+      "message": "Since the function is returning a bunch of bits, use the bit-packing API so you don\u0027t have to worry about masking and shifting and hard-coded offsets.\n```suggestion\n\nauto ipmiAppGetSelfTestResults(ipmi::Context::ptr\u0026 ctx) -\u003e ipmi::RspType\u003c\n  uint8_t, // self-test return value\n  uint1_t, // Controller operational firmware corrupted\n  uint1_t, // (bit 2)\n  uint1_t, // (bit 3)\n  uint1_t, // ... other value descriptions here...\n  uint1_t, // ...\n  uint1_t, // ...\n  uint1_t, // (bit 6)\n  uint1_t  // cannot access SEL device\n\u003e\n```",
+      "range": {
+        "startLine": 756,
+        "startChar": 50,
+        "endLine": 756,
+        "endChar": 66
+      },
+      "revId": "d3e45f8741b7722efbb14281d3a2a8dbc191dbb7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b3658e9e_b3c259aa",
+        "filename": "apphandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 777,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-05-04T23:19:18Z",
+      "side": 1,
+      "message": "this can be removed with the proper documentation above regarding the return value",
+      "range": {
+        "startLine": 758,
+        "startChar": 7,
+        "endLine": 777,
+        "endChar": 63
+      },
+      "revId": "d3e45f8741b7722efbb14281d3a2a8dbc191dbb7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e7a12123_af5647ea",
+        "filename": "apphandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 780,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-05-04T23:19:18Z",
+      "side": 1,
+      "message": "this is not needed if you have ctx.",
+      "revId": "d3e45f8741b7722efbb14281d3a2a8dbc191dbb7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "99e28b9a_96f44c64",
+        "filename": "apphandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 823,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-05-04T23:19:18Z",
+      "side": 1,
+      "message": "this would need to be changed to use the bit-packing suggested above.",
+      "range": {
+        "startLine": 818,
+        "startChar": 4,
+        "endLine": 823,
+        "endChar": 67
+      },
+      "revId": "d3e45f8741b7722efbb14281d3a2a8dbc191dbb7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
