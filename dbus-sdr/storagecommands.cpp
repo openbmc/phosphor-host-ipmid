@@ -98,10 +98,17 @@ static uint16_t cacheBus = invalidBus;
 static uint8_t cacheAddr = invalidAddr;
 static uint8_t lastDevId = 0xFF;
 
-static uint16_t writeBus = invalidBus;
-static uint8_t writeAddr = invalidAddr;
+struct FruWriteCtx
+{
+    uint16_t bus = invalidBus;
+    uint8_t addr = invalidAddr;
+    std::vector<uint8_t> data;
+    bool active = false;
+};
 
-std::unique_ptr<sdbusplus::Timer> writeTimer = nullptr;
+static std::map<uint8_t, FruWriteCtx> fruWriteCtxMap;
+static std::unique_ptr<sdbusplus::Timer> writeTimer = nullptr;
+static uint8_t writeTimerDevId = 0xFF;
 static std::vector<sdbusplus::bus::match_t> fruMatches;
 
 ManagedObjectType frus;
@@ -111,13 +118,19 @@ ManagedObjectType frus;
 boost::container::flat_map<uint8_t, std::pair<uint16_t, uint8_t>> deviceHashes;
 void registerStorageFunctions() __attribute__((constructor));
 
-bool writeFru(const std::vector<uint8_t>& fru)
+bool writeFru(uint16_t writeBus, uint8_t writeAddr,
+              const std::vector<uint8_t>& fru)
 {
     if (writeBus == invalidBus && writeAddr == invalidAddr)
     {
         return true;
     }
     lastDevId = 0xFF;
+
+    lg2::info("writeFru D-Bus call: writeBus={BUS}, writeAddr={ADDR}, "
+              "dataSize={SIZE}",
+              "BUS", writeBus, "ADDR", writeAddr, "SIZE", fru.size());
+
     std::shared_ptr<sdbusplus::asio::connection> dbus = getSdBus();
     sdbusplus::message_t writeFru = dbus->new_method_call(
         fruDeviceServiceName, "/xyz/openbmc_project/FruDevice",
@@ -133,14 +146,27 @@ bool writeFru(const std::vector<uint8_t>& fru)
         lg2::error("error writing fru");
         return false;
     }
-    writeBus = invalidBus;
-    writeAddr = invalidAddr;
     return true;
 }
 
 void writeFruCache()
 {
-    writeFru(fruCache);
+    if (writeTimerDevId == 0xFF)
+    {
+        return;
+    }
+
+    auto it = fruWriteCtxMap.find(writeTimerDevId);
+    if (it == fruWriteCtxMap.end() || !it->second.active)
+    {
+        writeTimerDevId = 0xFF;
+        return;
+    }
+
+    auto& wctx = it->second;
+    writeFru(wctx.bus, wctx.addr, wctx.data);
+    wctx.active = false;
+    writeTimerDevId = 0xFF;
 }
 
 void createTimers()
@@ -421,11 +447,42 @@ ipmi::RspType<uint8_t> ipmiStorageWriteFruData(
 
     size_t writeLen = dataToWrite.size();
 
-    auto [status, fru] = getFru(ctx, fruDeviceId);
-    if (status != ipmi::ccSuccess)
+    auto& wctx = fruWriteCtxMap[fruDeviceId];
+
+    if (!wctx.active)
     {
-        return ipmi::response(status);
+        // Lookup bus/addr before getFru() yield point.
+        // deviceHashes.find() is synchronous — no coroutine can
+        // interleave and change the mapping between lookup and save.
+        auto deviceFind = deviceHashes.find(fruDeviceId);
+        if (deviceFind == deviceHashes.end())
+        {
+            return ipmi::response(IPMI_CC_SENSOR_INVALID);
+        }
+        uint16_t expectedBus = deviceFind->second.first;
+        uint8_t expectedAddr = deviceFind->second.second;
+
+        // getFru() yields on D-Bus call; other coroutines may
+        // overwrite global cacheBus/cacheAddr during the yield.
+        auto [status, fru] = getFru(ctx, fruDeviceId);
+        if (status != ipmi::ccSuccess)
+        {
+            return ipmi::response(status);
+        }
+
+        // Use pre-yield values, not the polluted globals.
+        wctx.bus = expectedBus;
+        wctx.addr = expectedAddr;
+        wctx.data = std::move(fru);
+        wctx.active = true;
+
+        lg2::info("WriteFruData new session: devId={DEVID}, "
+                  "bus={BUS}, addr={ADDR}",
+                  "DEVID", fruDeviceId, "BUS", wctx.bus, "ADDR", wctx.addr);
     }
+
+    auto& fru = wctx.data;
+
     size_t lastWriteAddr = fruInventoryOffset + writeLen;
     if (fru.size() < lastWriteAddr)
     {
@@ -486,23 +543,22 @@ ipmi::RspType<uint8_t> ipmiStorageWriteFruData(
     }
     uint8_t countWritten = 0;
 
-    writeBus = cacheBus;
-    writeAddr = cacheAddr;
     if (atEnd)
     {
         // cancel timer, we're at the end so might as well send it
         writeTimer->stop();
-        if (!writeFru(fru))
+        if (!writeFru(wctx.bus, wctx.addr, wctx.data))
         {
+            wctx.active = false;
             return ipmi::responseInvalidFieldRequest();
         }
+        wctx.active = false;
         countWritten = std::min(fru.size(), static_cast<size_t>(0xFF));
     }
     else
     {
-        fruCache = fru; // Write-back
-        // start a timer, if no further data is sent  to check to see if it is
-        // valid
+        // Start/restart the timer for this devId
+        writeTimerDevId = fruDeviceId;
         writeTimer->start(std::chrono::duration_cast<std::chrono::microseconds>(
             std::chrono::seconds(writeTimeoutSeconds)));
         countWritten = 0;
