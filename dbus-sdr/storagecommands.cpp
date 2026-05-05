@@ -98,10 +98,16 @@ static uint16_t cacheBus = invalidBus;
 static uint8_t cacheAddr = invalidAddr;
 static uint8_t lastDevId = 0xFF;
 
-static uint16_t writeBus = invalidBus;
-static uint8_t writeAddr = invalidAddr;
+struct FruWriteCtx
+{
+    uint16_t bus = invalidBus;
+    uint8_t addr = invalidAddr;
+    std::vector<uint8_t> data;
+    bool active = false;
+    std::unique_ptr<sdbusplus::Timer> timer = nullptr;
+};
 
-std::unique_ptr<sdbusplus::Timer> writeTimer = nullptr;
+static std::map<uint8_t, FruWriteCtx> fruWriteCtxMap;
 static std::vector<sdbusplus::bus::match_t> fruMatches;
 
 ManagedObjectType frus;
@@ -111,13 +117,19 @@ ManagedObjectType frus;
 boost::container::flat_map<uint8_t, std::pair<uint16_t, uint8_t>> deviceHashes;
 void registerStorageFunctions() __attribute__((constructor));
 
-bool writeFru(const std::vector<uint8_t>& fru)
+bool writeFru(uint16_t writeBus, uint8_t writeAddr,
+              const std::vector<uint8_t>& fru)
 {
     if (writeBus == invalidBus && writeAddr == invalidAddr)
     {
         return true;
     }
     lastDevId = 0xFF;
+
+    lg2::debug("writeFru D-Bus call: writeBus={BUS}, writeAddr={ADDR}, "
+               "dataSize={SIZE}",
+               "BUS", writeBus, "ADDR", writeAddr, "SIZE", fru.size());
+
     std::shared_ptr<sdbusplus::asio::connection> dbus = getSdBus();
     sdbusplus::message_t writeFru = dbus->new_method_call(
         fruDeviceServiceName, "/xyz/openbmc_project/FruDevice",
@@ -133,19 +145,49 @@ bool writeFru(const std::vector<uint8_t>& fru)
         lg2::error("error writing fru");
         return false;
     }
-    writeBus = invalidBus;
-    writeAddr = invalidAddr;
     return true;
 }
 
-void writeFruCache()
+void writeFruCache(uint8_t devId)
 {
-    writeFru(fruCache);
+    auto it = fruWriteCtxMap.find(devId);
+    if (it == fruWriteCtxMap.end() || !it->second.active)
+    {
+        return;
+    }
+
+    auto& wctx = it->second;
+    writeFru(wctx.bus, wctx.addr, wctx.data);
+    // NOTE: Do NOT erase the map entry here. This function runs
+    // inside sdbusplus::Timer::timeoutHandler(), which continues
+    // to access eventSource after userCallBack() returns. Erasing
+    // would destroy the Timer mid-dispatch, causing a Use-After-Free
+    // on eventSource. Release the large data buffer instead; the
+    // Timer object itself is small and will be reused on next write.
+    wctx.data.clear();
+    wctx.data.shrink_to_fit();
+    wctx.active = false;
 }
 
-void createTimers()
+static void startWriteTimer(FruWriteCtx& wctx, uint8_t devId,
+                            std::chrono::seconds timeout)
 {
-    writeTimer = std::make_unique<sdbusplus::Timer>(writeFruCache);
+    if (!wctx.timer)
+    {
+        wctx.timer = std::make_unique<sdbusplus::Timer>([devId]() {
+            writeFruCache(devId);
+        });
+    }
+    wctx.timer->start(
+        std::chrono::duration_cast<std::chrono::microseconds>(timeout));
+}
+
+static void stopWriteTimer(FruWriteCtx& wctx)
+{
+    if (wctx.timer)
+    {
+        wctx.timer->stop();
+    }
 }
 
 void recalculateHashes()
@@ -274,12 +316,29 @@ std::pair<ipmi::Cc, std::vector<uint8_t>> getFru(ipmi::Context::ptr ctx,
 
 void writeFruIfRunning()
 {
-    if (!writeTimer->isRunning())
+    for (auto it = fruWriteCtxMap.begin(); it != fruWriteCtxMap.end();)
     {
-        return;
+        auto& wctx = it->second;
+        if (!wctx.timer || !wctx.timer->isRunning())
+        {
+            ++it;
+            continue;
+        }
+        wctx.timer->stop();
+
+        if (!wctx.active)
+        {
+            ++it;
+            continue;
+        }
+
+        lg2::info("writeFruIfRunning: flushing devId={DEVID}, "
+                  "bus={BUS}, addr={ADDR}",
+                  "DEVID", it->first, "BUS", wctx.bus, "ADDR", wctx.addr);
+
+        writeFru(wctx.bus, wctx.addr, wctx.data);
+        it = fruWriteCtxMap.erase(it);
     }
-    writeTimer->stop();
-    writeFruCache();
 }
 
 void startMatch(void)
@@ -421,11 +480,46 @@ ipmi::RspType<uint8_t> ipmiStorageWriteFruData(
 
     size_t writeLen = dataToWrite.size();
 
-    auto [status, fru] = getFru(ctx, fruDeviceId);
-    if (status != ipmi::ccSuccess)
+    auto ctxIt = fruWriteCtxMap.find(fruDeviceId);
+
+    if (ctxIt == fruWriteCtxMap.end() || !ctxIt->second.active)
     {
-        return ipmi::response(status);
+        // Lookup bus/addr before getFru() yield point.
+        // deviceHashes.find() is synchronous — no coroutine can
+        // interleave and change the mapping between lookup and save.
+        auto deviceFind = deviceHashes.find(fruDeviceId);
+        if (deviceFind == deviceHashes.end())
+        {
+            return ipmi::response(IPMI_CC_SENSOR_INVALID);
+        }
+        uint16_t expectedBus = deviceFind->second.first;
+        uint8_t expectedAddr = deviceFind->second.second;
+
+        // getFru() yields on D-Bus call; other coroutines may
+        // overwrite global cacheBus/cacheAddr during the yield.
+        auto [status, fru] = getFru(ctx, fruDeviceId);
+        if (status != ipmi::ccSuccess)
+        {
+            return ipmi::response(status);
+        }
+
+        // try_emplace either inserts a fresh ctx or returns the existing
+        // inactive one. Either way, we overwrite all fields below.
+        ctxIt = fruWriteCtxMap.try_emplace(fruDeviceId).first;
+        ctxIt->second.bus = expectedBus;
+        ctxIt->second.addr = expectedAddr;
+        ctxIt->second.data = std::move(fru);
+        ctxIt->second.active = true;
+
+        lg2::debug("WriteFruData new session: devId={DEVID}, "
+                   "bus={BUS}, addr={ADDR}",
+                   "DEVID", fruDeviceId, "BUS", ctxIt->second.bus, "ADDR",
+                   ctxIt->second.addr);
     }
+
+    auto& wctx = ctxIt->second;
+    auto& fru = wctx.data;
+
     size_t lastWriteAddr = fruInventoryOffset + writeLen;
     if (fru.size() < lastWriteAddr)
     {
@@ -486,25 +580,25 @@ ipmi::RspType<uint8_t> ipmiStorageWriteFruData(
     }
     uint8_t countWritten = 0;
 
-    writeBus = cacheBus;
-    writeAddr = cacheAddr;
     if (atEnd)
     {
         // cancel timer, we're at the end so might as well send it
-        writeTimer->stop();
-        if (!writeFru(fru))
+        stopWriteTimer(wctx);
+        bool writeOK = writeFru(wctx.bus, wctx.addr, wctx.data);
+        size_t fruSize = wctx.data.size();
+        fruWriteCtxMap.erase(ctxIt);
+
+        if (!writeOK)
         {
             return ipmi::responseInvalidFieldRequest();
         }
-        countWritten = std::min(fru.size(), static_cast<size_t>(0xFF));
+        countWritten = std::min(fruSize, static_cast<size_t>(0xFF));
     }
     else
     {
-        fruCache = fru; // Write-back
-        // start a timer, if no further data is sent  to check to see if it is
-        // valid
-        writeTimer->start(std::chrono::duration_cast<std::chrono::microseconds>(
-            std::chrono::seconds(writeTimeoutSeconds)));
+        // Start/restart the timer for this devId
+        startWriteTimer(wctx, fruDeviceId,
+                        std::chrono::seconds(writeTimeoutSeconds));
         countWritten = 0;
     }
 
@@ -1255,7 +1349,6 @@ std::vector<uint8_t> getType12SDRs(uint16_t index, uint16_t recordId)
 
 void registerStorageFunctions()
 {
-    createTimers();
     startMatch();
 
     // <Get FRU Inventory Area Info>
