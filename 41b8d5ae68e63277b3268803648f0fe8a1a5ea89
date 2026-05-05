@@ -20,6 +20,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "5754581d_1407f39b",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 1435,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-05-05T09:37:46Z",
+      "side": 1,
+      "message": "Done. Added ipmi::Context::ptr\u0026 ctx as the first parameter to both getThermalLimit and setThermalLimit so the context can be passed to the D-Bus utility functions.",
+      "parentUuid": "23e06479_fd548a71",
+      "revId": "41b8d5ae68e63277b3268803648f0fe8a1a5ea89",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "5d9644df_38b8ec9a",
         "filename": "dcmihandler.cpp",
         "patchSetId": 6
@@ -31,6 +49,24 @@
       "writtenOn": "2026-05-04T23:05:38Z",
       "side": 1,
       "message": "use the yielding API here and below.",
+      "revId": "41b8d5ae68e63277b3268803648f0fe8a1a5ea89",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6583a68d_7305214a",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 1458,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-05-05T09:37:46Z",
+      "side": 1,
+      "message": "Done. Replaced the blocking getDbusProperty(*dbus, ...) / setDbusProperty(*dbus, ...) calls with the yielding getDbusProperty(ctx, ...) / setDbusProperty(ctx, ...) APIs, and updated error handling from try/catch to boost::system::error_code accordingly.",
+      "parentUuid": "5d9644df_38b8ec9a",
       "revId": "41b8d5ae68e63277b3268803648f0fe8a1a5ea89",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
