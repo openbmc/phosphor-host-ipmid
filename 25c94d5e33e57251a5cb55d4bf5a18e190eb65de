@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4efca8fe_f3659b91",
+        "filename": "apphandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-05-06T21:33:06Z",
+      "side": 1,
+      "message": "typically, services are found dynamically at runtime with the getService mapper call.",
+      "revId": "25c94d5e33e57251a5cb55d4bf5a18e190eb65de",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "892af2ce_cf9a7f02",
+        "filename": "apphandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-05-06T21:33:06Z",
+      "side": 1,
+      "message": "unless the path is used in multiple functions, limit the scope to the function it is used in.",
+      "revId": "25c94d5e33e57251a5cb55d4bf5a18e190eb65de",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "fa5a395f_7a244ef3",
+        "filename": "apphandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-05-06T21:33:06Z",
+      "side": 1,
+      "message": "limit the scope of these constants to the self test function that uses them.",
+      "revId": "25c94d5e33e57251a5cb55d4bf5a18e190eb65de",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
