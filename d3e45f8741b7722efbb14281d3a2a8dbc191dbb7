@@ -49,6 +49,54 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "9f379325_159e9ab2",
+        "filename": "apphandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 756,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-05-06T05:38:28Z",
+      "side": 1,
+      "message": "Done.Please Check",
+      "parentUuid": "cfcf26fe_746ad11f",
+      "range": {
+        "startLine": 756,
+        "startChar": 30,
+        "endLine": 756,
+        "endChar": 32
+      },
+      "revId": "d3e45f8741b7722efbb14281d3a2a8dbc191dbb7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2d63b7a8_e5e72af8",
+        "filename": "apphandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 756,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-05-06T05:38:28Z",
+      "side": 1,
+      "message": "Done.Please Check",
+      "parentUuid": "ab7e9e9f_09c2f3dd",
+      "range": {
+        "startLine": 756,
+        "startChar": 50,
+        "endLine": 756,
+        "endChar": 66
+      },
+      "revId": "d3e45f8741b7722efbb14281d3a2a8dbc191dbb7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "b3658e9e_b3c259aa",
         "filename": "apphandler.cpp",
         "patchSetId": 1
@@ -60,6 +108,30 @@
       "writtenOn": "2026-05-04T23:19:18Z",
       "side": 1,
       "message": "this can be removed with the proper documentation above regarding the return value",
+      "range": {
+        "startLine": 758,
+        "startChar": 7,
+        "endLine": 777,
+        "endChar": 63
+      },
+      "revId": "d3e45f8741b7722efbb14281d3a2a8dbc191dbb7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6c65c2e1_6e3d54f9",
+        "filename": "apphandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 777,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-05-06T05:38:28Z",
+      "side": 1,
+      "message": "Done.Please Check",
+      "parentUuid": "b3658e9e_b3c259aa",
       "range": {
         "startLine": 758,
         "startChar": 7,
@@ -89,6 +161,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "a3af5c0f_eb8fd735",
+        "filename": "apphandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 780,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-05-06T05:38:28Z",
+      "side": 1,
+      "message": "Done.Please Check",
+      "parentUuid": "e7a12123_af5647ea",
+      "revId": "d3e45f8741b7722efbb14281d3a2a8dbc191dbb7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "99e28b9a_96f44c64",
         "filename": "apphandler.cpp",
         "patchSetId": 1
@@ -100,6 +190,30 @@
       "writtenOn": "2026-05-04T23:19:18Z",
       "side": 1,
       "message": "this would need to be changed to use the bit-packing suggested above.",
+      "range": {
+        "startLine": 818,
+        "startChar": 4,
+        "endLine": 823,
+        "endChar": 67
+      },
+      "revId": "d3e45f8741b7722efbb14281d3a2a8dbc191dbb7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8a5e70e7_b27d88d8",
+        "filename": "apphandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 823,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-05-06T05:38:28Z",
+      "side": 1,
+      "message": "Done.Please Check",
+      "parentUuid": "99e28b9a_96f44c64",
       "range": {
         "startLine": 818,
         "startChar": 4,
