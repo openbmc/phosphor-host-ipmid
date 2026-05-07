@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "689dcab3_2edd7319",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-05-07T05:42:13Z",
+      "side": 1,
+      "message": "The core fix is correct and well-reasoned. The old code captured writeBus/writeAddr from globals after a D-Bus yield point,, where interleaving coroutines could corrupt them.\n\nThe new code snapshots bus/addr from deviceHashes before the yield and stores them in a per-device FruWriteCtx — this eliminates the race entirely.\n\nOne minor gap: writeTimerDevId is still a single global. If two devices have in-progress partial writes (neither has reached atEnd), the second device overwrites writeTimerDevId, and the first device\u0027s buffered data is never flushed by the timer.\n\nplease correct me if my understanding is wrong ?",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 55
+      },
+      "revId": "24a507312ba2aad42322b29ec1ea8265da3b84ae",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "266f9bef_8697f247",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-05-07T05:42:13Z",
+      "side": 1,
+      "message": "writeTimerDevId is a single variable but fruWriteCtxMap supports multiple devices. If two devices have partial writes pending, the second one overwrites writeTimerDevId, and the first device\u0027s data is never flushed.\n\nShould this be a per-device timer inside FruWriteCtx?",
+      "range": {
+        "startLine": 111,
+        "startChar": 30,
+        "endLine": 111,
+        "endChar": 31
+      },
+      "revId": "24a507312ba2aad42322b29ec1ea8265da3b84ae",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "13fb04c2_dd2c5b1f",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-05-07T05:42:13Z",
+      "side": 1,
+      "message": "Only one device gets flushed when the timer fires. Other entries in fruWriteCtxMap with active\u003dtrue remain stuck forever.",
+      "range": {
+        "startLine": 159,
+        "startChar": 14,
+        "endLine": 159,
+        "endChar": 28
+      },
+      "revId": "24a507312ba2aad42322b29ec1ea8265da3b84ae",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e086ba41_70d3d4fa",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 561,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-05-07T05:42:13Z",
+      "side": 1,
+      "message": "This unconditionally overwrites any previously stored devId. If another device had a pending timer flush, it\u0027s silently dropped.",
+      "range": {
+        "startLine": 561,
+        "startChar": 26,
+        "endLine": 561,
+        "endChar": 37
+      },
+      "revId": "24a507312ba2aad42322b29ec1ea8265da3b84ae",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
