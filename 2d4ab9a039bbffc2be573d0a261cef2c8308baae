@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "bbc877fa_a91d7770",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-05-07T04:22:05Z",
+      "side": 1,
+      "message": "Good change! Implementation is clean and consistent with existing boot flag handlers. Error handling is proper.\n\nMostly Reviewers will come back to review after https://gerrit.openbmc.org/c/openbmc/openbmc/+/88607 is merged.",
+      "revId": "2d4ab9a039bbffc2be573d0a261cef2c8308baae",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
