@@ -24,6 +24,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "ec7882fb_dedde2ab",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1002827
+      },
+      "writtenOn": "2026-05-07T10:20:55Z",
+      "side": 1,
+      "message": "Thanks. Your understanding is correct. The single writeTimerDevId global cannot track multiple in-progress partial writes. In the updated patch (Patch Set 4), I moved the timer into FruWriteCtx so each devId has its own independent timer.",
+      "parentUuid": "689dcab3_2edd7319",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 55
+      },
+      "revId": "24a507312ba2aad42322b29ec1ea8265da3b84ae",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "266f9bef_8697f247",
@@ -37,6 +61,30 @@
       "writtenOn": "2026-05-07T05:42:13Z",
       "side": 1,
       "message": "writeTimerDevId is a single variable but fruWriteCtxMap supports multiple devices. If two devices have partial writes pending, the second one overwrites writeTimerDevId, and the first device\u0027s data is never flushed.\n\nShould this be a per-device timer inside FruWriteCtx?",
+      "range": {
+        "startLine": 111,
+        "startChar": 30,
+        "endLine": 111,
+        "endChar": 31
+      },
+      "revId": "24a507312ba2aad42322b29ec1ea8265da3b84ae",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "39acbe17_6302906b",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1002827
+      },
+      "writtenOn": "2026-05-07T10:20:55Z",
+      "side": 1,
+      "message": "Yes, agreed. Patch Set 4 moves the timer into FruWriteCtx. Each device now owns its timer.",
+      "parentUuid": "266f9bef_8697f247",
       "range": {
         "startLine": 111,
         "startChar": 30,
@@ -70,6 +118,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "60765269_55dcc185",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1002827
+      },
+      "writtenOn": "2026-05-07T10:20:55Z",
+      "side": 1,
+      "message": "Thanks. I pushed the patch set 4 to fix the design gap.",
+      "parentUuid": "13fb04c2_dd2c5b1f",
+      "range": {
+        "startLine": 159,
+        "startChar": 14,
+        "endLine": 159,
+        "endChar": 28
+      },
+      "revId": "24a507312ba2aad42322b29ec1ea8265da3b84ae",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "e086ba41_70d3d4fa",
@@ -83,6 +155,30 @@
       "writtenOn": "2026-05-07T05:42:13Z",
       "side": 1,
       "message": "This unconditionally overwrites any previously stored devId. If another device had a pending timer flush, it\u0027s silently dropped.",
+      "range": {
+        "startLine": 561,
+        "startChar": 26,
+        "endLine": 561,
+        "endChar": 37
+      },
+      "revId": "24a507312ba2aad42322b29ec1ea8265da3b84ae",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "cae81d4b_8d6097d1",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 561,
+      "author": {
+        "id": 1002827
+      },
+      "writtenOn": "2026-05-07T10:20:55Z",
+      "side": 1,
+      "message": "Thanks. I pushed the patch set 4 to fix the design gap.",
+      "parentUuid": "e086ba41_70d3d4fa",
       "range": {
         "startLine": 561,
         "startChar": 26,
