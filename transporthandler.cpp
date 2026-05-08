@@ -5,8 +5,17 @@
 #include <stdplus/net/addr/subnet.hpp>
 #include <stdplus/raw.hpp>
 
+#include <algorithm>
 #include <array>
 #include <fstream>
+#include <variant>
+
+constexpr uint8_t maxCommunityStrLen = 18;
+constexpr auto snmpService = "xyz.openbmc_project.Network.SNMP";
+constexpr auto snmpObjPath = "/xyz/openbmc_project/network/snmp/manager";
+constexpr auto snmpCommunityIface =
+    "xyz.openbmc_project.Network.SNMP.CommunityString";
+constexpr auto snmpCommunityProp = "CommunityString";
 
 using phosphor::logging::elog;
 using sdbusplus::error::xyz::openbmc_project::common::InternalFailure;
@@ -902,6 +911,39 @@ RspType<> setLanInt(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
             channelCall<reconfigureGatewayMAC<AF_INET>>(channel, gatewayMAC);
             return responseSuccess();
         }
+        case LanParam::CommunityString:
+        {
+            std::array<uint8_t, maxCommunityStrLen> data;
+            if (req.unpack(data) != 0)
+            {
+                return responseReqDataLenInvalid();
+            }
+            unpackFinal(req);
+
+            // Convert to string, trimming trailing nulls
+            std::string communityStr(
+                data.begin(),
+                std::find(data.begin(), data.end(), '\0'));
+
+            try
+            {
+                auto dbus = getSdBus();
+                auto method = dbus->new_method_call(
+                    snmpService, snmpObjPath,
+                    "org.freedesktop.DBus.Properties", "Set");
+                method.append(snmpCommunityIface, snmpCommunityProp,
+                              std::variant<std::string>(communityStr));
+                dbus->call_noreply(method);
+            }
+            catch (const sdbusplus::exception_t& e)
+            {
+                lg2::error(
+                    "Failed to set SNMP community string via D-Bus: {ERROR}",
+                    "ERROR", e.what());
+                return responseUnspecifiedError();
+            }
+            return responseSuccess();
+        }
         case LanParam::VLANId:
         {
             uint12_t vlanData;
@@ -1247,6 +1289,38 @@ RspType<message::Payload> getLan(Context::ptr ctx, uint4_t channelBits,
                 mac = neighbor->mac;
             }
             ret.pack(stdplus::raw::asView<char>(mac));
+            return responseSuccess(std::move(ret));
+        }
+        case LanParam::CommunityString:
+        {
+            std::array<uint8_t, maxCommunityStrLen> comStrData{};
+            try
+            {
+                auto dbus = getSdBus();
+                auto method = dbus->new_method_call(
+                    snmpService, snmpObjPath,
+                    "org.freedesktop.DBus.Properties", "Get");
+                method.append(snmpCommunityIface, snmpCommunityProp);
+                auto reply = dbus->call(method);
+
+                std::variant<std::string> value;
+                reply.read(value);
+                const auto& communityStr = std::get<std::string>(value);
+
+                std::copy_n(
+                    communityStr.begin(),
+                    std::min(communityStr.size(),
+                             static_cast<size_t>(maxCommunityStrLen)),
+                    comStrData.begin());
+            }
+            catch (const sdbusplus::exception_t& e)
+            {
+                lg2::error(
+                    "Failed to get SNMP community string via D-Bus: {ERROR}",
+                    "ERROR", e.what());
+                // Return empty community string (all zeros) on failure
+            }
+            ret.pack(comStrData);
             return responseSuccess(std::move(ret));
         }
         case LanParam::VLANId:
