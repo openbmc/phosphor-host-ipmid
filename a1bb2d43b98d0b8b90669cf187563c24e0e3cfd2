@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5cb4b5f4_f4b39a97",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-05-08T03:07:29Z",
+      "side": 1,
+      "message": "These lg2::info calls will log on every FRU write segment and every timer flush. On systems with frequent FRU writes (e.g., SPD data updates, multi-device provisioning), this could flood the journal.\n\nShould these be lg2::debug instead? lg2::info is typically reserved for infrequent, operationally significant events. The debug level would still be available when needed via busctl set-property to raise the log level.",
+      "range": {
+        "startLine": 130,
+        "startChar": 0,
+        "endLine": 130,
+        "endChar": 32
+      },
+      "revId": "a1bb2d43b98d0b8b90669cf187563c24e0e3cfd2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "357fbdea_9ee5cfdc",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 502,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-05-08T03:07:29Z",
+      "side": 1,
+      "message": "These lg2::info calls will log on every FRU write segment and every timer flush. On systems with frequent FRU writes (e.g., SPD data updates, multi-device provisioning), this could flood the journal.\n\nShould these be lg2::debug instead? lg2::info is typically reserved for infrequent, operationally significant events. The debug level would still be available when needed via busctl set-property to raise the log level.",
+      "range": {
+        "startLine": 502,
+        "startChar": 24,
+        "endLine": 502,
+        "endChar": 27
+      },
+      "revId": "a1bb2d43b98d0b8b90669cf187563c24e0e3cfd2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
