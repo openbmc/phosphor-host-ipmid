@@ -36,7 +36,6 @@ owners:
 - vernon.mauery@gmail.com
 
 reviewers:
-- anoo@us.ibm.com
 - deepak.kodihalli.83@gmail.com
 - ratankgupta31@gmail.com
 
@@ -49,9 +48,6 @@ matchers:
   - prithvi24pai@gmail.com
 
 openbmc:
-- name: Adriana Kobylak
-  email: anoo@us.ibm.com
-  discord: anoo
 - name: Deepak Kodihalli
   email: deepak.kodihalli.83@gmail.com
   discord: dkodihal
