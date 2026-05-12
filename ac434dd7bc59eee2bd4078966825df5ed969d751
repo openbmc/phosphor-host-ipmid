@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c5a965f2_2e35b1e7",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-05-12T04:43:08Z",
+      "side": 1,
+      "message": "FRU image data and timer remain allocated after write completes. Please erase the map entry to avoid unbounded memory growth in this long-running daemon",
+      "range": {
+        "startLine": 161,
+        "startChar": 0,
+        "endLine": 161,
+        "endChar": 24
+      },
+      "revId": "ac434dd7bc59eee2bd4078966825df5ed969d751",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e3610ef0_a1be680d",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 472,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-05-12T04:43:08Z",
+      "side": 1,
+      "message": "operator[] inserts a default entry before validation. If deviceHashes.find() fails, an empty entry leaks. Please move the deviceHashes check first and use try_emplace after.",
+      "range": {
+        "startLine": 472,
+        "startChar": 0,
+        "endLine": 472,
+        "endChar": 45
+      },
+      "revId": "ac434dd7bc59eee2bd4078966825df5ed969d751",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "64105511_586aa072",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 574,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-05-12T04:43:08Z",
+      "side": 1,
+      "message": "FRU image data and timer remain allocated after write completes. Please erase the map entry to avoid unbounded memory growth in this long-running daemon",
+      "range": {
+        "startLine": 574,
+        "startChar": 0,
+        "endLine": 574,
+        "endChar": 32
+      },
+      "revId": "ac434dd7bc59eee2bd4078966825df5ed969d751",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "440a2137_771a6769",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 577,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-05-12T04:43:08Z",
+      "side": 1,
+      "message": "FRU image data and timer remain allocated after write completes. Please erase the map entry to avoid unbounded memory growth in this long-running daemon",
+      "range": {
+        "startLine": 577,
+        "startChar": 0,
+        "endLine": 577,
+        "endChar": 28
+      },
+      "revId": "ac434dd7bc59eee2bd4078966825df5ed969d751",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
