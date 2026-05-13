@@ -24,6 +24,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "018d8ca4_2156a20e",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1002827
+      },
+      "writtenOn": "2026-05-13T02:06:29Z",
+      "side": 1,
+      "message": "Thanks for your review and catching the resource retention issue.\n \nAddressed in the latest patchset, but with clear() + shrink_to_fit() rather than\nerase(). Erasing the map entry from writeFruCache() is unsafe because that function runs inside sdbusplus::Timer::timeoutHandler() (see sdbusplus/include/sdbusplus/timer.hpp). After invoking userCallBack(), timeoutHandler() continues to access eventSource:\n\n    if (userCallBack)\n    {\n        userCallBack();   // \u003c- our writeFruCache() runs here\n    }\n\n    int running;\n    if (sd_event_source_get_enabled(eventSource, \u0026running) \u003c 0 ||\n        running \u003d\u003d SD_EVENT_ONESHOT)\n    {\n        stop();           // \u003c- also touches eventSource\n    }\n\nErasing the map entry inside the callback would destroy the Timer mid-dispatch, freeing eventSource while the dispatcher is still using it — a Use-After-Free.\n\nCompromise: Added releaseWriteCtx() helper that does clear() + shrink_to_fit() \non the data buffer, releasing the dominant memory cost but keeping the Timer\nobject.\n\nOn unbounded growth: the map is keyed by uint8_t fruDeviceId, and after fixing the validation order, entries are only inserted for IDs that exist in deviceHashes. Map size is therefore bounded by the platform\u0027s FRU topology, not unbounded.",
+      "parentUuid": "c5a965f2_2e35b1e7",
+      "range": {
+        "startLine": 161,
+        "startChar": 0,
+        "endLine": 161,
+        "endChar": 24
+      },
+      "revId": "ac434dd7bc59eee2bd4078966825df5ed969d751",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "e3610ef0_a1be680d",
@@ -37,6 +61,30 @@
       "writtenOn": "2026-05-12T04:43:08Z",
       "side": 1,
       "message": "operator[] inserts a default entry before validation. If deviceHashes.find() fails, an empty entry leaks. Please move the deviceHashes check first and use try_emplace after.",
+      "range": {
+        "startLine": 472,
+        "startChar": 0,
+        "endLine": 472,
+        "endChar": 45
+      },
+      "revId": "ac434dd7bc59eee2bd4078966825df5ed969d751",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "00329869_4001259f",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 472,
+      "author": {
+        "id": 1002827
+      },
+      "writtenOn": "2026-05-13T02:06:29Z",
+      "side": 1,
+      "message": "Thanks for your review. I reordered to find() first, validate fruDeviceId against deviceHashes, then try_emplace() only after all checks pass. Invalid IDs no longer mutate the map.",
+      "parentUuid": "e3610ef0_a1be680d",
       "range": {
         "startLine": 472,
         "startChar": 0,
@@ -70,6 +118,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "965f111e_4d33c3b2",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 574,
+      "author": {
+        "id": 1002827
+      },
+      "writtenOn": "2026-05-13T02:06:29Z",
+      "side": 1,
+      "message": "Thanks for your review and catching the resource retention issue.\n\nAddressed in the latest patchset, but with clear() + shrink_to_fit() rather than\nerase(). Erasing the map entry from writeFruCache() is unsafe because that function runs inside sdbusplus::Timer::timeoutHandler() (see sdbusplus/include/sdbusplus/timer.hpp). After invoking userCallBack(), timeoutHandler() continues to access eventSource:\n\nif (userCallBack)\n{\n    userCallBack();   // \u003c- our writeFruCache() runs here\n}\n\nint running;\nif (sd_event_source_get_enabled(eventSource, \u0026running) \u003c 0 ||\n    running \u003d\u003d SD_EVENT_ONESHOT)\n{\n    stop();           // \u003c- also touches eventSource\n}\n\nErasing the map entry inside the callback would destroy the Timer mid-dispatch, freeing eventSource while the dispatcher is still using it — a Use-After-Free.\n\nCompromise: Added releaseWriteCtx() helper that does clear() + shrink_to_fit()\non the data buffer, releasing the dominant memory cost but keeping the Timer\nobject.\n\nOn unbounded growth: the map is keyed by uint8_t fruDeviceId, and after fixing the validation order, entries are only inserted for IDs that exist in deviceHashes. Map size is therefore bounded by the platform\u0027s FRU topology, not unbounded.",
+      "parentUuid": "64105511_586aa072",
+      "range": {
+        "startLine": 574,
+        "startChar": 0,
+        "endLine": 574,
+        "endChar": 32
+      },
+      "revId": "ac434dd7bc59eee2bd4078966825df5ed969d751",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "440a2137_771a6769",
@@ -83,6 +155,30 @@
       "writtenOn": "2026-05-12T04:43:08Z",
       "side": 1,
       "message": "FRU image data and timer remain allocated after write completes. Please erase the map entry to avoid unbounded memory growth in this long-running daemon",
+      "range": {
+        "startLine": 577,
+        "startChar": 0,
+        "endLine": 577,
+        "endChar": 28
+      },
+      "revId": "ac434dd7bc59eee2bd4078966825df5ed969d751",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e3a67148_44dc7389",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 577,
+      "author": {
+        "id": 1002827
+      },
+      "writtenOn": "2026-05-13T02:06:29Z",
+      "side": 1,
+      "message": "Thanks for your review and catching the resource retention issue.\n\nAddressed in the latest patchset, but with clear() + shrink_to_fit() rather than\nerase(). Erasing the map entry from writeFruCache() is unsafe because that function runs inside sdbusplus::Timer::timeoutHandler() (see sdbusplus/include/sdbusplus/timer.hpp). After invoking userCallBack(), timeoutHandler() continues to access eventSource:\n\nif (userCallBack)\n{\n    userCallBack();   // \u003c- our writeFruCache() runs here\n}\n\nint running;\nif (sd_event_source_get_enabled(eventSource, \u0026running) \u003c 0 ||\n    running \u003d\u003d SD_EVENT_ONESHOT)\n{\n    stop();           // \u003c- also touches eventSource\n}\n\nErasing the map entry inside the callback would destroy the Timer mid-dispatch, freeing eventSource while the dispatcher is still using it — a Use-After-Free.\n\nCompromise: Added releaseWriteCtx() helper that does clear() + shrink_to_fit()\non the data buffer, releasing the dominant memory cost but keeping the Timer\nobject.\n\nOn unbounded growth: the map is keyed by uint8_t fruDeviceId, and after fixing the validation order, entries are only inserted for IDs that exist in deviceHashes. Map size is therefore bounded by the platform\u0027s FRU topology, not unbounded.",
+      "parentUuid": "440a2137_771a6769",
       "range": {
         "startLine": 577,
         "startChar": 0,
