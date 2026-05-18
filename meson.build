@@ -297,6 +297,7 @@ libipmi20_src = [
     'ipmi_fru_info_area.cpp',
     'read_fru_data.cpp',
     'sensordatahandler.cpp',
+    'pefhandler.cpp',
     'user_channel/channelcommands.cpp',
     generated_src,
     transportoem_src,
