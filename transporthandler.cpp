@@ -195,6 +195,33 @@ static void setEthProp(sdbusplus::bus_t& bus, const ChannelParams& params,
                            INTF_ETHERNET, prop, t);
 }
 
+constexpr const char* numofDestProp = "NumofDestination";
+
+/** @brief set the value for Number of destinations to Dbus.
+ *
+ * @param[in] bus        - The bus object used for lookups
+ * @param[in] params     - The parameters for the channel
+ * @param[in] destValue  - Number of destinations value
+ */
+void setNumofDestinationValue(sdbusplus::bus_t& bus,
+                              const ChannelParams& params, uint8_t destValue)
+{
+    setDbusProperty(bus, params.service, params.logicalPath, INTF_ETHERNET,
+                    numofDestProp, destValue);
+}
+
+/** @brief get the value for Number of destinations from Dbus.
+ *
+ * @param[in] bus        - The bus object used for lookups
+ * @param[in] params     - The parameters for the channel
+ * @return Number of Destinations value.
+ */
+uint8_t getNumofDestinationValue(sdbusplus::bus_t& bus,
+                                 const ChannelParams& params)
+{
+    return getEthProp<uint8_t>(bus, params, numofDestProp);
+}
+
 /** @brief Determines the MAC of the ethernet interface
  *
  *  @param[in] bus    - The bus object used for lookups
@@ -902,6 +929,11 @@ RspType<> setLanInt(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
             channelCall<reconfigureGatewayMAC<AF_INET>>(channel, gatewayMAC);
             return responseSuccess();
         }
+        case LanParam::NumofDestination:
+        {
+            req.trailingOk = true;
+            return responseParamReadOnly();
+        }
         case LanParam::VLANId:
         {
             uint12_t vlanData;
@@ -1248,6 +1280,23 @@ RspType<message::Payload> getLan(Context::ptr ctx, uint4_t channelBits,
             }
             ret.pack(stdplus::raw::asView<char>(mac));
             return responseSuccess(std::move(ret));
+        }
+        case LanParam::NumofDestination:
+        {
+            try
+            {
+                sdbusplus::bus_t bus(ipmid_get_sd_bus_connection());
+                auto params = getChannelParams(bus, channel);
+                uint8_t numDest = getNumofDestinationValue(bus, params);
+                ret.pack(numDest);
+                return responseSuccess(std::move(ret));
+            }
+            catch (const std::exception& e)
+            {
+                lg2::error("Error retrieving NumofDestination: {ERROR}",
+                           "ERROR", e.what());
+                return responseUnspecifiedError();
+            }
         }
         case LanParam::VLANId:
         {

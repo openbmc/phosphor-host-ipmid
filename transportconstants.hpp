@@ -38,6 +38,7 @@ enum class LanParam : uint8_t
     SubnetMask = 6,
     Gateway1 = 12,
     Gateway1MAC = 13,
+    NumofDestination = 17,
     VLANId = 20,
     CiphersuiteSupport = 22,
     CiphersuiteEntries = 23,
