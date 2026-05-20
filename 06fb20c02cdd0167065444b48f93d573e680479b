@@ -16,6 +16,52 @@
       "message": "Can you please review my implementation",
       "revId": "06fb20c02cdd0167065444b48f93d573e680479b",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ca827ac8_937c96ec",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 978,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-05-20T08:19:28Z",
+      "side": 1,
+      "message": "The constant sensor::operationalStatusInterface is already defined at line 258 for this exact string. Please use the constant here instead of the hardcoded literal to avoid a potential mismatch if the interface name is updated in the future.",
+      "range": {
+        "startLine": 978,
+        "startChar": 23,
+        "endLine": 978,
+        "endChar": 24
+      },
+      "revId": "06fb20c02cdd0167065444b48f93d573e680479b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6fe1427b_33e997d8",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 986,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-05-20T08:19:28Z",
+      "side": 1,
+      "message": "std::get\u003cbool\u003e will throw std::bad_variant_access if the variant holds a type other than bool, which would crash the IPMI daemon. This can happen if a D-Bus provider implements the OperationalStatus interface with a non-standard property type (e.g., uint8_t instead of bool). This would take down all IPMI functionality until systemd restarts the daemon",
+      "range": {
+        "startLine": 986,
+        "startChar": 0,
+        "endLine": 986,
+        "endChar": 65
+      },
+      "revId": "06fb20c02cdd0167065444b48f93d573e680479b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
