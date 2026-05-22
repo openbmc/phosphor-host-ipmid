@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "11400765_1df7b18e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000016
+      },
+      "writtenOn": "2026-05-22T00:35:02Z",
+      "side": 1,
+      "message": "I have some notes on the Network side of this, but those partially reflected here. It would make more sense for this to be accompanied by the actual alert mehcanism. Until that\u0027s in place, we should just be indicating that LAN Alerts are not supported, byt returning a constant 0 for this parameter.",
+      "revId": "412844f39b4f23b0f7241941afb4e47c9ca7eee1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "083c664d_6eaab22b",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 211,
+      "author": {
+        "id": 1000016
+      },
+      "writtenOn": "2026-05-22T00:35:02Z",
+      "side": 1,
+      "message": "What could be calling set? This is a read-only parameter.",
+      "revId": "412844f39b4f23b0f7241941afb4e47c9ca7eee1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b1a6a7bd_7181532b",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1300,
+      "author": {
+        "id": 1000016
+      },
+      "writtenOn": "2026-05-22T00:35:02Z",
+      "side": 1,
+      "message": "Until we have support for LAN Alerts, it doesn\u0027t make much sense to report anything other than `0` for this parameter.",
+      "revId": "412844f39b4f23b0f7241941afb4e47c9ca7eee1",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
