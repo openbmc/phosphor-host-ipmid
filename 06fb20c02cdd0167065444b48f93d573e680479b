@@ -43,6 +43,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "050b5af7_f17dd49a",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 978,
+      "author": {
+        "id": 1002830
+      },
+      "writtenOn": "2026-05-25T16:56:20Z",
+      "side": 1,
+      "message": "Thank you for the review, I have replaced string with constant at line 978.",
+      "parentUuid": "ca827ac8_937c96ec",
+      "range": {
+        "startLine": 978,
+        "startChar": 23,
+        "endLine": 978,
+        "endChar": 24
+      },
+      "revId": "06fb20c02cdd0167065444b48f93d573e680479b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "6fe1427b_33e997d8",
         "filename": "dbus-sdr/sensorcommands.cpp",
         "patchSetId": 4
@@ -54,6 +78,30 @@
       "writtenOn": "2026-05-20T08:19:28Z",
       "side": 1,
       "message": "std::get\u003cbool\u003e will throw std::bad_variant_access if the variant holds a type other than bool, which would crash the IPMI daemon. This can happen if a D-Bus provider implements the OperationalStatus interface with a non-standard property type (e.g., uint8_t instead of bool). This would take down all IPMI functionality until systemd restarts the daemon",
+      "range": {
+        "startLine": 986,
+        "startChar": 0,
+        "endLine": 986,
+        "endChar": 65
+      },
+      "revId": "06fb20c02cdd0167065444b48f93d573e680479b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c38e5e77_34d36836",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 986,
+      "author": {
+        "id": 1002830
+      },
+      "writtenOn": "2026-05-25T16:56:20Z",
+      "side": 1,
+      "message": "Thank you for the review. I have handled error condition to handle non bool types.",
+      "parentUuid": "6fe1427b_33e997d8",
       "range": {
         "startLine": 986,
         "startChar": 0,
