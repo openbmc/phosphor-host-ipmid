@@ -16,6 +16,23 @@
       "message": "Reviewed the changes. The per-devId FruWriteCtx correctly eliminates the global cache race by capturing bus/addr before the yield point, and the erase-vs-release distinction for timer safety is sound. No issues found — LGTM.",
       "revId": "3f09b8ac3ebabfda69022a3e87f017101645be36",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "321efc40_4175e9e6",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 11
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002827
+      },
+      "writtenOn": "2026-05-25T06:48:41Z",
+      "side": 1,
+      "message": "Ready for next review.",
+      "revId": "3f09b8ac3ebabfda69022a3e87f017101645be36",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
