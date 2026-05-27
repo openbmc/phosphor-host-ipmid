@@ -1,0 +1,174 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9d2f5928_34f437b6",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-05-27T20:42:09Z",
+      "side": 1,
+      "message": "There are going to be a lot of changed lines in the next set to support the yielding D-Bus APIs, so this was not yet a thorough review. But enough to keep things moving.",
+      "revId": "43fda67508d4b750f3aad182bd0d97e6425ab0f4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "eff63eb0_a4a09b7e",
+        "filename": "pefhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-05-27T20:42:09Z",
+      "side": 1,
+      "message": "this should be unnecessary if you use the yielding D-Bus APIs.",
+      "revId": "43fda67508d4b750f3aad182bd0d97e6425ab0f4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0ba7a9c7_7db034b4",
+        "filename": "pefhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-05-27T20:42:09Z",
+      "side": 1,
+      "message": "I think I would prefer actually handling the other values appropriately than an abort or whatever __builtin_unreachable does. At the very least throwing an exception will unwind the handler and return an IPMI error code. Since an invalid enum is unlikely a fatal error, let\u0027s not treat it as one.",
+      "revId": "43fda67508d4b750f3aad182bd0d97e6425ab0f4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b259d2e0_944908e6",
+        "filename": "pefhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 261,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-05-27T20:42:09Z",
+      "side": 1,
+      "message": "If a D-Bus call is made from ipmi handler context, it must use the yielding D-Bus APIs.",
+      "revId": "43fda67508d4b750f3aad182bd0d97e6425ab0f4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6f442ae0_c4659d6f",
+        "filename": "pefhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 299,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-05-27T20:42:09Z",
+      "side": 1,
+      "message": "If a D-Bus call is made from ipmi handler context, it must use the yielding D-Bus APIs.",
+      "revId": "43fda67508d4b750f3aad182bd0d97e6425ab0f4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "11efcbd9_3c47d62c",
+        "filename": "pefhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 328,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-05-27T20:42:09Z",
+      "side": 1,
+      "message": "If a D-Bus call is made from ipmi handler context, it must use the yielding D-Bus APIs.",
+      "revId": "43fda67508d4b750f3aad182bd0d97e6425ab0f4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "92bfcc82_bf647e8c",
+        "filename": "pefhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 355,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-05-27T20:42:09Z",
+      "side": 1,
+      "message": "If a D-Bus call is made from ipmi handler context, it must use the yielding D-Bus APIs.",
+      "revId": "43fda67508d4b750f3aad182bd0d97e6425ab0f4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "769dfe13_78ec4021",
+        "filename": "pefhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 432,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-05-27T20:42:09Z",
+      "side": 1,
+      "message": "First parameter should be ipmi::Context::ptr \u0026ctx so that all your dbus calls can be made using the yielding APIs.",
+      "revId": "43fda67508d4b750f3aad182bd0d97e6425ab0f4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "868df5b6_4d8a1053",
+        "filename": "pefhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 591,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-05-27T20:42:09Z",
+      "side": 1,
+      "message": "First parameter should be ipmi::Context::ptr \u0026ctx so that all your dbus calls can be made using the yielding APIs.",
+      "revId": "43fda67508d4b750f3aad182bd0d97e6425ab0f4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f61842fc_426c34d2",
+        "filename": "pefhandler.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-05-27T20:42:09Z",
+      "side": 1,
+      "message": "Are any of these values expected to be used in other cpp files? If not, just roll these into the top of the pefhandler.cpp file.",
+      "revId": "43fda67508d4b750f3aad182bd0d97e6425ab0f4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
