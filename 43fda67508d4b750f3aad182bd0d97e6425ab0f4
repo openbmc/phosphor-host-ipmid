@@ -35,6 +35,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "97317d94_b69065db",
+        "filename": "pefhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1002973
+      },
+      "writtenOn": "2026-06-01T21:00:57Z",
+      "side": 1,
+      "message": "Done. The dbusConn() singleton and the standalone service-discovery helper are gone. resolveService(ctx, …) now uses the yielding ipmi::getService(ctx, intf, path, out) overload and is shared by all four call sites.",
+      "parentUuid": "eff63eb0_a4a09b7e",
+      "revId": "43fda67508d4b750f3aad182bd0d97e6425ab0f4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "0ba7a9c7_7db034b4",
@@ -48,6 +66,24 @@
       "writtenOn": "2026-05-27T20:42:09Z",
       "side": 1,
       "message": "I think I would prefer actually handling the other values appropriately than an abort or whatever __builtin_unreachable does. At the very least throwing an exception will unwind the handler and return an IPMI error code. Since an invalid enum is unlikely a fatal error, let\u0027s not treat it as one.",
+      "revId": "43fda67508d4b750f3aad182bd0d97e6425ab0f4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6d7c91f0_d1fa4373",
+        "filename": "pefhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1002973
+      },
+      "writtenOn": "2026-06-01T21:00:57Z",
+      "side": 1,
+      "message": "Done. The pefUnreachable() helper is removed and both ccFor() / mapErr\u003c\u003e() switches now fall through to responseUnspecifiedError() (CC 0xFF). An unexpected DbusResult value surfaces to the IPMI client as a generic error instead of aborting the handler thread.",
+      "parentUuid": "0ba7a9c7_7db034b4",
       "revId": "43fda67508d4b750f3aad182bd0d97e6425ab0f4",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -69,6 +105,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "0acef17e_d2b4e18a",
+        "filename": "pefhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 261,
+      "author": {
+        "id": 1002973
+      },
+      "writtenOn": "2026-06-01T21:00:57Z",
+      "side": 1,
+      "message": "Done. dbusGetByteProp(ctx, …) uses ctx-\u003ebus-\u003eyield_method_call\u003cstd::variant\u003cuint8_t\u003e\u003e(ctx-\u003eyield, ec, …).",
+      "parentUuid": "b259d2e0_944908e6",
+      "revId": "43fda67508d4b750f3aad182bd0d97e6425ab0f4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "6f442ae0_c4659d6f",
@@ -82,6 +136,24 @@
       "writtenOn": "2026-05-27T20:42:09Z",
       "side": 1,
       "message": "If a D-Bus call is made from ipmi handler context, it must use the yielding D-Bus APIs.",
+      "revId": "43fda67508d4b750f3aad182bd0d97e6425ab0f4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1b90cf83_cce679bf",
+        "filename": "pefhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 299,
+      "author": {
+        "id": 1002973
+      },
+      "writtenOn": "2026-06-01T21:00:57Z",
+      "side": 1,
+      "message": "Done. dbusSetByteProp(ctx, …) uses ctx-\u003ebus-\u003eyield_method_call\u003cvoid\u003e(ctx-\u003eyield, ec, …).",
+      "parentUuid": "6f442ae0_c4659d6f",
       "revId": "43fda67508d4b750f3aad182bd0d97e6425ab0f4",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -103,6 +175,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "f5042ee5_d0082aa6",
+        "filename": "pefhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 328,
+      "author": {
+        "id": 1002973
+      },
+      "writtenOn": "2026-06-01T21:00:57Z",
+      "side": 1,
+      "message": "Done. dbusSetFilter(ctx, …) uses ctx-\u003ebus-\u003eyield_method_call\u003cvoid\u003e(ctx-\u003eyield, ec, …).",
+      "parentUuid": "11efcbd9_3c47d62c",
+      "revId": "43fda67508d4b750f3aad182bd0d97e6425ab0f4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "92bfcc82_bf647e8c",
@@ -116,6 +206,24 @@
       "writtenOn": "2026-05-27T20:42:09Z",
       "side": 1,
       "message": "If a D-Bus call is made from ipmi handler context, it must use the yielding D-Bus APIs.",
+      "revId": "43fda67508d4b750f3aad182bd0d97e6425ab0f4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "61c7bd95_ef9130a0",
+        "filename": "pefhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 355,
+      "author": {
+        "id": 1002973
+      },
+      "writtenOn": "2026-06-01T21:00:57Z",
+      "side": 1,
+      "message": "Done. dbusGetFilter(ctx, …) uses ctx-\u003ebus-\u003eyield_method_call\u003cstd::vector\u003cuint8_t\u003e\u003e(ctx-\u003eyield, ec, …).",
+      "parentUuid": "92bfcc82_bf647e8c",
       "revId": "43fda67508d4b750f3aad182bd0d97e6425ab0f4",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -137,6 +245,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "ffb7f243_a1504ba7",
+        "filename": "pefhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 432,
+      "author": {
+        "id": 1002973
+      },
+      "writtenOn": "2026-06-01T21:00:57Z",
+      "side": 1,
+      "message": "Done. Signature is now ipmiSetPefConfigParams(ipmi::Context::ptr ctx, uint8_t paramSelByte, ipmi::message::Payload\u0026 req). (Context::ptr is std::shared_ptr\u003cContext\u003e so I passed it by value, matching the prevailing pattern in upstream handlers; happy to switch to const\u0026 if you prefer.)",
+      "parentUuid": "769dfe13_78ec4021",
+      "revId": "43fda67508d4b750f3aad182bd0d97e6425ab0f4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "868df5b6_4d8a1053",
@@ -154,6 +280,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "bd73349d_94051ef6",
+        "filename": "pefhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 591,
+      "author": {
+        "id": 1002973
+      },
+      "writtenOn": "2026-06-01T21:00:57Z",
+      "side": 1,
+      "message": "Done. Signature is now ipmiGetPefConfigParams(ipmi::Context::ptr ctx, uint8_t paramSelByte, uint8_t setSelector, uint8_t blockSelector).",
+      "parentUuid": "868df5b6_4d8a1053",
+      "revId": "43fda67508d4b750f3aad182bd0d97e6425ab0f4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "f61842fc_426c34d2",
@@ -167,6 +311,24 @@
       "writtenOn": "2026-05-27T20:42:09Z",
       "side": 1,
       "message": "Are any of these values expected to be used in other cpp files? If not, just roll these into the top of the pefhandler.cpp file.",
+      "revId": "43fda67508d4b750f3aad182bd0d97e6425ab0f4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "873cbb08_ae3c5701",
+        "filename": "pefhandler.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1002973
+      },
+      "writtenOn": "2026-06-01T21:00:57Z",
+      "side": 1,
+      "message": "Pushing back on consistency + extensibility grounds, happy to fold if you\u0027d still prefer:\n\nConsistency with peer handlers. chassishandler.hpp (40 LoC, 6 constants), dcmihandler.hpp (51 LoC, 23 constants), and transporthandler.hpp (450 LoC, 8 constants) all keep companion headers carrying command/parameter constants that no other .cpp in this repo includes. pefhandler.hpp follows the same split.\n\nDocumented D-Bus contract surface. The header also documents the PefManager / PefFilter interface contract (object paths, property names, byte layout of the 20-byte filter entry per IPMI 2.0 Table 17.7, pefMaxFilters slot count, ObjectManager requirements). The in-tree provider and the matcher  intentionally carry parallel local copies because they live in separate Yocto recipes that can\u0027t share a header, but they were authored against this contract.\n\nFuture use. Any in-tree provider, mock, or unit test added later naturally #includes the header rather than redefining the constants — that\u0027s the cheap insurance the header buys.",
+      "parentUuid": "f61842fc_426c34d2",
       "revId": "43fda67508d4b750f3aad182bd0d97e6425ab0f4",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }

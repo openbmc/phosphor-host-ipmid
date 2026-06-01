@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a97d764a_98dac313",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1002973
+      },
+      "writtenOn": "2026-06-01T21:00:57Z",
+      "side": 1,
+      "message": "Thanks for the PS1 review. PS2 addresses all inline comments and reworks the D-Bus layer to use the yielding APIs on `ipmi::Context::ptr`. Tested on hardware : wire round-trips byte-identical, no timeouts/deadlocks in ipmid\u0027s journal under concurrent provider activity, CRUD/persistence/matcher/ghost/wrong-format/no-provider all green. Inline replies below.",
+      "revId": "5e1e81f1b4fa0b8dc3ca8876917fa586d02610da",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
