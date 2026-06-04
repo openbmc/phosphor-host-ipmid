@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "379a086c_e48e3706",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-06-04T12:17:36Z",
+      "side": 1,
+      "message": "Please check this PR, Build Errors not related to My changes. Thanks",
+      "revId": "f2612737cca9c8d450d3bc186fb6040d8187199a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
