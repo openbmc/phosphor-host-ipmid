@@ -1025,7 +1025,7 @@ uint8_t getTotalSessionCount()
  * @param[in] reqSessionHandle - unpacked session handle will be assigned
  *
  * @return success completion code if request data is valid
- * else return the correcponding error completion code.
+ * else return the corresponding error completion code.
  **/
 uint8_t getSessionInfoRequestData(
     const ipmi::Context::ptr ctx, const uint8_t sessionIndex,
