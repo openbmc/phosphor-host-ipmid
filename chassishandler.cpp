@@ -2351,11 +2351,11 @@ ipmi::RspType<> ipmiChassisSetSysBootOptions(ipmi::Context::ptr ctx,
     else if (types::enum_cast<BootOptionParameter>(parameterSelector) ==
              BootOptionParameter::bootInfo)
     {
-        uint8_t writeMak;
+        uint8_t writeMask;
         uint5_t bootInfoAck;
         uint3_t rsvd;
 
-        if (data.unpack(writeMak, bootInfoAck, rsvd) != 0 ||
+        if (data.unpack(writeMask, bootInfoAck, rsvd) != 0 ||
             !data.fullyUnpacked())
         {
             return ipmi::responseReqDataLenInvalid();
@@ -2364,8 +2364,8 @@ ipmi::RspType<> ipmiChassisSetSysBootOptions(ipmi::Context::ptr ctx,
         {
             return ipmi::responseInvalidFieldRequest();
         }
-        bootInitiatorAckData &= ~writeMak;
-        bootInitiatorAckData |= (writeMak & bootInfoAck);
+        bootInitiatorAckData &= ~writeMask;
+        bootInitiatorAckData |= (writeMask & bootInfoAck);
         lg2::info("ipmiChassisSetSysBootOptions: bootInfo parameter set "
                   "successfully");
         data.trailingOk = true;
