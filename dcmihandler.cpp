@@ -419,7 +419,7 @@ bool setPcapSamplPeriod(ipmi::Context::ptr& ctx, uint16_t pcapSamplPeriod)
     }
 
     /*
-     * Dbus is storing Sampling periodic in microseconds unit.
+     * Dbus is storing Sampling period in microseconds unit.
      * Therefore, we have to convert it from seconds to microseconds unit.
      */
     uint64_t pcapSamplPeriodUs =
@@ -1255,7 +1255,7 @@ ipmi::RspType<> setDCMIConfParams(ipmi::Context::ptr& ctx, uint8_t parameter,
             dcmi::setDHCPOption(ctx, dcmi::dhcpOpt12Enabled, option12);
             break;
         }
-        // Systemd-networkd doesn't allow to configure DHCP timigs
+        // Systemd-networkd doesn't allow to configure DHCP timings
         case dcmi::DCMIConfigParameters::DHCPTiming1:
         case dcmi::DCMIConfigParameters::DHCPTiming2:
         case dcmi::DCMIConfigParameters::DHCPTiming3:
@@ -1550,7 +1550,7 @@ void registerNetFnDcmiFunctions()
                          ipmi::dcmi::cmdGetPowerReading, ipmi::Privilege::User,
                          getPowerReading);
 
-// The Get sensor should get the senor details dynamically when
+// The Get sensor should get the sensor details dynamically when
 // FEATURE_DYNAMIC_SENSORS is enabled.
 #ifndef FEATURE_DYNAMIC_SENSORS
     // <Get Sensor Info>
