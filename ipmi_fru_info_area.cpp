@@ -173,7 +173,7 @@ void appendData(const Property& key, const PropertyMap& propMap,
 
         // 6 bits for length as per FRU spec v1.0
         // if length is greater then 63(2^6) bytes then trim the data to 63
-        // bytess.
+        // bytes.
         auto valueLength = (value.length() > maxRecordAttributeValue)
                                ? maxRecordAttributeValue
                                : value.length();
