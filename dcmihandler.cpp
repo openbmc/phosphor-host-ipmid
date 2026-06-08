@@ -1240,9 +1240,10 @@ ipmi::RspType<> setDCMIConfParams(ipmi::Context::ptr& ctx, uint8_t parameter,
         case dcmi::DCMIConfigParameters::DiscoveryConfig:
         {
             bool option12{};
-            uint6_t reserved1{};
+            bool option60{};
+            uint5_t reserved1{};
             bool randBackOff{};
-            if (payload.unpack(option12, reserved1, randBackOff) ||
+            if (payload.unpack(option12, option60, reserved1, randBackOff) ||
                 !payload.fullyUnpacked())
             {
                 return ipmi::responseReqDataLenInvalid();
@@ -1251,6 +1252,10 @@ ipmi::RspType<> setDCMIConfParams(ipmi::Context::ptr& ctx, uint8_t parameter,
             if (reserved1 || randBackOff)
             {
                 return ipmi::responseInvalidFieldRequest();
+            }
+            if (option60)
+            {
+                return ipmi::responseCommandNotAvailable();
             }
             dcmi::setDHCPOption(ctx, dcmi::dhcpOpt12Enabled, option12);
             break;
