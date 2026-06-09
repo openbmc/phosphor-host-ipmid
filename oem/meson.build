@@ -5,6 +5,10 @@ ipmi_plugin_options = ['b_lundef=false']
 #################################################
 # keep options below sorted alphabetically
 #################################################
+if 'arm' in oem_opt or 'all' in oem_opt
+    subdir('arm')
+endif
+
 if 'example' in oem_opt or 'all' in oem_opt
     subdir('example')
 endif
