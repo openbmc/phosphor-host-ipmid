@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5faca451_8a543aed",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 631,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-06-09T15:51:26Z",
+      "side": 1,
+      "message": "overall changes are good,It avoids deleting parent interface objects unnecessarily.\n\nI have Below doubt: \n\nIf params.logicalPath \u003d\u003d params.ifPath (first time VLAN enable), deconfigureVLAN() is skipped, but later we still create VLAN and reapply saved IP/DHCP/gateway settings.\n\nMy concern is that parent interface settings may remain while the same settings are applied to the new VLAN interface, which can cause duplicate or ambiguous network state.\n\nCan you confirm:\n\n1. How parent interface L3 settings are cleared in this path.\n2. Why this is safe for non-VLAN -\u003e VLAN transition.\n\nNote: Tell me if My understanding is wrong ?",
+      "range": {
+        "startLine": 631,
+        "startChar": 0,
+        "endLine": 631,
+        "endChar": 44
+      },
+      "revId": "946411aa6e87d1c1bc83416eda6a6a251d61a225",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
