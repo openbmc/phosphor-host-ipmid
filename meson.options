@@ -275,6 +275,7 @@ option(
         #######################################
         # keep list below sorted alphabetically
         #######################################
+        'arm',
         'example',
         'nvidia',
     ],
