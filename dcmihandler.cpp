@@ -944,7 +944,8 @@ ipmi::RspType<uint8_t> setMgmntCtrlIdStr(ipmi::Context::ptr& ctx,
         hostname.resize(offset);
     }
 
-    // operation is to truncate at offset and append new data
+    // truncate at offset to drop stale data, then append the new data
+    hostname.resize(offset);
     hostname.append(data.begin(), data.end());
 
     // do the update if this is the last write
