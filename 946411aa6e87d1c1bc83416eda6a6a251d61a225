@@ -18,6 +18,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "9a0ec590_73cf38fe",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-06-11T09:57:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5638dd55_347095ed",
+      "revId": "946411aa6e87d1c1bc83416eda6a6a251d61a225",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "5faca451_8a543aed",
@@ -55,6 +73,30 @@
       "side": 1,
       "message": "This PR\u0027s scope is to fix issue https://github.com/openbmc/phosphor-networkd/issues/67 by avoiding unnecessary deletion of parent interface objects when configuring VLANs. \n\nThe duplicate behavior you mentioned is existing behavior in current OpenBMC that this PR maintains. The patch adds deconfigureVLAN() to delete only VLAN objects (not parent objects) when changing VLANs.",
       "parentUuid": "5faca451_8a543aed",
+      "range": {
+        "startLine": 631,
+        "startChar": 0,
+        "endLine": 631,
+        "endChar": 44
+      },
+      "revId": "946411aa6e87d1c1bc83416eda6a6a251d61a225",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "31f0f3f1_00216178",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 631,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-06-11T09:57:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6e08fc44_a7282d31",
       "range": {
         "startLine": 631,
         "startChar": 0,
