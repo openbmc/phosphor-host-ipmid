@@ -43,6 +43,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "71e7a0f0_cc0aa771",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1512,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-06-11T06:10:35Z",
+      "side": 1,
+      "message": "Done. Wrapped writeUserData() in a try/catch inside initializeUserDataFile(), catching both std::ios_base::failure and std::runtime_error. Failures are logged via lg2::error and handled gracefully without crashing the daemon.",
+      "parentUuid": "e39c9bec_f4926be0",
+      "range": {
+        "startLine": 1512,
+        "startChar": 4,
+        "endLine": 1512,
+        "endChar": 17
+      },
+      "revId": "d9ac28eda09f9bd1bad8a472fa6f62a0dc513205",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "cd4cb05b_bd2e92fb",
         "filename": "user_channel/user_mgmt.cpp",
         "patchSetId": 2
@@ -54,6 +78,30 @@
       "writtenOn": "2026-06-10T06:30:17Z",
       "side": 1,
       "message": "Can this guard be added to checkAndReloadUserData too?",
+      "range": {
+        "startLine": 1528,
+        "startChar": 8,
+        "endLine": 1528,
+        "endChar": 30
+      },
+      "revId": "d9ac28eda09f9bd1bad8a472fa6f62a0dc513205",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6fffce4d_4f986ad8",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1528,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-06-11T06:10:35Z",
+      "side": 1,
+      "message": "Done. Added the same try/catch guard around readUserData() in checkAndReloadUserData(), since it is called on every IPMI command at runtime. On failure, it logs the error and calls initializeUserDataFile() to recover with safe defaults, consistent with the startup recovery path in cacheUserDataFile().",
+      "parentUuid": "cd4cb05b_bd2e92fb",
       "range": {
         "startLine": 1528,
         "startChar": 8,
