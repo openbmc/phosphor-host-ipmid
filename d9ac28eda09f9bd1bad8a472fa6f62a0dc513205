@@ -65,6 +65,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "aac2680a_c71b1457",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1512,
+      "author": {
+        "id": 1002630
+      },
+      "writtenOn": "2026-06-11T06:33:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "71e7a0f0_cc0aa771",
+      "range": {
+        "startLine": 1512,
+        "startChar": 4,
+        "endLine": 1512,
+        "endChar": 17
+      },
+      "revId": "d9ac28eda09f9bd1bad8a472fa6f62a0dc513205",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "cd4cb05b_bd2e92fb",
@@ -102,6 +126,30 @@
       "side": 1,
       "message": "Done. Added the same try/catch guard around readUserData() in checkAndReloadUserData(), since it is called on every IPMI command at runtime. On failure, it logs the error and calls initializeUserDataFile() to recover with safe defaults, consistent with the startup recovery path in cacheUserDataFile().",
       "parentUuid": "cd4cb05b_bd2e92fb",
+      "range": {
+        "startLine": 1528,
+        "startChar": 8,
+        "endLine": 1528,
+        "endChar": 30
+      },
+      "revId": "d9ac28eda09f9bd1bad8a472fa6f62a0dc513205",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8f47e817_47de6a9c",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1528,
+      "author": {
+        "id": 1002630
+      },
+      "writtenOn": "2026-06-11T06:33:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6fffce4d_4f986ad8",
       "range": {
         "startLine": 1528,
         "startChar": 8,
