@@ -932,8 +932,12 @@ ipmi::RspType<uint8_t> setMgmntCtrlIdStr(ipmi::Context::ptr& ctx,
     }
 
     static std::string hostname{};
-    // read in the current value if not starting at offset 0
-    if (hostname.size() == 0 && offset != 0)
+    // Do not reuse stale partial data on offset-0 writes.
+    if (offset == 0)
+    {
+        hostname.clear();
+    }
+    else if (hostname.empty())
     {
         /* read old ctrlIdStr */
         std::optional<std::string> hostnameResp = dcmi::getHostName(ctx);
@@ -942,10 +946,15 @@ ipmi::RspType<uint8_t> setMgmntCtrlIdStr(ipmi::Context::ptr& ctx,
             return ipmi::responseUnspecifiedError();
         }
         hostname = hostnameResp.value();
-        hostname.resize(offset);
     }
 
-    // operation is to truncate at offset and append new data
+    if (offset > hostname.size())
+    {
+        return ipmi::responseParmOutOfRange();
+    }
+
+    // truncate at offset to drop stale data, then append the new data
+    hostname.resize(offset);
     hostname.append(data.begin(), data.end());
 
     // do the update if this is the last write
