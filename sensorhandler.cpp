@@ -1342,6 +1342,11 @@ ipmi::RspType<uint16_t,            // nextRecordId
     ipmiSensorGetSdr(uint16_t /* reservationId */, uint16_t recordID,
                      uint8_t offset, uint8_t bytesToRead)
 {
+    if (bytesToRead > sizeof(get_sdr::GetSdrResp))
+    {
+        return ipmi::responseParmOutOfRange();
+    }
+
     // Note: we use an iterator so we can provide the next ID at the end of
     // the call.
     auto sensor = ipmi::sensor::sensors.begin();
