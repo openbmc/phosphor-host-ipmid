@@ -919,11 +919,16 @@ ipmi::RspType<uint8_t> setMgmntCtrlIdStr(ipmi::Context::ptr& ctx,
     {
         return ipmi::responseReqDataLenInvalid();
     }
-    bool terminalWrite{data.back() == '\0'};
-    if (terminalWrite)
+    bool terminalWrite = false;
+    if (!data.empty())
     {
-        // remove the null termination from the data (no need with std::string)
-        data.resize(count - 1);
+        terminalWrite = (data.back() == '\0');
+        if (terminalWrite)
+        {
+            // remove the null termination from the data (no need with
+            // std::string)
+            data.resize(count - 1);
+        }
     }
     else if ((offset + count) == dcmi::maxCtrlIdStrLen)
     {
