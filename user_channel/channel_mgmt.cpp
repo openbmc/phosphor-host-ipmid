@@ -384,6 +384,10 @@ bool ChannelConfig::isValidChannel(const uint8_t chNum)
 EChannelSessSupported ChannelConfig::getChannelSessionSupport(
     const uint8_t chNum)
 {
+    if (chNum >= maxIpmiChannels)
+    {
+        return EChannelSessSupported::none;
+    }
     EChannelSessSupported chSessSupport =
         (EChannelSessSupported)channelData[chNum].chInfo.sessionSupported;
     return chSessSupport;
@@ -392,6 +396,10 @@ EChannelSessSupported ChannelConfig::getChannelSessionSupport(
 bool ChannelConfig::isValidAuthType(const uint8_t chNum,
                                     const EAuthType& authType)
 {
+    if (chNum >= maxIpmiChannels)
+    {
+        return false;
+    }
     if ((authType < EAuthType::md2) || (authType > EAuthType::oem))
     {
         lg2::debug("Invalid authentication type");
@@ -410,6 +418,10 @@ bool ChannelConfig::isValidAuthType(const uint8_t chNum,
 
 int ChannelConfig::getChannelActiveSessions(const uint8_t chNum)
 {
+    if (chNum >= maxIpmiChannels)
+    {
+        return 0;
+    }
     // TODO: TEMPORARY FIX
     // Channels active session count is managed separately
     // by monitoring channel session which includes LAN and
@@ -420,6 +432,10 @@ int ChannelConfig::getChannelActiveSessions(const uint8_t chNum)
 
 size_t ChannelConfig::getChannelMaxTransferSize(uint8_t chNum)
 {
+    if (chNum >= maxIpmiChannels)
+    {
+        return 0;
+    }
     return channelData[chNum].maxTransferSize;
 }
 
