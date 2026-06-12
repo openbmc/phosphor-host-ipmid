@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "41c4ae80_fe92561f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-06-12T05:58:02Z",
+      "side": 1,
+      "message": "Suggested coverage: selector 0x00 success (00 88 ff fc), selector 0x01 Parameter Out Of Range via apphandler.cpp:41, and selector 0x10 Invalid Field via apphandler.cpp:36.\nThis will provide stronger regression protection for future changes.",
+      "range": {
+        "startLine": 19,
+        "startChar": 25,
+        "endLine": 19,
+        "endChar": 29
+      },
+      "revId": "332b369432be9a375dc30f500d4a0eaaa976e234",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8abc72bd_7f0e9d8a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-06-12T05:58:02Z",
+      "side": 1,
+      "message": "The implementation and tested output indicate fc, but one decode note mentions fe.",
+      "range": {
+        "startLine": 30,
+        "startChar": 22,
+        "endLine": 30,
+        "endChar": 27
+      },
+      "revId": "332b369432be9a375dc30f500d4a0eaaa976e234",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d0c6815d_cab7a5e4",
+        "filename": "oem/arm/apphandler.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-06-12T05:58:02Z",
+      "side": 1,
+      "message": "At apphandler.cpp:36, reserved bits return Invalid Field, while at apphandler.cpp:41, unsupported interface type returns Parameter Out Of Range.\nA short note explaining this distinction will improve maintainability and avoid future ambiguity.",
+      "range": {
+        "startLine": 44,
+        "startChar": 0,
+        "endLine": 44,
+        "endChar": 46
+      },
+      "revId": "332b369432be9a375dc30f500d4a0eaaa976e234",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
