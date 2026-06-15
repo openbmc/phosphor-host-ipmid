@@ -24,6 +24,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "35b29d28_01b8182a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1003022
+      },
+      "writtenOn": "2026-06-15T09:04:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "41c4ae80_fe92561f",
+      "range": {
+        "startLine": 19,
+        "startChar": 25,
+        "endLine": 19,
+        "endChar": 29
+      },
+      "revId": "332b369432be9a375dc30f500d4a0eaaa976e234",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "8abc72bd_7f0e9d8a",
@@ -47,6 +71,47 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "589e9a97_aa504307",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1003022
+      },
+      "writtenOn": "2026-06-15T09:04:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8abc72bd_7f0e9d8a",
+      "range": {
+        "startLine": 30,
+        "startChar": 22,
+        "endLine": 30,
+        "endChar": 27
+      },
+      "revId": "332b369432be9a375dc30f500d4a0eaaa976e234",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a1d2eeb5_cef5d552",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003022
+      },
+      "writtenOn": "2026-06-15T09:04:45Z",
+      "side": 1,
+      "message": "Thank you for your valuable comments Nagavarapu.\nI have addressed all your comments and have pushed the patchiest.\nPlease have a look. thanks.",
+      "revId": "332b369432be9a375dc30f500d4a0eaaa976e234",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d0c6815d_cab7a5e4",
@@ -60,6 +125,30 @@
       "writtenOn": "2026-06-12T05:58:02Z",
       "side": 1,
       "message": "At apphandler.cpp:36, reserved bits return Invalid Field, while at apphandler.cpp:41, unsupported interface type returns Parameter Out Of Range.\nA short note explaining this distinction will improve maintainability and avoid future ambiguity.",
+      "range": {
+        "startLine": 44,
+        "startChar": 0,
+        "endLine": 44,
+        "endChar": 46
+      },
+      "revId": "332b369432be9a375dc30f500d4a0eaaa976e234",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "699551d2_134453cd",
+        "filename": "oem/arm/apphandler.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1003022
+      },
+      "writtenOn": "2026-06-15T09:04:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d0c6815d_cab7a5e4",
       "range": {
         "startLine": 44,
         "startChar": 0,
