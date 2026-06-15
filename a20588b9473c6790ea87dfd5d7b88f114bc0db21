@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0229b103_27bd0c75",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003022
+      },
+      "writtenOn": "2026-06-15T09:09:36Z",
+      "side": 1,
+      "message": "This CI failure appears unrelated to this patch.\n\n  The job fails in `openbmc-build-scripts` while building the unit-test Docker\n  image, before `phosphor-host-ipmid` is built or tested. The failure is from\n  `pip3 install --break-system-packages ...` trying to uninstall the Debian\n  `cryptography 46.0.5` package and aborting with `no RECORD file was found`.\n\n  This looks like a CI/container dependency issue, not a patch-specific failure.",
+      "revId": "a20588b9473c6790ea87dfd5d7b88f114bc0db21",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
