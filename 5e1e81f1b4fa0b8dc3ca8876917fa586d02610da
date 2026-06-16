@@ -16,6 +16,176 @@
       "message": "Thanks for the PS1 review. PS2 addresses all inline comments and reworks the D-Bus layer to use the yielding APIs on `ipmi::Context::ptr`. Tested on hardware : wire round-trips byte-identical, no timeouts/deadlocks in ipmid\u0027s journal under concurrent provider activity, CRUD/persistence/matcher/ghost/wrong-format/no-provider all green. Inline replies below.",
       "revId": "5e1e81f1b4fa0b8dc3ca8876917fa586d02610da",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d05093ee_74637f4a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1002321
+      },
+      "writtenOn": "2026-06-16T10:13:58Z",
+      "side": 1,
+      "message": "Is this a new service that will be in upstream? Is it being included in another service like PIM, EM or whatsoever? Is there a design doc for it? I can\u0027t find any (submitted) design or code about PEF except for this CR. The mentioned D-Bus interface, as well as `PefFilter` are not published by any service yet.",
+      "revId": "5e1e81f1b4fa0b8dc3ca8876917fa586d02610da",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9a4bac50_dd22ab15",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002321
+      },
+      "writtenOn": "2026-06-16T10:13:58Z",
+      "side": 1,
+      "message": "I haven\u0027t reviewed the D-Bus related code that much but it doesn\u0027t look right at all (lots of logic for things like D-Bus service state parsing which feels over-engineered.)\nUsually we have documented D-Bus interfaces for this in phosphor-dbus-interfaces which define how a message should look like, some of which also have a raw data field there.\n\nAdditionally, I don\u0027t get what `PefManager` and `PefFilter` will do here. There\u0027s no design doc for it anywhere, so it\u0027s unclear how ipmid has to interact with this service in the first place.",
+      "revId": "5e1e81f1b4fa0b8dc3ca8876917fa586d02610da",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1f7ca354_fd240f1e",
+        "filename": "pefhandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1002321
+      },
+      "writtenOn": "2026-06-16T10:13:58Z",
+      "side": 1,
+      "message": "Use `lg2`, not `phosphor::logging`. Most of the code was already migrated to `lg2`.",
+      "revId": "5e1e81f1b4fa0b8dc3ca8876917fa586d02610da",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8d3af7dc_8545c176",
+        "filename": "pefhandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1002321
+      },
+      "writtenOn": "2026-06-16T10:13:58Z",
+      "side": 1,
+      "message": "How is a user supposed to configure this value otherwise? If it should be user-configurable then make sure to add a meson option, but I don\u0027t see why they should be able to do that in the first place.",
+      "revId": "5e1e81f1b4fa0b8dc3ca8876917fa586d02610da",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "52823f32_7dbd7636",
+        "filename": "pefhandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1002321
+      },
+      "writtenOn": "2026-06-16T10:13:58Z",
+      "side": 1,
+      "message": "30-3 is the \"Arm PEF postpone timer command\". I _think_ you\u0027re referring to table `30-6` instead.",
+      "revId": "5e1e81f1b4fa0b8dc3ca8876917fa586d02610da",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d3b56f24_540f8887",
+        "filename": "pefhandler.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1002321
+      },
+      "writtenOn": "2026-06-16T10:13:58Z",
+      "side": 1,
+      "message": "The reference you\u0027re mentioning here does not match with the spec (I\u0027ve \ngot IPMI 2.0 rev 1.1 April 21, 2015 E7 Markup). What I see:\n\nbyte 9 + 10 \u003d Event Data 1 Event Offset Mask\nbyte 11 \u003d Event Data 1 AND Mask\nbyte 12 \u003d Event Data 1 Compare 1\nbyte 13 \u003d Event Data 1 Compare 2\n\nand the next bytes (14..19) are always \"Event Data N AND Mask\", \"Event \nData N Compare 1\" and \"Event Data N Compare 2\".",
+      "revId": "5e1e81f1b4fa0b8dc3ca8876917fa586d02610da",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dfbeed1c_c601dc01",
+        "filename": "pefhandler.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1002321
+      },
+      "writtenOn": "2026-06-16T10:13:58Z",
+      "side": 1,
+      "message": "not in this table entry. I\u0027ve no clue where this is coming from.",
+      "revId": "5e1e81f1b4fa0b8dc3ca8876917fa586d02610da",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a93ce6f2_b42d28bf",
+        "filename": "pefhandler.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1002321
+      },
+      "writtenOn": "2026-06-16T10:13:58Z",
+      "side": 1,
+      "message": "Part of byte 2 (Alert Policy Number) bites 6:4:\n\n\u003e [6:4] - group control selector (1-based). Selects entry from group control table. (see [ICMB)",
+      "revId": "5e1e81f1b4fa0b8dc3ca8876917fa586d02610da",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d30d88af_0ea90346",
+        "filename": "pefhandler.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1002321
+      },
+      "writtenOn": "2026-06-16T10:13:58Z",
+      "side": 1,
+      "message": "why do you assert on compile time for this value? This feels unnecessary.",
+      "revId": "5e1e81f1b4fa0b8dc3ca8876917fa586d02610da",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1a986df0_812eb41a",
+        "filename": "pefhandler.hpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1002321
+      },
+      "writtenOn": "2026-06-16T10:13:58Z",
+      "side": 1,
+      "message": "No use of `propRawData` anywhere here?",
+      "revId": "5e1e81f1b4fa0b8dc3ca8876917fa586d02610da",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
