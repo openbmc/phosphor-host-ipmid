@@ -803,7 +803,7 @@ ipmi::RspType<uint8_t,          // total tag length
         assetTag.resize(dcmi::assetTagMaxSize);
     }
 
-    if (offset >= assetTag.size())
+    if (offset > 0 && offset >= assetTag.size())
     {
         return ipmi::responseParmOutOfRange();
     }
