@@ -361,7 +361,7 @@ namespace
 {
 std::unordered_map<std::string, uint8_t> uniqueNameToChannelNumber;
 
-// sdbusplus::bus::match::rules::arg0namespace() wants the prefix
+// sdbusplus::match_rules::arg0namespace() wants the prefix
 // to match without any trailing '.'
 constexpr const char ipmiDbusChannelMatch[] =
     "xyz.openbmc_project.Ipmi.Channel";
@@ -872,16 +872,14 @@ int main(int argc, char* argv[])
     // listen on deprecated signal interface for kcs/bt commands
     constexpr const char* FILTER = "type='signal',interface='org.openbmc."
                                    "HostIpmi',member='ReceivedMessage'";
-    sdbusplus::bus::match_t oldIpmiInterface(*sdbusp, FILTER,
-                                             handleLegacyIpmiCommand);
+    sdbusplus::match oldIpmiInterface(*sdbusp, FILTER, handleLegacyIpmiCommand);
 #endif /* ALLOW_DEPRECATED_API */
 
     // set up bus name watching to match channels with bus names
-    sdbusplus::bus::match_t nameOwnerChanged(
+    sdbusplus::match nameOwnerChanged(
         *sdbusp,
-        sdbusplus::bus::match::rules::nameOwnerChanged() +
-            sdbusplus::bus::match::rules::arg0namespace(
-                ipmi::ipmiDbusChannelMatch),
+        sdbusplus::match_rules::nameOwnerChanged() +
+            sdbusplus::match_rules::arg0namespace(ipmi::ipmiDbusChannelMatch),
         ipmi::nameChangeHandler);
     ipmi::doListNames(*sdbusp);
 

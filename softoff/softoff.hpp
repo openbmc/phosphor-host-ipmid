@@ -17,7 +17,7 @@ namespace ipmi
 namespace Base = sdbusplus::server::xyz::openbmc_project::ipmi::internal;
 using namespace sdbusplus::server::xyz::openbmc_project::control;
 
-namespace sdbusRule = sdbusplus::bus::match::rules;
+namespace sdbusRule = sdbusplus::match_rules;
 
 namespace
 {
@@ -116,7 +116,7 @@ class SoftPowerOff : public SoftPowerOffInherit
      *  Protocol is to send the host power off request to the host
      *  control interface and then wait for a signal indicating pass/fail
      **/
-    sdbusplus::bus::match_t hostControlSignal;
+    sdbusplus::match hostControlSignal;
 
     /** @brief Sends host control command to tell host to shut down
      *

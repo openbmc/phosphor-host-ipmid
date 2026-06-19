@@ -102,7 +102,7 @@ static uint16_t writeBus = invalidBus;
 static uint8_t writeAddr = invalidAddr;
 
 std::unique_ptr<sdbusplus::Timer> writeTimer = nullptr;
-static std::vector<sdbusplus::bus::match_t> fruMatches;
+static std::vector<sdbusplus::match> fruMatches;
 
 ManagedObjectType frus;
 

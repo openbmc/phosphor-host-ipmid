@@ -98,13 +98,13 @@ static const std::vector<std::string> thresholdNames{"Warning", "Critical",
                                                      "NonRecoverable"};
 
 #ifdef FEATURE_SENSORS_CACHE
-std::map<uint8_t, std::unique_ptr<sdbusplus::bus::match_t>> sensorAddedMatches
+std::map<uint8_t, std::unique_ptr<sdbusplus::match>> sensorAddedMatches
     __attribute__((init_priority(101)));
-std::map<uint8_t, std::unique_ptr<sdbusplus::bus::match_t>> sensorUpdatedMatches
+std::map<uint8_t, std::unique_ptr<sdbusplus::match>> sensorUpdatedMatches
     __attribute__((init_priority(101)));
-std::map<uint8_t, std::unique_ptr<sdbusplus::bus::match_t>> sensorRemovedMatches
+std::map<uint8_t, std::unique_ptr<sdbusplus::match>> sensorRemovedMatches
     __attribute__((init_priority(101)));
-std::unique_ptr<sdbusplus::bus::match_t> sensorsOwnerMatch
+std::unique_ptr<sdbusplus::match> sensorsOwnerMatch
     __attribute__((init_priority(101)));
 
 ipmi::sensor::SensorCacheMap sensorCacheMap __attribute__((init_priority(101)));
@@ -154,20 +154,20 @@ static void fillSensorIdServiceMap(const std::string& obj,
 
 void initSensorMatches()
 {
-    using namespace sdbusplus::bus::match::rules;
+    using namespace sdbusplus::match_rules;
     sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
     for (const auto& s : ipmi::sensor::sensors)
     {
         sensorAddedMatches.emplace(
             s.first,
-            std::make_unique<sdbusplus::bus::match_t>(
+            std::make_unique<sdbusplus::match>(
                 bus, interfacesAdded() + argNpath(0, s.second.sensorPath),
                 [id = s.first, obj = s.second.sensorPath,
                  intf = s.second.propertyInterfaces.begin()->first](
                     auto& /*msg*/) { fillSensorIdServiceMap(obj, intf, id); }));
         sensorRemovedMatches.emplace(
             s.first,
-            std::make_unique<sdbusplus::bus::match_t>(
+            std::make_unique<sdbusplus::match>(
                 bus, interfacesRemoved() + argNpath(0, s.second.sensorPath),
                 [id = s.first](auto& /*msg*/) {
                     // Ideally this should work.
@@ -178,7 +178,7 @@ void initSensorMatches()
                 }));
         sensorUpdatedMatches.emplace(
             s.first,
-            std::make_unique<sdbusplus::bus::match_t>(
+            std::make_unique<sdbusplus::match>(
                 bus,
                 type::signal() + path(s.second.sensorPath) +
                     member("PropertiesChanged"s) +
@@ -202,7 +202,7 @@ void initSensorMatches()
                     }
                 }));
     }
-    sensorsOwnerMatch = std::make_unique<sdbusplus::bus::match_t>(
+    sensorsOwnerMatch = std::make_unique<sdbusplus::match>(
         bus, nameOwnerChanged(), [](auto& msg) {
             std::string name;
             std::string oldOwner;

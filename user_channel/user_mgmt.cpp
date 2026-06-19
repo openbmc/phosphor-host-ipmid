@@ -54,11 +54,11 @@ using NoResource =
 using InternalFailure =
     sdbusplus::error::xyz::openbmc_project::common::InternalFailure;
 
-std::unique_ptr<sdbusplus::bus::match_t> userUpdatedSignal
+std::unique_ptr<sdbusplus::match> userUpdatedSignal
     __attribute__((init_priority(101)));
-std::unique_ptr<sdbusplus::bus::match_t> userMgrRenamedSignal
+std::unique_ptr<sdbusplus::match> userMgrRenamedSignal
     __attribute__((init_priority(101)));
-std::unique_ptr<sdbusplus::bus::match_t> userPropertiesSignal
+std::unique_ptr<sdbusplus::match> userPropertiesSignal
     __attribute__((init_priority(101)));
 
 void setDbusProperty(sdbusplus::bus_t& bus, const std::string& service,
@@ -1529,30 +1529,29 @@ void UserAccess::cacheUserDataFile()
     if (userUpdatedSignal == nullptr && sigHndlrLock.try_lock())
     {
         lg2::debug("Registering signal handler");
-        userUpdatedSignal = std::make_unique<sdbusplus::bus::match_t>(
+        userUpdatedSignal = std::make_unique<sdbusplus::match>(
             bus,
-            sdbusplus::bus::match::rules::type::signal() +
-                sdbusplus::bus::match::rules::interface(dBusObjManager) +
-                sdbusplus::bus::match::rules::path(userMgrObjBasePath),
+            sdbusplus::match_rules::type::signal() +
+                sdbusplus::match_rules::interface(dBusObjManager) +
+                sdbusplus::match_rules::path(userMgrObjBasePath),
             [&](sdbusplus::message_t& msg) {
                 userUpdatedSignalHandler(*this, msg);
             });
-        userMgrRenamedSignal = std::make_unique<sdbusplus::bus::match_t>(
+        userMgrRenamedSignal = std::make_unique<sdbusplus::match>(
             bus,
-            sdbusplus::bus::match::rules::type::signal() +
-                sdbusplus::bus::match::rules::interface(userMgrInterface) +
-                sdbusplus::bus::match::rules::path(userMgrObjBasePath),
+            sdbusplus::match_rules::type::signal() +
+                sdbusplus::match_rules::interface(userMgrInterface) +
+                sdbusplus::match_rules::path(userMgrObjBasePath),
             [&](sdbusplus::message_t& msg) {
                 userUpdatedSignalHandler(*this, msg);
             });
-        userPropertiesSignal = std::make_unique<sdbusplus::bus::match_t>(
+        userPropertiesSignal = std::make_unique<sdbusplus::match>(
             bus,
-            sdbusplus::bus::match::rules::type::signal() +
-                sdbusplus::bus::match::rules::path_namespace(userObjBasePath) +
-                sdbusplus::bus::match::rules::interface(
-                    dBusPropertiesInterface) +
-                sdbusplus::bus::match::rules::member(propertiesChangedSignal) +
-                sdbusplus::bus::match::rules::argN(0, usersInterface),
+            sdbusplus::match_rules::type::signal() +
+                sdbusplus::match_rules::path_namespace(userObjBasePath) +
+                sdbusplus::match_rules::interface(dBusPropertiesInterface) +
+                sdbusplus::match_rules::member(propertiesChangedSignal) +
+                sdbusplus::match_rules::argN(0, usersInterface),
             [&](sdbusplus::message_t& msg) {
                 userUpdatedSignalHandler(*this, msg);
             });

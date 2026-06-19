@@ -105,7 +105,7 @@ class Manager
     sdbusplus::Timer timer;
 
     /** @brief Match handler for the requested host state */
-    sdbusplus::bus::match_t hostTransitionMatch;
+    sdbusplus::match hostTransitionMatch;
 };
 
 } // namespace command

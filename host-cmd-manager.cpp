@@ -28,7 +28,7 @@ using namespace phosphor::logging;
 using InternalFailure =
     sdbusplus::error::xyz::openbmc_project::common::InternalFailure;
 
-namespace sdbusRule = sdbusplus::bus::match::rules;
+namespace sdbusRule = sdbusplus::match_rules;
 
 Manager::Manager(sdbusplus::bus_t& bus) :
     bus(bus), timer(std::bind(&Manager::hostTimeout, this)),

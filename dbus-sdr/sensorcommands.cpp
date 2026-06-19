@@ -138,7 +138,7 @@ const static boost::container::flat_map<const char*, SensorUnits, CmpStr>
 
 void registerSensorFunctions() __attribute__((constructor));
 
-static sdbusplus::bus::match_t sensorAdded(
+static sdbusplus::match sensorAdded(
     *getSdBus(),
     "type='signal',member='InterfacesAdded',arg0path='/xyz/openbmc_project/"
     "sensors/'",
@@ -150,7 +150,7 @@ static sdbusplus::bus::match_t sensorAdded(
                          .count();
     });
 
-static sdbusplus::bus::match_t sensorRemoved(
+static sdbusplus::match sensorRemoved(
     *getSdBus(),
     "type='signal',member='InterfacesRemoved',arg0path='/xyz/openbmc_project/"
     "sensors/'",
@@ -209,7 +209,7 @@ static boost::container::flat_map<
     std::string, boost::container::flat_map<std::string, std::optional<bool>>>
     thresholdDeassertMap;
 
-static sdbusplus::bus::match_t thresholdChanged(
+static sdbusplus::match thresholdChanged(
     *getSdBus(),
     "type='signal',member='PropertiesChanged',interface='org.freedesktop.DBus."
     "Properties',arg0namespace='xyz.openbmc_project.Sensor.Threshold'",

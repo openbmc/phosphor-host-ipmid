@@ -22,8 +22,7 @@ namespace fru
 using namespace phosphor::logging;
 using InternalFailure =
     sdbusplus::error::xyz::openbmc_project::common::InternalFailure;
-std::unique_ptr<sdbusplus::bus::match_t> matchPtr
-    __attribute__((init_priority(101)));
+std::unique_ptr<sdbusplus::match> matchPtr __attribute__((init_priority(101)));
 
 namespace cache
 {
@@ -112,9 +111,9 @@ int registerCallbackHandler()
 {
     if (matchPtr == nullptr)
     {
-        using namespace sdbusplus::bus::match::rules;
+        using namespace sdbusplus::match_rules;
         sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
-        matchPtr = std::make_unique<sdbusplus::bus::match_t>(
+        matchPtr = std::make_unique<sdbusplus::match>(
             bus,
             path_namespace(invObjPath) + type::signal() +
                 member("PropertiesChanged") + interface(propInterface),
