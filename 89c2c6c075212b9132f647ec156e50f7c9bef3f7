@@ -16,6 +16,24 @@
       "message": "User not approved, see admin, no CI\n\nAre you on the CLA?",
       "revId": "89c2c6c075212b9132f647ec156e50f7c9bef3f7",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "52ad4116_1ae5fb6e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003036
+      },
+      "writtenOn": "2026-06-19T14:39:12Z",
+      "side": 1,
+      "message": "Thank you for the comment.\n\nI submitted my signed OpenBMC Individual CLA to manager@lfprojects.org on June 16.\n\nMy Gerrit account is:\nEmail: chungpo1020@gmail.com\nUsername: cpt1020\n\nI will contact manager@lfprojects.org to check my CLA status.\nPlease let me know if there is anything else I should do on my side.\n\nThank you very much for your time.",
+      "parentUuid": "723f884b_c09d0fbb",
+      "revId": "89c2c6c075212b9132f647ec156e50f7c9bef3f7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
