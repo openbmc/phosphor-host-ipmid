@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cf5e0bff_cd655722",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-06-19T13:42:30Z",
+      "side": 1,
+      "message": "Can you point to the specific section in the DCMI v1.5 spec that defines the expected behavior for Get Asset Tag when no tag is set?",
+      "range": {
+        "startLine": 11,
+        "startChar": 45,
+        "endLine": 11,
+        "endChar": 49
+      },
+      "revId": "916d4fac2ac1d8ed37616096635c7f8c1b9d4672",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
