@@ -872,12 +872,11 @@ int main(int argc, char* argv[])
     // listen on deprecated signal interface for kcs/bt commands
     constexpr const char* FILTER = "type='signal',interface='org.openbmc."
                                    "HostIpmi',member='ReceivedMessage'";
-    sdbusplus::bus::match_t oldIpmiInterface(*sdbusp, FILTER,
-                                             handleLegacyIpmiCommand);
+    sdbusplus::match oldIpmiInterface(*sdbusp, FILTER, handleLegacyIpmiCommand);
 #endif /* ALLOW_DEPRECATED_API */
 
     // set up bus name watching to match channels with bus names
-    sdbusplus::bus::match_t nameOwnerChanged(
+    sdbusplus::match nameOwnerChanged(
         *sdbusp,
         sdbusplus::bus::match::rules::nameOwnerChanged() +
             sdbusplus::bus::match::rules::arg0namespace(

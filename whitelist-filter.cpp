@@ -48,7 +48,7 @@ class AllowlistFilter
     std::vector<bool> restrictedMode;
     std::shared_ptr<sdbusplus::asio::connection> bus;
     std::unique_ptr<settings::Objects> objects;
-    std::unique_ptr<sdbusplus::bus::match_t> modeChangeMatch;
+    std::unique_ptr<sdbusplus::match> modeChangeMatch;
 
     static constexpr const char restrictionModeIntf[] =
         "xyz.openbmc_project.Control.Security.RestrictionMode";
@@ -210,7 +210,7 @@ void AllowlistFilter::postInit()
     filterStr = sdbusplus::bus::match::rules::propertiesChangedNamespace(
         devicesDbusPath, restrictionModeIntf);
 
-    modeChangeMatch = std::make_unique<sdbusplus::bus::match_t>(
+    modeChangeMatch = std::make_unique<sdbusplus::match>(
         *bus, filterStr, [this, deviceList](sdbusplus::message_t& m) {
             handleRestrictedModeChange(m, deviceList);
         });

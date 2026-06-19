@@ -91,13 +91,13 @@ static constexpr const uint8_t defaultAuthType =
 static constexpr const bool defaultIsIpmiState = false;
 static constexpr size_t smallChannelSize = 64;
 
-std::unique_ptr<sdbusplus::bus::match_t> chPropertiesSignal
+std::unique_ptr<sdbusplus::match> chPropertiesSignal
     __attribute__((init_priority(101)));
 
-std::unique_ptr<sdbusplus::bus::match_t> chInterfaceAddedSignal
+std::unique_ptr<sdbusplus::match> chInterfaceAddedSignal
     __attribute__((init_priority(101)));
 
-std::unique_ptr<sdbusplus::bus::match_t> chInterfaceRemovedSignal
+std::unique_ptr<sdbusplus::match> chInterfaceRemovedSignal
     __attribute__((init_priority(101)));
 
 // String mappings use in JSON config file
@@ -334,7 +334,7 @@ ChannelConfig::ChannelConfig() : bus(ipmid_get_sd_bus_connection())
     if (chPropertiesSignal == nullptr && sigHndlrLock.try_lock())
     {
         lg2::debug("Registering channel signal handler.");
-        chPropertiesSignal = std::make_unique<sdbusplus::bus::match_t>(
+        chPropertiesSignal = std::make_unique<sdbusplus::match>(
             bus,
             sdbusplus::bus::match::rules::path_namespace(
                 networkIntfObjectBasePath) +
@@ -352,7 +352,7 @@ ChannelConfig::ChannelConfig() : bus(ipmid_get_sd_bus_connection())
             });
         signalHndlrObjectState = true;
 
-        chInterfaceAddedSignal = std::make_unique<sdbusplus::bus::match_t>(
+        chInterfaceAddedSignal = std::make_unique<sdbusplus::match>(
             bus,
             sdbusplus::bus::match::rules::type::signal() +
                 sdbusplus::bus::match::rules::member(interfaceAddedSignal) +
@@ -360,7 +360,7 @@ ChannelConfig::ChannelConfig() : bus(ipmid_get_sd_bus_connection())
                     0, std::string(networkIntfObjectBasePath) + "/"),
             [&](sdbusplus::message_t&) { initChannelPersistData(); });
 
-        chInterfaceRemovedSignal = std::make_unique<sdbusplus::bus::match_t>(
+        chInterfaceRemovedSignal = std::make_unique<sdbusplus::match>(
             bus,
             sdbusplus::bus::match::rules::type::signal() +
                 sdbusplus::bus::match::rules::member(interfaceRemovedSignal) +

@@ -54,11 +54,11 @@ using NoResource =
 using InternalFailure =
     sdbusplus::error::xyz::openbmc_project::common::InternalFailure;
 
-std::unique_ptr<sdbusplus::bus::match_t> userUpdatedSignal
+std::unique_ptr<sdbusplus::match> userUpdatedSignal
     __attribute__((init_priority(101)));
-std::unique_ptr<sdbusplus::bus::match_t> userMgrRenamedSignal
+std::unique_ptr<sdbusplus::match> userMgrRenamedSignal
     __attribute__((init_priority(101)));
-std::unique_ptr<sdbusplus::bus::match_t> userPropertiesSignal
+std::unique_ptr<sdbusplus::match> userPropertiesSignal
     __attribute__((init_priority(101)));
 
 void setDbusProperty(sdbusplus::bus_t& bus, const std::string& service,
@@ -1529,7 +1529,7 @@ void UserAccess::cacheUserDataFile()
     if (userUpdatedSignal == nullptr && sigHndlrLock.try_lock())
     {
         lg2::debug("Registering signal handler");
-        userUpdatedSignal = std::make_unique<sdbusplus::bus::match_t>(
+        userUpdatedSignal = std::make_unique<sdbusplus::match>(
             bus,
             sdbusplus::bus::match::rules::type::signal() +
                 sdbusplus::bus::match::rules::interface(dBusObjManager) +
@@ -1537,7 +1537,7 @@ void UserAccess::cacheUserDataFile()
             [&](sdbusplus::message_t& msg) {
                 userUpdatedSignalHandler(*this, msg);
             });
-        userMgrRenamedSignal = std::make_unique<sdbusplus::bus::match_t>(
+        userMgrRenamedSignal = std::make_unique<sdbusplus::match>(
             bus,
             sdbusplus::bus::match::rules::type::signal() +
                 sdbusplus::bus::match::rules::interface(userMgrInterface) +
@@ -1545,7 +1545,7 @@ void UserAccess::cacheUserDataFile()
             [&](sdbusplus::message_t& msg) {
                 userUpdatedSignalHandler(*this, msg);
             });
-        userPropertiesSignal = std::make_unique<sdbusplus::bus::match_t>(
+        userPropertiesSignal = std::make_unique<sdbusplus::match>(
             bus,
             sdbusplus::bus::match::rules::type::signal() +
                 sdbusplus::bus::match::rules::path_namespace(userObjBasePath) +

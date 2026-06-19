@@ -67,11 +67,11 @@ using SELCacheMap = std::map<SELRecordID, SELEntry>;
 
 SELCacheMap selCacheMap __attribute__((init_priority(101)));
 bool selCacheMapInitialized;
-std::unique_ptr<sdbusplus::bus::match_t> selAddedMatch
+std::unique_ptr<sdbusplus::match> selAddedMatch
     __attribute__((init_priority(101)));
-std::unique_ptr<sdbusplus::bus::match_t> selRemovedMatch
+std::unique_ptr<sdbusplus::match> selRemovedMatch
     __attribute__((init_priority(101)));
-std::unique_ptr<sdbusplus::bus::match_t> selUpdatedMatch
+std::unique_ptr<sdbusplus::match> selUpdatedMatch
     __attribute__((init_priority(101)));
 
 static inline uint16_t getLoggingId(const std::string& p)
@@ -162,19 +162,19 @@ void registerSelCallbackHandler()
     sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
     if (!selAddedMatch)
     {
-        selAddedMatch = std::make_unique<sdbusplus::bus::match_t>(
+        selAddedMatch = std::make_unique<sdbusplus::match>(
             bus, interfacesAdded(ipmi::sel::logWatchPath),
             std::bind(selAddedCallback, std::placeholders::_1));
     }
     if (!selRemovedMatch)
     {
-        selRemovedMatch = std::make_unique<sdbusplus::bus::match_t>(
+        selRemovedMatch = std::make_unique<sdbusplus::match>(
             bus, interfacesRemoved(ipmi::sel::logWatchPath),
             std::bind(selRemovedCallback, std::placeholders::_1));
     }
     if (!selUpdatedMatch)
     {
-        selUpdatedMatch = std::make_unique<sdbusplus::bus::match_t>(
+        selUpdatedMatch = std::make_unique<sdbusplus::match>(
             bus,
             type::signal() + member("PropertiesChanged"s) +
                 interface("org.freedesktop.DBus.Properties"s) +

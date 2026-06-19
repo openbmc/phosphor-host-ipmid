@@ -116,7 +116,7 @@ class SoftPowerOff : public SoftPowerOffInherit
      *  Protocol is to send the host power off request to the host
      *  control interface and then wait for a signal indicating pass/fail
      **/
-    sdbusplus::bus::match_t hostControlSignal;
+    sdbusplus::match hostControlSignal;
 
     /** @brief Sends host control command to tell host to shut down
      *
