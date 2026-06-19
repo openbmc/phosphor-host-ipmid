@@ -63,9 +63,9 @@ static constexpr const char* ipmiSELAddInterface =
     "xyz.openbmc_project.Logging.IPMI";
 static const std::string ipmiSELAddMessage = "IPMI generated SEL Entry";
 
-static constexpr int selSystemEventSizeWith3Bytes = 8;
-static constexpr int selSystemEventSizeWith2Bytes = 7;
-static constexpr int selSystemEventSizeWith1Bytes = 6;
+static constexpr int platformEventSizeWith3Bytes = 7;
+static constexpr int platformEventSizeWith2Bytes = 6;
+static constexpr int platformEventSizeWith1Bytes = 5;
 static constexpr int selIPMBEventSize = 7;
 static constexpr uint8_t directionMask = 0x80;
 static constexpr uint8_t byte3EnableMask = 0x30;

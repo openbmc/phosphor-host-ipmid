@@ -1519,20 +1519,27 @@ ipmi::RspType<
         t.upperNonRecoverable, 0, 0, 0, 0);
 }
 
-static bool isFromSystemChannel()
+static bool isFromSystemChannel(const ipmi::Context::ptr& ctx)
 {
-    // TODO we could not figure out where the request is from based on IPMI
-    // command handler parameters. because of it, we can not differentiate
-    // request from SMS/SMM or IPMB channel
-    return true;
+    return ctx->channel == ipmi::channelSystemIface;
 }
 
 ipmi::RspType<> ipmicmdPlatformEvent(ipmi::Context::ptr& ctx,
                                      const std::vector<uint8_t>& data)
 {
-    size_t paraLen = data.size();
-    if (paraLen < selSystemEventSizeWith1Bytes ||
-        paraLen > selSystemEventSizeWith3Bytes)
+    const bool fromSystem = isFromSystemChannel(ctx);
+    const size_t generatorIDLen = fromSystem ? 1 : 0;
+
+    // Avoid unsigned underflow when subtracting the optional Generator ID
+    if (data.size() < generatorIDLen)
+    {
+        return ipmi::responseReqDataLenInvalid();
+    }
+
+    const size_t paraLen = data.size() - generatorIDLen;
+
+    if (paraLen < platformEventSizeWith1Bytes ||
+        paraLen > platformEventSizeWith3Bytes)
     {
         return ipmi::responseReqDataLenInvalid();
     }
@@ -1541,11 +1548,12 @@ ipmi::RspType<> ipmicmdPlatformEvent(ipmi::Context::ptr& ctx,
     std::string sensorPath = "IPMB";
     const uint8_t* raw = data.data();
     const PlatformEventRequest* req = nullptr;
-    if (isFromSystemChannel())
+
+    if (fromSystem)
     {
         // first byte for SYSTEM Interface is Generator ID +1 to get common
         // struct
-        req = reinterpret_cast<const PlatformEventRequest*>(raw + 1);
+        req = reinterpret_cast<const PlatformEventRequest*>(raw + generatorIDLen);
         // Capture the generator ID
         generatorID = *raw;
         // Platform Event usually comes from other firmware, like BIOS.
@@ -1562,9 +1570,9 @@ ipmi::RspType<> ipmicmdPlatformEvent(ipmi::Context::ptr& ctx,
     // When data0 bit[5:4] is non-zero, valid data counts is 3.
     // When data0 bit[7:6] is non-zero, valid data counts is 2.
     if (((req->data[0] & byte3EnableMask) != 0 &&
-         paraLen < selSystemEventSizeWith3Bytes) ||
+         paraLen < platformEventSizeWith3Bytes) ||
         ((req->data[0] & byte2EnableMask) != 0 &&
-         paraLen < selSystemEventSizeWith2Bytes))
+         paraLen < platformEventSizeWith2Bytes))
     {
         return ipmi::responseReqDataLenInvalid();
     }
