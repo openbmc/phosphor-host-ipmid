@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "edbdc265_2c48045e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 13
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002827
+      },
+      "writtenOn": "2026-06-22T03:07:32Z",
+      "side": 1,
+      "message": "Rebased onto latest master. No functional change.",
+      "revId": "562f40877e6fe746ae13778b456ea617021a98e5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
