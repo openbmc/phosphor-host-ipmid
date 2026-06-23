@@ -16,6 +16,23 @@
       "message": "LGTM",
       "revId": "92bbe8eb4138408752025aca97099675c9696830",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "dcc08fc0_0894d820",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003022
+      },
+      "writtenOn": "2026-06-23T09:51:16Z",
+      "side": 1,
+      "message": "Gentle reminders for reviews on this Patch.Thanks\nthanks for 3 +1 already.",
+      "revId": "92bbe8eb4138408752025aca97099675c9696830",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
