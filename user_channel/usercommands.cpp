@@ -37,10 +37,16 @@ static constexpr uint8_t userIdDisabledViaSetPassword = 0x02;
 
 /** IPMI set password return codes (refer spec sec 22.30) */
 constexpr Cc ccPasswdFailMismatch = 0x80;
+constexpr Cc ccPasswdFailWrongSize = 0x81;
 
 static inline auto responsePasswdFailMismatch()
 {
     return response(ccPasswdFailMismatch);
+}
+
+static inline auto responsePasswdFailWrongSize()
+{
+    return response(ccPasswdFailWrongSize);
 }
 
 /** @brief implements the set user access command
@@ -305,7 +311,7 @@ ipmi::RspType<> // user name
          (!pwLen20 && (userPassword.size() != maxIpmi15PasswordSize))))
     {
         lg2::debug("Invalid Length");
-        return ipmi::responseReqDataLenInvalid();
+        return responsePasswdFailWrongSize();
     }
 
     size_t passwordLength = userPassword.size();
