@@ -22,6 +22,30 @@
       },
       "revId": "916d4fac2ac1d8ed37616096635c7f8c1b9d4672",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2f701ef4_935e1b47",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1003004
+      },
+      "writtenOn": "2026-06-24T07:21:57Z",
+      "side": 1,
+      "message": "The DCMI v1.5 specification does not explicitly describe the empty asset tag case. However, Table 6-8 defines C9h only for invalid offset/length combinations (offset \u003e 62, offset + bytes \u003e 63, or bytes \u003e 16). Since offset 0 is valid and the response always reports the Total Asset Tag Length, an empty asset tag is represented by Length \u003d 0 and the command should complete successfully rather than returning a parameter-out-of-range error.",
+      "parentUuid": "cf5e0bff_cd655722",
+      "range": {
+        "startLine": 11,
+        "startChar": 45,
+        "endLine": 11,
+        "endChar": 49
+      },
+      "revId": "916d4fac2ac1d8ed37616096635c7f8c1b9d4672",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
