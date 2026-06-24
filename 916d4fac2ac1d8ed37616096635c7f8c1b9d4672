@@ -46,6 +46,23 @@
       },
       "revId": "916d4fac2ac1d8ed37616096635c7f8c1b9d4672",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "06ad497d_1ecd78c3",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-06-24T08:37:07Z",
+      "side": 1,
+      "message": "Per DCMI v1.5 spec Table 6-8, offset 0 is valid even for empty tags. Fix correctly allows this case and returns success with length 0. Spec-compliant and tested.",
+      "revId": "916d4fac2ac1d8ed37616096635c7f8c1b9d4672",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
