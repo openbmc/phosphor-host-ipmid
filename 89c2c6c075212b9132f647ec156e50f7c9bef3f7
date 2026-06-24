@@ -24,6 +24,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "4f961a46_03f00509",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1003036
+      },
+      "writtenOn": "2026-06-24T12:01:17Z",
+      "side": 1,
+      "message": "Hello, thank you for testing.\n\nOn one of our downstream platforms, I can reproduce the issue with the `ipmitool event` command:\n\n```\n$ ipmitool -I lanplus -H \u003cbmc_ip\u003e -U root -P 0penBmc event \u003csensor\u003e ucr\nFinding sensor \u003csensor\u003e... ok\n0 | Pre-Init |0000000000| \u003csensor id\u003e | Upper Critical going high | Asserted\nPlatform Event Message command failed: Request data length invalid\n```\n\nI also tested on Romulus and observed the same completion code behavior as you did. In my Romulus setup, both the original code and the patched code return 0xFF due to the SEL backend path, so the exact completion code appears to be platform dependent.\n\nThe main issue I am trying to address is the payload parsing offset.\n\nFor a LAN/RMCP+ Platform Event Message, the request arrives on channel 1 with the following payload:\n\n```\n04 01 01 01 59 01 00\n```\n\nAccording to IPMI v2.0 (Table 29), this should be interpreted as:\n```\nEvMRev         \u003d 0x04\nSensor Type    \u003d 0x01\nSensor Number  \u003d 0x01\nEvent Dir/Type \u003d 0x01\nEvent Data 1   \u003d 0x59\nEvent Data 2   \u003d 0x01\nEvent Data 3   \u003d 0x00\n```\n\nHowever, the original implementation always treats the request as a System Interface Platform Event Message and unconditionally skips the first byte (`raw + 1`).\n\nAs a result, the payload is parsed with a one-byte offset.\n\n[Original code]\n```none\neventRevision\u003d1\nsensorType\u003d1\nsensorNumber\u003d1\neventDirectionType\u003d89\ndata0\u003d1\n```\n\n[Patched code]\n```none\neventRevision\u003d4\nsensorType\u003d1\nsensorNumber\u003d1\neventDirectionType\u003d1\ndata0\u003d89\n```\n\nThis matches the expected field layout defined by IPMI v2.0 Table 29.\n\nFor reference, I temporarily added the following debug logs to verify the payload and parsing behavior:\n\n```diff\ndiff --git a/sensorhandler.cpp b/sensorhandler.cpp\nindex 9ab3612..3221f8a 100644\n--- a/sensorhandler.cpp\n+++ b/sensorhandler.cpp\n@@ -1530,6 +1530,15 @@ static bool isFromSystemChannel()\n ipmi::RspType\u003c\u003e ipmicmdPlatformEvent(ipmi::Context::ptr\u0026 ctx,\n                                      const std::vector\u003cuint8_t\u003e\u0026 data)\n {\n+    lg2::info(\"PlatformEvent: channel\u003d{CHANNEL}, size\u003d{SIZE}\",\n+          \"CHANNEL\", ctx-\u003echannel, \"SIZE\", data.size());\n+\n+    for (size_t i \u003d 0; i \u003c data.size(); ++i)\n+    {\n+        lg2::info(\"PlatformEvent: data[{INDEX}]\u003d{BYTE}\",\n+                  \"INDEX\", i, \"BYTE\", data[i]);\n+    }\n+\n     size_t paraLen \u003d data.size();\n     if (paraLen \u003c selSystemEventSizeWith1Bytes ||\n         paraLen \u003e selSystemEventSizeWith3Bytes)\n@@ -1558,6 +1567,14 @@ ipmi::RspType\u003c\u003e ipmicmdPlatformEvent(ipmi::Context::ptr\u0026 ctx,\n         // TODO GenratorID for IPMB is combination of RqSA and RqLUN\n     }\n \n+    lg2::info(\"PlatformEvent: eventRevision\u003d{REV}, sensorType\u003d{TYPE}, \"\n+          \"sensorNumber\u003d{NUM}, eventDirectionType\u003d{EVENT}, data0\u003d{DATA0}\",\n+          \"REV\", req-\u003eeventMessageRevision,\n+          \"TYPE\", req-\u003esensorType,\n+          \"NUM\", req-\u003esensorNumber,\n+          \"EVENT\", req-\u003eeventDirectionType,\n+          \"DATA0\", req-\u003edata[0]);\n+\n     // Content of event data field depends on sensor class.\n     // When data0 bit[5:4] is non-zero, valid data counts is 3.\n     // When data0 bit[7:6] is non-zero, valid data counts is 2.\n```",
+      "parentUuid": "003d5530_4e275d8e",
+      "range": {
+        "startLine": 15,
+        "startChar": 0,
+        "endLine": 15,
+        "endChar": 53
+      },
+      "revId": "89c2c6c075212b9132f647ec156e50f7c9bef3f7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": false,
       "key": {
         "uuid": "723f884b_c09d0fbb",
