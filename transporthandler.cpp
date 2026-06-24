@@ -574,6 +574,16 @@ void createVLAN(sdbusplus::bus_t& bus, ChannelParams& params, uint16_t vlan)
 void reconfigureVLAN(sdbusplus::bus_t& bus, ChannelParams& params,
                      uint16_t vlan)
 {
+    // If the VLAN id is unchanged, no reconfiguration is needed
+    uint16_t currentVlan = getVLANProperty(bus, params);
+    if (currentVlan == vlan)
+    {
+        lg2::info("VLAN id {VLAN} is already configured on {IFNAME}, "
+                  "skipping reconfiguration",
+                  "VLAN", vlan, "IFNAME", params.ifname);
+        return;
+    }
+
     // Unfortunately we don't have built-in functions to migrate our interface
     // customizations to new VLAN interfaces, or have some kind of decoupling.
     // We therefore must retain all of our old information, setup the new VLAN
