@@ -1,6 +1,29 @@
 {
   "comments": [
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "003d5530_4e275d8e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-06-24T09:09:57Z",
+      "side": 1,
+      "message": "I tried to reproduce the issue using the same LAN/RMCP+ ipmitool raw command, and it completed successfully on my side. I did not observe the 0xC7 error? Could you tell me is my understanding is correct?\n\nmegarac@megarac-desktop:~$ ipmitool -I lanplus -H 172.16.97.21 -U root -P 0penBmc -C 17 raw 0x04 0x02 0x04 0x01 0x01 0x01 0x59 0x01 0x00\n\nmegarac@megarac-desktop:~$",
+      "range": {
+        "startLine": 15,
+        "startChar": 0,
+        "endLine": 15,
+        "endChar": 53
+      },
+      "revId": "89c2c6c075212b9132f647ec156e50f7c9bef3f7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": false,
       "key": {
         "uuid": "723f884b_c09d0fbb",
