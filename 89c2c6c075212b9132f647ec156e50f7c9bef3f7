@@ -128,6 +128,23 @@
       "parentUuid": "723f884b_c09d0fbb",
       "revId": "89c2c6c075212b9132f647ec156e50f7c9bef3f7",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "39bf8dfd_1681bcbf",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-06-25T11:44:47Z",
+      "side": 1,
+      "message": "@chungpo1020@gmail.com\n\nI have did following validation \n\n1. With the patch, LANplus (non-system interface) parsing is correct and matches expected field alignment.\n\n   * ipmitool -I lanplus -H 127.0.0.1 -p 2623 -U root -P 0penBmc raw 0x04 0x02 0x04 0x01 0x01 0x01 0x59 0x01 0x00\n\n   * ipmid[308]: PlatformEvent: eventRevision\u003d4, sensorType\u003d1, sensorNumber\u003d1, eventDirectionType\u003d1, data0\u003d89\n\n2.When I tested from BMC console (with patch) using the System Interface-style payload, it failed in my setup.\n\n   * root@romulus:~# ipmitool raw 0x04 0x02 0x21 0x04 0x01 0x01 0x01 0x59 0x01 0x00\nUnable to send RAW command (channel\u003d0x0 netfn\u003d0x4 lun\u003d0x0 cmd\u003d0x2 rsp\u003d0xc7): Request data length invalid\nroot@romulus:~#\n\n3.After reverting the patch, that BMC-console command succeeded and fields aligned for that payload format.\n\n   * ipmitool raw 0x04 0x02 0x21 0x04 0x01 0x01 0x01 0x59 0x01 0x00\n\n   * PlatformEvent: eventRevision\u003d4, sensorType\u003d1, sensorNumber\u003d1, eventDirectionType\u003d1, data0\u003d89\n\nNote: Just My doubt is After New implementation previous behavior also should work right? correct me if I am wrong. Thanks",
+      "revId": "89c2c6c075212b9132f647ec156e50f7c9bef3f7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
