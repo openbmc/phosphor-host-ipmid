@@ -22,6 +22,30 @@
       },
       "revId": "35394370dfd1f5203ef1531f48aa59d0bdf6e465",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ed829657_b99d5225",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 922,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-06-25T22:24:11Z",
+      "side": 1,
+      "message": "Just to be clear, this ^^^ line change is the only thing that needs to change here. The changes below should be discarded.",
+      "parentUuid": "c1dd0313_8df08ba8",
+      "range": {
+        "startLine": 922,
+        "startChar": 0,
+        "endLine": 922,
+        "endChar": 31
+      },
+      "revId": "35394370dfd1f5203ef1531f48aa59d0bdf6e465",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
