@@ -72,6 +72,29 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "88969f2a_0ae90b77",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-06-25T10:25:32Z",
+      "side": 1,
+      "message": "Could you please update the commit message with a clear Before vs After section for easier understanding?\nPlease include:\n\nWhat the issue was before the fix (one-byte parsing offset for LAN or RMCP+ Platform Event).\nExample input payload used.\nDecoded output before fix.\nDecoded output after fix.\nOne line stating why after-fix output matches IPMI Table 29.",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 7
+      },
+      "revId": "89c2c6c075212b9132f647ec156e50f7c9bef3f7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": false,
       "key": {
         "uuid": "723f884b_c09d0fbb",
