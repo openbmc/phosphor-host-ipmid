@@ -62,6 +62,11 @@ using Activation =
 using BMCState = sdbusplus::server::xyz::openbmc_project::state::BMC;
 namespace fs = std::filesystem;
 
+struct GlobalEncoding
+{
+    uint8_t globalencoding = 0;
+} globalEncoding;
+
 #ifdef ENABLE_I2C_WHITELIST_CHECK
 typedef struct
 {
@@ -1450,9 +1455,9 @@ ipmi::RspType<uint8_t,                // Parameter revision
     std::vector<uint8_t> configData;
     size_t count = 0;
     if (setSelector == 0)
-    {                               // First chunk has only 14 bytes.
-        configData.emplace_back(0); // encoding
-        configData.emplace_back(paramString.length()); // string length
+    { // First chunk has only 14 bytes.
+        configData.emplace_back(globalEncoding.globalencoding); // encoding
+        configData.emplace_back(paramString.length());          // string length
         count = std::min(paramString.length(), smallChunkSize);
         configData.resize(count + configDataOverhead);
         std::copy_n(paramString.begin(), count,
@@ -1512,16 +1517,10 @@ ipmi::RspType<> ipmiAppSetSystemInfo(uint8_t paramSelector, uint8_t data1,
         return ipmi::responseSuccess();
     }
 
-    if (configData.size() > configParameterLength)
+    // Configuration Parameter Data (bytes 2:17) is a fixed 16-byte field.
+    if (configData.size() != configParameterLength)
     {
-        return ipmi::responseInvalidFieldRequest();
-    }
-
-    // Append zero's to remaining bytes
-    if (configData.size() < configParameterLength)
-    {
-        fill_n(back_inserter(configData),
-               (configParameterLength - configData.size()), 0x00);
+        return ipmi::responseReqDataLenInvalid();
     }
 
     if (!sysInfoParamStore)
@@ -1551,11 +1550,12 @@ ipmi::RspType<> ipmiAppSetSystemInfo(uint8_t paramSelector, uint8_t data1,
         {
             return ipmi::responseInvalidFieldRequest();
         }
+        globalEncoding.globalencoding = encoding;
 
         size_t stringLen = configData.at(1); // string length
         count = std::min(stringLen, smallChunkSize);
-        count = std::min(count, configData.size());
-        paramString.resize(stringLen); // reserve space
+        paramString.resize(stringLen);       // reserve space
+
         std::copy_n(configData.begin() + configDataOverhead, count,
                     paramString.begin());
     }
