@@ -30,3 +30,18 @@ void SysInfoParamStore::update(uint8_t paramSelector,
 {
     params[paramSelector] = callback;
 }
+
+void SysInfoParamStore::updateEncoding(uint8_t paramSelector, uint8_t encoding)
+{
+    encodings[paramSelector] = encoding;
+}
+
+uint8_t SysInfoParamStore::lookupEncoding(uint8_t paramSelector) const
+{
+    const auto it = encodings.find(paramSelector);
+    if (it == encodings.end())
+    {
+        return 0;
+    }
+    return it->second;
+}
