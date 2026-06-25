@@ -529,28 +529,27 @@ ipmi::RspType<uint8_t // erase status
  *   -current time
  */
 ipmi::RspType<uint32_t> // current time
-    ipmiStorageGetSelTime()
+    ipmiStorageGetSelTime(ipmi::Context::ptr ctx)
 {
     using namespace std::chrono;
     uint64_t bmc_time_usec = 0;
-    std::stringstream bmcTime;
 
-    try
+    std::string service;
+    boost::system::error_code ec =
+        ipmi::getService(ctx, TIME_INTERFACE, BMC_TIME_PATH, service);
+    if (ec)
     {
-        sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
-        auto service = ipmi::getService(bus, TIME_INTERFACE, BMC_TIME_PATH);
-        auto propValue = ipmi::getDbusProperty(
-            bus, service, BMC_TIME_PATH, TIME_INTERFACE, PROPERTY_ELAPSED);
-        bmc_time_usec = std::get<uint64_t>(propValue);
-    }
-    catch (const InternalFailure& e)
-    {
-        lg2::error("Internal Failure: {ERROR}", "ERROR", e);
+        lg2::error("Failed to get BMC time service: {ERROR}", "ERROR",
+                   ec.message());
         return ipmi::responseUnspecifiedError();
     }
-    catch (const std::exception& e)
+
+    ec = ipmi::getDbusProperty(ctx, service, BMC_TIME_PATH, TIME_INTERFACE,
+                               PROPERTY_ELAPSED, bmc_time_usec);
+    if (ec)
     {
-        lg2::error("exception message: {ERROR}", "ERROR", e);
+        lg2::error("Failed to get Elapsed property: {ERROR}", "ERROR",
+                   ec.message());
         return ipmi::responseUnspecifiedError();
     }
 
