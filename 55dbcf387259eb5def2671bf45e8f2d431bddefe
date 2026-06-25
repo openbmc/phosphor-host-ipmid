@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c9f7f2ba_3fde8e3f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-06-25T04:57:46Z",
+      "side": 1,
+      "message": "Change looks correct and improves idempotency by skipping unnecessary VLAN reconfigure when ID is unchanged. Please add a small test for repeated \"set same VLAN ID\" to lock this behavior.",
+      "range": {
+        "startLine": 12,
+        "startChar": 52,
+        "endLine": 12,
+        "endChar": 61
+      },
+      "revId": "55dbcf387259eb5def2671bf45e8f2d431bddefe",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
