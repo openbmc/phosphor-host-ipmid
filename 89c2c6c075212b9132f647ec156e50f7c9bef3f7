@@ -50,6 +50,30 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "7288146c_961b347b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-06-25T10:14:11Z",
+      "side": 1,
+      "message": "Parsing was previously offset by one byte for LAN channel requests because the handler always assumed System Interface format and skipped byte 0; the patch makes channel-aware decoding, so payload fields now match IPMI Table 29 expectations.",
+      "parentUuid": "4f961a46_03f00509",
+      "range": {
+        "startLine": 15,
+        "startChar": 0,
+        "endLine": 15,
+        "endChar": 53
+      },
+      "revId": "89c2c6c075212b9132f647ec156e50f7c9bef3f7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "723f884b_c09d0fbb",
         "filename": "/PATCHSET_LEVEL",
         "patchSetId": 1
