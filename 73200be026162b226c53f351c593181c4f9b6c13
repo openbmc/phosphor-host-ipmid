@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "74b11046_f95c7062",
+        "filename": "user_channel/usercommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-06-25T22:39:35Z",
+      "side": 1,
+      "message": "While adding this in for the test password case would match the spec more exactly, it is a security issue to tell WHY the test failed (information leak).",
+      "revId": "73200be026162b226c53f351c593181c4f9b6c13",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b3cf4a6d_ac58f11e",
+        "filename": "user_channel/usercommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 314,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-06-25T22:39:35Z",
+      "side": 1,
+      "message": "0x81 is only for failing when the password test option is used. The current response here is correct.",
+      "revId": "73200be026162b226c53f351c593181c4f9b6c13",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
