@@ -1450,9 +1450,10 @@ ipmi::RspType<uint8_t,                // Parameter revision
     std::vector<uint8_t> configData;
     size_t count = 0;
     if (setSelector == 0)
-    {                               // First chunk has only 14 bytes.
-        configData.emplace_back(0); // encoding
-        configData.emplace_back(paramString.length()); // string length
+    { // First chunk has only 14 bytes.
+        configData.emplace_back(
+            sysInfoParamStore->lookupEncoding(paramSelector)); // encoding
+        configData.emplace_back(paramString.length());        // string length
         count = std::min(paramString.length(), smallChunkSize);
         configData.resize(count + configDataOverhead);
         std::copy_n(paramString.begin(), count,
@@ -1551,11 +1552,12 @@ ipmi::RspType<> ipmiAppSetSystemInfo(uint8_t paramSelector, uint8_t data1,
         {
             return ipmi::responseInvalidFieldRequest();
         }
+        sysInfoParamStore->updateEncoding(paramSelector, encoding);
 
         size_t stringLen = configData.at(1); // string length
         count = std::min(stringLen, smallChunkSize);
-        count = std::min(count, configData.size());
-        paramString.resize(stringLen); // reserve space
+        paramString.resize(stringLen);       // reserve space
+
         std::copy_n(configData.begin() + configDataOverhead, count,
                     paramString.begin());
     }
