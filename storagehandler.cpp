@@ -532,36 +532,19 @@ ipmi::RspType<uint32_t> // current time
     ipmiStorageGetSelTime()
 {
     using namespace std::chrono;
-    uint64_t bmc_time_usec = 0;
-    std::stringstream bmcTime;
 
     try
     {
-        sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
-        auto service = ipmi::getService(bus, TIME_INTERFACE, BMC_TIME_PATH);
-        auto propValue = ipmi::getDbusProperty(
-            bus, service, BMC_TIME_PATH, TIME_INTERFACE, PROPERTY_ELAPSED);
-        bmc_time_usec = std::get<uint64_t>(propValue);
-    }
-    catch (const InternalFailure& e)
-    {
-        lg2::error("Internal Failure: {ERROR}", "ERROR", e);
-        return ipmi::responseUnspecifiedError();
+        auto now = system_clock::now();
+        auto sec = duration_cast<seconds>(now.time_since_epoch()).count();
+
+        return ipmi::responseSuccess(static_cast<uint32_t>(sec));
     }
     catch (const std::exception& e)
     {
         lg2::error("exception message: {ERROR}", "ERROR", e);
         return ipmi::responseUnspecifiedError();
     }
-
-    lg2::debug("BMC time: {BMC_TIME}", "BMC_TIME",
-               duration_cast<seconds>(microseconds(bmc_time_usec)).count());
-
-    // Time is really long int but IPMI wants just uint32. This works okay until
-    // the number of seconds since 1970 overflows uint32 size.. Still a whole
-    // lot of time here to even think about that.
-    return ipmi::responseSuccess(
-        duration_cast<seconds>(microseconds(bmc_time_usec)).count());
 }
 
 /** @brief implements the set SEL time command
