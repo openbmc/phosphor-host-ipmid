@@ -143,6 +143,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "a86faddb_2ba810b7",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1003036
+      },
+      "writtenOn": "2026-06-26T05:04:41Z",
+      "side": 1,
+      "message": "Thank you for checking.\n\nAndrew Geissler has confirmed that my Individual CLA can be accepted and he also mentioned that he will add me to the approved CI group after processing it.\n\nI believe the approval process is still in progress, so the Gerrit/CI status has not been updated yet.\n\nThank you again for your review and your patience.",
+      "parentUuid": "8ba4047b_9c2275fc",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 7
+      },
+      "revId": "89c2c6c075212b9132f647ec156e50f7c9bef3f7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": false,
       "key": {
         "uuid": "723f884b_c09d0fbb",
