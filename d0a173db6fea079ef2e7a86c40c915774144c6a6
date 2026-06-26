@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "967bef86_6036714e",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 1226,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-06-26T22:47:24Z",
+      "side": 1,
+      "message": "This does not seem to match your commit message intent. Can you elaborate?",
+      "range": {
+        "startLine": 1224,
+        "startChar": 15,
+        "endLine": 1226,
+        "endChar": 58
+      },
+      "revId": "d0a173db6fea079ef2e7a86c40c915774144c6a6",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
