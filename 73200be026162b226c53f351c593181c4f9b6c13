@@ -1,6 +1,23 @@
 {
   "comments": [
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "9c86e10e_646fb873",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-06-29T10:17:49Z",
+      "side": 1,
+      "message": "Thank you for the feedback. Based on your review comments, I understand that:\n\n1. Returning 0x81 is a security issue (information leak about test password attempts)\n2. The original generic error response is the correct approach\n\nI\u0027m abandoning this PR and reverting to the original behavior where both\nset and test password operations with wrong size return the generic error\n(ipmi::responseReqDataLenInvalid()).\n\nThis maintains security while being spec-compliant for set password operations.",
+      "revId": "73200be026162b226c53f351c593181c4f9b6c13",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "74b11046_f95c7062",
@@ -18,6 +35,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "97c71791_49cac296",
+        "filename": "user_channel/usercommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-06-29T10:17:49Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "74b11046_f95c7062",
+      "revId": "73200be026162b226c53f351c593181c4f9b6c13",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "b3cf4a6d_ac58f11e",
@@ -31,6 +66,24 @@
       "writtenOn": "2026-06-25T22:39:35Z",
       "side": 1,
       "message": "0x81 is only for failing when the password test option is used. The current response here is correct.",
+      "revId": "73200be026162b226c53f351c593181c4f9b6c13",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6ebeeaed_ae41d0a0",
+        "filename": "user_channel/usercommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 314,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-06-29T10:17:49Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "b3cf4a6d_ac58f11e",
       "revId": "73200be026162b226c53f351c593181c4f9b6c13",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
