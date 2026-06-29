@@ -33,6 +33,24 @@
       "message": "as part of the resolution for removing the time owner portion of phosphor-time-manager, the email in the linked 4d623e9 commit says:\n\n    With that said: Both IPMI and PLDM will now use \"/xyz/openbmc_project/time/bmc” as part of SetTime/GetTime instead of “/xyz/openbmc_project/time/host”\n\nSo the expectation is to continue to use phosphor-time-manager as the source of truth for time (even though it is directly reading the clock. Since IPMI times are only to the second, I don\u0027t see a need to break this link. Any savings in time due to reading the clock directly instead of two dbus calls will be ignored due to the casting to seconds in the response.",
       "revId": "f351556a4c5910d4bae24f105019a36bb9945da0",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1caab4d9_bde9b511",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002827
+      },
+      "writtenOn": "2026-06-29T05:55:11Z",
+      "side": 1,
+      "message": "Thanks for the review on this change.\n\nPushed patch set 4, which converts the SEL Time handlers to async D-Bus using ipmi::Context. This approach preserves phosphor-time-manager as the source of truth while preventing other queued IPMI commands from being blocked when the loop stalls during the call.",
+      "parentUuid": "e5011050_55582bbc",
+      "revId": "f351556a4c5910d4bae24f105019a36bb9945da0",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
