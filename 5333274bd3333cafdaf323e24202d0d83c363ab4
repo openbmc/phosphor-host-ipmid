@@ -20,6 +20,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "17cde855_56e21e20",
+        "filename": "apphandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1520,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-06-29T09:18:48Z",
+      "side": 1,
+      "message": "Length validation: Changed from strict equality check to lenient\n   behavior. Accept payloads \u003c 16 bytes (zero-padded for backward\n   compatibility) and reject only oversized payloads \u003e 16 bytes. This\n   maintains expected behavior for existing tools and users.",
+      "parentUuid": "92105f19_38afe26d",
+      "revId": "5333274bd3333cafdaf323e24202d0d83c363ab4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "67afe4ad_3600a275",
         "filename": "apphandler.cpp",
         "patchSetId": 2
@@ -31,6 +49,24 @@
       "writtenOn": "2026-06-25T21:50:44Z",
       "side": 1,
       "message": "encoding should not be global; it is a per-parameter option. So if we are changing it, we should change it in the data storage so that along with each string, we store the encoding as well.",
+      "revId": "5333274bd3333cafdaf323e24202d0d83c363ab4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4984bd17_7acfbf57",
+        "filename": "apphandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1553,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-06-29T09:18:48Z",
+      "side": 1,
+      "message": "Removed global encoding variable and\n   implemented per-parameter encoding storage using std::map in\n   SysInfoParamStore. Each parameter now has independent encoding\n   value, preventing data isolation issues.",
+      "parentUuid": "67afe4ad_3600a275",
       "revId": "5333274bd3333cafdaf323e24202d0d83c363ab4",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
