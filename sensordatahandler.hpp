@@ -431,6 +431,11 @@ template <typename T>
 std::optional<GetSensorResponse> readingData(uint8_t id, const Info& sensorInfo,
                                              const PropertyMap& properties)
 {
+    if (!sensorCacheMap[id].has_value())
+    {
+        sensorCacheMap[id] = SensorData{};
+    }
+
     auto iter = properties.find("Functional");
     if (iter != properties.end())
     {
@@ -451,55 +456,107 @@ std::optional<GetSensorResponse> readingData(uint8_t id, const Info& sensorInfo,
     }
 #endif
 
-    GetSensorResponse response{};
-
-    enableScanning(response);
+    GetSensorResponse response = sensorCacheMap[id]->response;
+    if (!response.scanningEnabled)
+    {
+        enableScanning(response);
+    }
 
     iter = properties.find(
         sensorInfo.propertyInterfaces.begin()->second.begin()->first);
-    if (iter == properties.end())
+    if (iter != properties.end())
     {
-        return {};
-    }
+        double value = std::get<T>(iter->second) *
+                       std::pow(10, sensorInfo.scale - sensorInfo.exponentR);
+        int32_t rawData =
+            (value - sensorInfo.scaledOffset) / sensorInfo.coefficientM;
 
-    double value = std::get<T>(iter->second) *
-                   std::pow(10, sensorInfo.scale - sensorInfo.exponentR);
-    int32_t rawData =
-        (value - sensorInfo.scaledOffset) / sensorInfo.coefficientM;
-
-    constexpr uint8_t sensorUnitsSignedBits = 2 << 6;
-    constexpr uint8_t signedDataFormat = 0x80;
-    // if sensorUnits1 [7:6] = 10b, sensor is signed
-    if ((sensorInfo.sensorUnits1 & sensorUnitsSignedBits) == signedDataFormat)
-    {
-        if (rawData > std::numeric_limits<int8_t>::max() ||
-            rawData < std::numeric_limits<int8_t>::lowest())
+        constexpr uint8_t sensorUnitsSignedBits = 2 << 6;
+        constexpr uint8_t signedDataFormat = 0x80;
+        // if sensorUnits1 [7:6] = 10b, sensor is signed
+        if ((sensorInfo.sensorUnits1 & sensorUnitsSignedBits) ==
+            signedDataFormat)
         {
-            lg2::error("Value out of range");
-            throw std::out_of_range("Value out of range");
+            if (rawData > std::numeric_limits<int8_t>::max() ||
+                rawData < std::numeric_limits<int8_t>::lowest())
+            {
+                lg2::error("Value out of range");
+                throw std::out_of_range("Value out of range");
+            }
+            setReading(static_cast<int8_t>(rawData), response);
         }
-        setReading(static_cast<int8_t>(rawData), response);
-    }
-    else
-    {
-        if (rawData > std::numeric_limits<uint8_t>::max() ||
-            rawData < std::numeric_limits<uint8_t>::lowest())
+        else
         {
-            lg2::error("Value out of range");
-            throw std::out_of_range("Value out of range");
+            if (rawData > std::numeric_limits<uint8_t>::max() ||
+                rawData < std::numeric_limits<uint8_t>::lowest())
+            {
+                lg2::error("Value out of range");
+                throw std::out_of_range("Value out of range");
+            }
+            setReading(static_cast<uint8_t>(rawData), response);
         }
-        setReading(static_cast<uint8_t>(rawData), response);
+
+        if (!std::isfinite(value))
+        {
+            response.readingOrStateUnavailable = 1;
+        }
     }
 
-    if (!std::isfinite(value))
+    bool critAlarmHigh =
+        static_cast<bool>(response.thresholdLevelsStates & (1U << 4));
+    auto critAlarmHighIter = properties.find(
+        SensorThresholdCritical::property_names::critical_alarm_high);
+    if (critAlarmHighIter != properties.end())
     {
-        response.readingOrStateUnavailable = 1;
+        if (const auto* alarm = std::get_if<bool>(&critAlarmHighIter->second))
+        {
+            critAlarmHigh = *alarm;
+        }
     }
 
-    if (!sensorCacheMap[id].has_value())
+    bool critAlarmLow =
+        static_cast<bool>(response.thresholdLevelsStates & (1U << 1));
+    auto critAlarmLowIter = properties.find(
+        SensorThresholdCritical::property_names::critical_alarm_low);
+    if (critAlarmLowIter != properties.end())
     {
-        sensorCacheMap[id] = SensorData{};
+        if (const auto* alarm = std::get_if<bool>(&critAlarmLowIter->second))
+        {
+            critAlarmLow = *alarm;
+        }
     }
+
+    bool warningAlarmHigh =
+        static_cast<bool>(response.thresholdLevelsStates & (1U << 3));
+    auto warningAlarmHighIter = properties.find(
+        SensorThresholdWarning::property_names::warning_alarm_high);
+    if (warningAlarmHighIter != properties.end())
+    {
+        if (const auto* alarm =
+                std::get_if<bool>(&warningAlarmHighIter->second))
+        {
+            warningAlarmHigh = *alarm;
+        }
+    }
+
+    bool warningAlarmLow =
+        static_cast<bool>(response.thresholdLevelsStates & (1U << 0));
+    auto warningAlarmLowIter = properties.find(
+        SensorThresholdWarning::property_names::warning_alarm_low);
+    if (warningAlarmLowIter != properties.end())
+    {
+        if (const auto* alarm = std::get_if<bool>(&warningAlarmLowIter->second))
+        {
+            warningAlarmLow = *alarm;
+        }
+    }
+
+    constexpr uint8_t reserved_bits_7_6 = 0xC0;
+    response.thresholdLevelsStates =
+        reserved_bits_7_6 | (static_cast<uint8_t>(critAlarmHigh) << 4) |
+        (static_cast<uint8_t>(warningAlarmHigh) << 3) |
+        (static_cast<uint8_t>(critAlarmLow) << 1) |
+        (static_cast<uint8_t>(warningAlarmLow) << 0);
     sensorCacheMap[id]->response = response;
 
     return response;
