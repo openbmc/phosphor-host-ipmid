@@ -640,6 +640,7 @@ static std::unordered_map<uint8_t, SetStatus> setStatus;
 // used for verification that a disable operation succeeded and will only
 // be sent if our system indicates that vlans are disabled.
 static std::unordered_map<uint8_t, uint16_t> lastDisabledVlan;
+static std::unordered_map<uint8_t, IPFamilyEnables> lastIPFamilyEnables;
 
 /** @brief Gets the set status for the channel if it exists
  *         Otherwise populates and returns the default value.
@@ -952,8 +953,17 @@ RspType<> setLanInt(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
             switch (static_cast<IPFamilyEnables>(enables))
             {
                 case IPFamilyEnables::DualStack:
+                    lastIPFamilyEnables[channel] = IPFamilyEnables::DualStack;
+                    channelCall<setEthProp<bool>>(channel, "IPv6AcceptRA",
+                                                 true);
+                    channelCall<setEthProp<bool>>(channel, "DHCP6", true);
                     return responseSuccess();
                 case IPFamilyEnables::IPv4Only:
+                    lastIPFamilyEnables[channel] = IPFamilyEnables::IPv4Only;
+                    channelCall<setEthProp<bool>>(channel, "IPv6AcceptRA",
+                                                 false);
+                    channelCall<setEthProp<bool>>(channel, "DHCP6", false);
+                    return responseSuccess();
                 case IPFamilyEnables::IPv6Only:
                     return responseParamNotSupported();
             }
@@ -1302,7 +1312,11 @@ RspType<message::Payload> getLan(Context::ptr ctx, uint4_t channelBits,
         }
         case LanParam::IPFamilyEnables:
         {
-            ret.pack(static_cast<uint8_t>(IPFamilyEnables::DualStack));
+            auto it = lastIPFamilyEnables.find(channel);
+            auto mode = (it != lastIPFamilyEnables.end())
+                            ? it->second
+                            : IPFamilyEnables::DualStack;
+            ret.pack(static_cast<uint8_t>(mode));
             return responseSuccess(std::move(ret));
         }
         case LanParam::IPv6Status:
