@@ -36,6 +36,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "1ac5f60c_025072e7",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 1435,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-07-01T06:25:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5754581d_1407f39b",
+      "revId": "41b8d5ae68e63277b3268803648f0fe8a1a5ea89",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "5d9644df_38b8ec9a",
@@ -67,6 +85,24 @@
       "side": 1,
       "message": "Done. Replaced the blocking getDbusProperty(*dbus, ...) / setDbusProperty(*dbus, ...) calls with the yielding getDbusProperty(ctx, ...) / setDbusProperty(ctx, ...) APIs, and updated error handling from try/catch to boost::system::error_code accordingly.",
       "parentUuid": "5d9644df_38b8ec9a",
+      "revId": "41b8d5ae68e63277b3268803648f0fe8a1a5ea89",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6267cf83_2b6ac995",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 1458,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-07-01T06:25:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6583a68d_7305214a",
       "revId": "41b8d5ae68e63277b3268803648f0fe8a1a5ea89",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
