@@ -582,7 +582,7 @@ auto executionEntry(boost::asio::yield_context yield, sdbusplus::message_t& m,
         getSdBus(), netFn, lun, cmd, channel, userId, sessionId, privilege,
         rqSA, hostIdx, yield);
     auto request = std::make_shared<ipmi::message::Request>(
-        ctx, std::forward<ipmi::SecureBuffer>(data));
+        ctx, ipmi::SecureBuffer(data));
     message::Response::ptr response = executeIpmiCommand(request);
 
     return dbusResponse(response->cc, response->payload.raw);
