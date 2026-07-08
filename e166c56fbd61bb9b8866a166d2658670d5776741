@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "918e1673_a5cdff4f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002869
+      },
+      "writtenOn": "2026-07-08T22:30:54Z",
+      "side": 1,
+      "message": "I had to also update `generate_whitelist_create.sh` to force the shell to perform word splitting and wildcard expansion. This was needed because our meson build uses wildcard expressions.",
+      "revId": "e166c56fbd61bb9b8866a166d2658670d5776741",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
