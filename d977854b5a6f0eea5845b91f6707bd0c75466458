@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "da79f408_2aa1e979",
+        "filename": "ipmid-new.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 585,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-07-09T09:28:30Z",
+      "side": 1,
+      "message": "One similar pattern is still present in the ipmid-new.cpp:784, where Request is still created using std::forward on data.\n\nCould you Please change that also.Thanks",
+      "range": {
+        "startLine": 585,
+        "startChar": 77,
+        "endLine": 585,
+        "endChar": 78
+      },
+      "revId": "d977854b5a6f0eea5845b91f6707bd0c75466458",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
