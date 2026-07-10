@@ -34,6 +34,24 @@
       "parentUuid": "61b8288b_b3b05655",
       "revId": "80853a9271eba81dabe6ebd3f3533e551ae13c4b",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9264a497_faa60859",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-07-10T12:26:25Z",
+      "side": 1,
+      "message": "Your proposal looks good and ensure it covers persistence, restart/reboot consistency, and static IPv6 behavior validation.",
+      "parentUuid": "e2755979_7bde98b0",
+      "revId": "80853a9271eba81dabe6ebd3f3533e551ae13c4b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
