@@ -787,11 +787,10 @@ RspType<> setLanInt(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
         {
             uint2_t flag;
             uint6_t rsvd;
-            if (req.unpack(flag, rsvd) != 0)
+            if (req.unpack(flag, rsvd) != 0 || !req.fullyUnpacked())
             {
                 return responseReqDataLenInvalid();
             }
-            unpackFinal(req);
             if (rsvd)
             {
                 return responseInvalidFieldRequest();
@@ -820,6 +819,8 @@ RspType<> setLanInt(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
                         return responseInvalidFieldRequest();
                     }
                     return responseSuccess();
+                case SetStatus::Reserved:
+                    return responseInvalidFieldRequest();
             }
             return responseParamNotSupported();
         }
