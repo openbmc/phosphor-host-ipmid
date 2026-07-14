@@ -32,6 +32,7 @@
 #include <sdbusplus/bus.hpp>
 #include <user_channel/channel_layer.hpp>
 #include <xyz/openbmc_project/Sensor/Threshold/Critical/common.hpp>
+#include <xyz/openbmc_project/Sensor/Threshold/NonRecoverable/common.hpp>
 #include <xyz/openbmc_project/Sensor/Threshold/Warning/common.hpp>
 #include <xyz/openbmc_project/Sensor/Value/common.hpp>
 
@@ -53,6 +54,8 @@ using SensorThresholdWarning =
     sdbusplus::common::xyz::openbmc_project::sensor::threshold::Warning;
 using SensorThresholdCritical =
     sdbusplus::common::xyz::openbmc_project::sensor::threshold::Critical;
+using SensorThresholdNonRecoverable =
+    sdbusplus::common::xyz::openbmc_project::sensor::threshold::NonRecoverable;
 
 #ifdef FEATURE_HYBRID_SENSORS
 
@@ -264,6 +267,8 @@ static void getSensorMaxMin(const DbusInterfaceMap& sensorMap, double& max,
     auto sensorObject = sensorMap.find(SensorValue::interface);
     auto critical = sensorMap.find(SensorThresholdCritical::interface);
     auto warning = sensorMap.find(SensorThresholdWarning::interface);
+    auto nonRecoverable =
+        sensorMap.find(SensorThresholdNonRecoverable::interface);
 
     if (sensorObject != sensorMap.end())
     {
@@ -319,6 +324,30 @@ static void getSensorMaxMin(const DbusInterfaceMap& sensorMap, double& max,
             }
         }
         if (upper != warning->second.end())
+        {
+            double value = std::visit(VariantToDoubleVisitor(), upper->second);
+            if (std::isfinite(value))
+            {
+                max = std::fmax(value, max);
+            }
+        }
+    }
+    if (nonRecoverable != sensorMap.end())
+    {
+        auto lower = nonRecoverable->second.find(
+            SensorThresholdNonRecoverable::property_names::non_recoverable_low);
+        auto upper = nonRecoverable->second.find(
+            SensorThresholdNonRecoverable::property_names::
+                non_recoverable_high);
+        if (lower != nonRecoverable->second.end())
+        {
+            double value = std::visit(VariantToDoubleVisitor(), lower->second);
+            if (std::isfinite(value))
+            {
+                min = std::fmin(value, min);
+            }
+        }
+        if (upper != nonRecoverable->second.end())
         {
             double value = std::visit(VariantToDoubleVisitor(), upper->second);
             if (std::isfinite(value))
@@ -1112,6 +1141,34 @@ ipmi::RspType<uint8_t, uint8_t, uint8_t, std::optional<uint8_t>>
         }
     }
 
+    auto nonRecoverableObject =
+        sensorMap.find(SensorThresholdNonRecoverable::interface);
+    if (nonRecoverableObject != sensorMap.end())
+    {
+        auto alarmHigh = nonRecoverableObject->second.find(
+            SensorThresholdNonRecoverable::property_names::
+                non_recoverable_alarm_high);
+        auto alarmLow = nonRecoverableObject->second.find(
+            SensorThresholdNonRecoverable::property_names::
+                non_recoverable_alarm_low);
+        if (alarmHigh != nonRecoverableObject->second.end())
+        {
+            if (std::get<bool>(alarmHigh->second))
+            {
+                thresholds |= static_cast<uint8_t>(
+                    IPMISensorReadingByte3::upperNonRecoverable);
+            }
+        }
+        if (alarmLow != nonRecoverableObject->second.end())
+        {
+            if (std::get<bool>(alarmLow->second))
+            {
+                thresholds |= static_cast<uint8_t>(
+                    IPMISensorReadingByte3::lowerNonRecoverable);
+            }
+        }
+    }
+
     // no discrete as of today so optional byte is never returned
     return ipmi::responseSuccess(value, operation, thresholds, std::nullopt);
 }
@@ -1139,17 +1196,11 @@ ipmi::RspType<> ipmiSenSetSensorThresholds(
     bool lowerCriticalThreshMask, bool lowerNonRecovThreshMask,
     bool upperNonCriticalThreshMask, bool upperCriticalThreshMask,
     bool upperNonRecovThreshMask, uint2_t reserved, uint8_t lowerNonCritical,
-    uint8_t lowerCritical, [[maybe_unused]] uint8_t lowerNonRecoverable,
+    uint8_t lowerCritical, uint8_t lowerNonRecoverable,
     uint8_t upperNonCritical, uint8_t upperCritical,
-    [[maybe_unused]] uint8_t upperNonRecoverable)
+    uint8_t upperNonRecoverable)
 {
     if (sensorNum == reservedSensorNumber || reserved)
-    {
-        return ipmi::responseInvalidFieldRequest();
-    }
-
-    // lower nc and upper nc not supported on any sensor
-    if (lowerNonRecovThreshMask || upperNonRecovThreshMask)
     {
         return ipmi::responseInvalidFieldRequest();
     }
@@ -1263,6 +1314,43 @@ ipmi::RspType<> ipmiSenSetSensorThresholds(
                 upperNonCritical, findThreshold->first);
         }
     }
+    if (lowerNonRecovThreshMask || upperNonRecovThreshMask)
+    {
+        auto findThreshold =
+            sensorMap.find(SensorThresholdNonRecoverable::interface);
+        if (findThreshold == sensorMap.end())
+        {
+            return ipmi::responseInvalidFieldRequest();
+        }
+        if (lowerNonRecovThreshMask)
+        {
+            auto findLower = findThreshold->second.find(
+                SensorThresholdNonRecoverable::property_names::
+                    non_recoverable_low);
+            if (findLower == findThreshold->second.end())
+            {
+                return ipmi::responseInvalidFieldRequest();
+            }
+            thresholdsToSet.emplace_back(
+                SensorThresholdNonRecoverable::property_names::
+                    non_recoverable_low,
+                lowerNonRecoverable, findThreshold->first);
+        }
+        if (upperNonRecovThreshMask)
+        {
+            auto findUpper = findThreshold->second.find(
+                SensorThresholdNonRecoverable::property_names::
+                    non_recoverable_high);
+            if (findUpper == findThreshold->second.end())
+            {
+                return ipmi::responseInvalidFieldRequest();
+            }
+            thresholdsToSet.emplace_back(
+                SensorThresholdNonRecoverable::property_names::
+                    non_recoverable_high,
+                upperNonRecoverable, findThreshold->first);
+        }
+    }
     for (const auto& property : thresholdsToSet)
     {
         // from section 36.3 in the IPMI Spec, assume all linear
@@ -1281,9 +1369,12 @@ IPMIThresholds getIPMIThresholds(const DbusInterfaceMap& sensorMap)
     IPMIThresholds resp;
     auto warningInterface = sensorMap.find(SensorThresholdWarning::interface);
     auto criticalInterface = sensorMap.find(SensorThresholdCritical::interface);
+    auto nonRecoverableInterface =
+        sensorMap.find(SensorThresholdNonRecoverable::interface);
 
     if ((warningInterface != sensorMap.end()) ||
-        (criticalInterface != sensorMap.end()))
+        (criticalInterface != sensorMap.end()) ||
+        (nonRecoverableInterface != sensorMap.end()))
     {
         auto sensorPair = sensorMap.find(SensorValue::interface);
 
@@ -1368,6 +1459,38 @@ IPMIThresholds getIPMIThresholds(const DbusInterfaceMap& sensorMap)
                 }
             }
         }
+        if (nonRecoverableInterface != sensorMap.end())
+        {
+            auto& nonRecoverableMap = nonRecoverableInterface->second;
+
+            auto nonRecoverableHigh = nonRecoverableMap.find(
+                SensorThresholdNonRecoverable::property_names::
+                    non_recoverable_high);
+            auto nonRecoverableLow = nonRecoverableMap.find(
+                SensorThresholdNonRecoverable::property_names::
+                    non_recoverable_low);
+
+            if (nonRecoverableHigh != nonRecoverableMap.end())
+            {
+                double value = std::visit(VariantToDoubleVisitor(),
+                                          nonRecoverableHigh->second);
+                if (std::isfinite(value))
+                {
+                    resp.nonRecoverableHigh = scaleIPMIValueFromDouble(
+                        value, mValue, rExp, bValue, bExp, bSigned);
+                }
+            }
+            if (nonRecoverableLow != nonRecoverableMap.end())
+            {
+                double value = std::visit(VariantToDoubleVisitor(),
+                                          nonRecoverableLow->second);
+                if (std::isfinite(value))
+                {
+                    resp.nonRecoverableLow = scaleIPMIValueFromDouble(
+                        value, mValue, rExp, bValue, bExp, bSigned);
+                }
+            }
+        }
     }
     return resp;
 }
@@ -1443,6 +1566,18 @@ ipmi::RspType<uint8_t, // readable
         readable |=
             1 << static_cast<uint8_t>(IPMIThresholdRespBits::lowerCritical);
         lowerCritical = *thresholdData.criticalLow;
+    }
+    if (thresholdData.nonRecoverableHigh)
+    {
+        readable |= 1 << static_cast<uint8_t>(
+                        IPMIThresholdRespBits::upperNonRecoverable);
+        upperNonRecoverable = *thresholdData.nonRecoverableHigh;
+    }
+    if (thresholdData.nonRecoverableLow)
+    {
+        readable |= 1 << static_cast<uint8_t>(
+                        IPMIThresholdRespBits::lowerNonRecoverable);
+        lowerNonRecoverable = *thresholdData.nonRecoverableLow;
     }
 
     return ipmi::responseSuccess(readable, lowerNC, lowerCritical,
@@ -1521,8 +1656,11 @@ ipmi::RspType<uint8_t, // enabled
 
     auto warningInterface = sensorMap.find(SensorThresholdWarning::interface);
     auto criticalInterface = sensorMap.find(SensorThresholdCritical::interface);
+    auto nonRecoverableInterface =
+        sensorMap.find(SensorThresholdNonRecoverable::interface);
     if ((warningInterface != sensorMap.end()) ||
-        (criticalInterface != sensorMap.end()))
+        (criticalInterface != sensorMap.end()) ||
+        (nonRecoverableInterface != sensorMap.end()))
     {
         enabled = static_cast<uint8_t>(
             IPMISensorEventEnableByte2::sensorScanningEnable);
@@ -1596,6 +1734,45 @@ ipmi::RspType<uint8_t, // enabled
                     deassertionEnabledLsb |= static_cast<uint8_t>(
                         IPMISensorEventEnableThresholds::
                             lowerCriticalGoingHigh);
+                }
+            }
+        }
+        if (nonRecoverableInterface != sensorMap.end())
+        {
+            auto& nonRecoverableMap = nonRecoverableInterface->second;
+
+            auto nonRecoverableHigh = nonRecoverableMap.find(
+                SensorThresholdNonRecoverable::property_names::
+                    non_recoverable_high);
+            auto nonRecoverableLow = nonRecoverableMap.find(
+                SensorThresholdNonRecoverable::property_names::
+                    non_recoverable_low);
+            if (nonRecoverableHigh != nonRecoverableMap.end())
+            {
+                double value = std::visit(VariantToDoubleVisitor(),
+                                          nonRecoverableHigh->second);
+                if (std::isfinite(value))
+                {
+                    assertionEnabledMsb |= static_cast<uint8_t>(
+                        IPMISensorEventEnableThresholds::
+                            upperNonRecoverableGoingHigh);
+                    deassertionEnabledMsb |= static_cast<uint8_t>(
+                        IPMISensorEventEnableThresholds::
+                            upperNonRecoverableGoingLow);
+                }
+            }
+            if (nonRecoverableLow != nonRecoverableMap.end())
+            {
+                double value = std::visit(VariantToDoubleVisitor(),
+                                          nonRecoverableLow->second);
+                if (std::isfinite(value))
+                {
+                    assertionEnabledLsb |= static_cast<uint8_t>(
+                        IPMISensorEventEnableThresholds::
+                            lowerNonRecoverableGoingLow);
+                    deassertionEnabledLsb |= static_cast<uint8_t>(
+                        IPMISensorEventEnableThresholds::
+                            lowerNonRecoverableGoingHigh);
                 }
             }
         }
@@ -1702,6 +1879,8 @@ ipmi::RspType<uint8_t,         // sensorEventStatus
 
     auto warningInterface = sensorMap.find(SensorThresholdWarning::interface);
     auto criticalInterface = sensorMap.find(SensorThresholdCritical::interface);
+    auto nonRecoverableInterface =
+        sensorMap.find(SensorThresholdNonRecoverable::interface);
 
     std::optional<bool> criticalDeassertHigh = thresholdDeassertMap
         [path][SensorThresholdCritical::property_names::critical_alarm_high];
@@ -1711,6 +1890,12 @@ ipmi::RspType<uint8_t,         // sensorEventStatus
         [path][SensorThresholdWarning::property_names::warning_alarm_high];
     std::optional<bool> warningDeassertLow = thresholdDeassertMap
         [path][SensorThresholdWarning::property_names::warning_alarm_low];
+    std::optional<bool> nonRecoverableDeassertHigh =
+        thresholdDeassertMap[path][SensorThresholdNonRecoverable::
+                                       property_names::non_recoverable_alarm_high];
+    std::optional<bool> nonRecoverableDeassertLow =
+        thresholdDeassertMap[path][SensorThresholdNonRecoverable::
+                                       property_names::non_recoverable_alarm_low];
 
     if (criticalDeassertHigh && !*criticalDeassertHigh)
     {
@@ -1732,8 +1917,19 @@ ipmi::RspType<uint8_t,         // sensorEventStatus
         deassertions.set(static_cast<size_t>(
             IPMIGetSensorEventEnableThresholds::lowerNonCriticalGoingHigh));
     }
+    if (nonRecoverableDeassertHigh && !*nonRecoverableDeassertHigh)
+    {
+        deassertions.set(static_cast<size_t>(
+            IPMIGetSensorEventEnableThresholds::upperNonRecoverableGoingHigh));
+    }
+    if (nonRecoverableDeassertLow && !*nonRecoverableDeassertLow)
+    {
+        deassertions.set(static_cast<size_t>(
+            IPMIGetSensorEventEnableThresholds::lowerNonRecoverableGoingHigh));
+    }
     if ((warningInterface != sensorMap.end()) ||
-        (criticalInterface != sensorMap.end()))
+        (criticalInterface != sensorMap.end()) ||
+        (nonRecoverableInterface != sensorMap.end()))
     {
         sensorEventStatus = static_cast<size_t>(
             IPMISensorEventEnableByte2::eventMessagesEnable);
@@ -1798,6 +1994,42 @@ ipmi::RspType<uint8_t,         // sensorEventStatus
             {
                 assertions.set(static_cast<size_t>(
                     IPMIGetSensorEventEnableThresholds::lowerCriticalGoingLow));
+            }
+        }
+        if (nonRecoverableInterface != sensorMap.end())
+        {
+            auto& nonRecoverableMap = nonRecoverableInterface->second;
+
+            auto nonRecoverableHigh = nonRecoverableMap.find(
+                SensorThresholdNonRecoverable::property_names::
+                    non_recoverable_alarm_high);
+            auto nonRecoverableLow = nonRecoverableMap.find(
+                SensorThresholdNonRecoverable::property_names::
+                    non_recoverable_alarm_low);
+            auto nonRecoverableHighAlarm = false;
+            auto nonRecoverableLowAlarm = false;
+
+            if (nonRecoverableHigh != nonRecoverableMap.end())
+            {
+                nonRecoverableHighAlarm =
+                    std::get<bool>(nonRecoverableHigh->second);
+            }
+            if (nonRecoverableLow != nonRecoverableMap.end())
+            {
+                nonRecoverableLowAlarm =
+                    std::get<bool>(nonRecoverableLow->second);
+            }
+            if (nonRecoverableHighAlarm)
+            {
+                assertions.set(static_cast<size_t>(
+                    IPMIGetSensorEventEnableThresholds::
+                        upperNonRecoverableGoingHigh));
+            }
+            if (nonRecoverableLowAlarm)
+            {
+                assertions.set(static_cast<size_t>(
+                    IPMIGetSensorEventEnableThresholds::
+                        lowerNonRecoverableGoingLow));
             }
         }
     }
