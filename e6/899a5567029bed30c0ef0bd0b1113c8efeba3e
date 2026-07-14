@@ -1,0 +1,11 @@
+Code-Review+1: Willy Tu <wltu@google.com>
+Code-Review+1: Ana Mendes <anamendes@google.com>
+Code-Review+1: Nagavarapu Sai Pavan <saipavann@ami.com>
+Verified+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Code-Review+2: George Liu <liuxiwei@ieisystem.com>
+Submitted-by: Nagavarapu Sai Pavan <saipavann@ami.com>
+Submitted-at: Tue, 14 Jul 2026 08:06:55 +0000
+Reviewed-on: https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/91841
+Comments-Total: 8
+Project: openbmc/phosphor-host-ipmid
+Branch: refs/heads/master
