@@ -119,6 +119,8 @@ struct IPMIThresholds
     std::optional<uint8_t> warningHigh;
     std::optional<uint8_t> criticalLow;
     std::optional<uint8_t> criticalHigh;
+    std::optional<uint8_t> nonRecoverableLow;
+    std::optional<uint8_t> nonRecoverableHigh;
 };
 
 namespace sensor
