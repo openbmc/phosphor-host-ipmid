@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "edf2c13a_3d810a3c",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 335,
+      "author": {
+        "id": 1002810
+      },
+      "writtenOn": "2026-07-17T02:53:08Z",
+      "side": 1,
+      "message": "nit: the three levels repeat the same find→visit→set-bit across 6 functions. A helper + table would de-dup and make adding a level a one-liner.",
+      "revId": "3e659e939ae5ee068d51f3b1e7c651ffa22c7ed3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d5efa522_4528dbd2",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 337,
+      "author": {
+        "id": 1002810
+      },
+      "writtenOn": "2026-07-17T02:53:08Z",
+      "side": 1,
+      "message": "nit: consider auto\u0026 map \u003d nonRecoverable-\u003esecond; and reuse it, matching the other blocks in this file and avoiding the repeated -\u003esecond.",
+      "revId": "3e659e939ae5ee068d51f3b1e7c651ffa22c7ed3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2bc41be2_ce12fc4c",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1156,
+      "author": {
+        "id": 1002810
+      },
+      "writtenOn": "2026-07-17T02:53:08Z",
+      "side": 1,
+      "message": "nit : std::get\u003cbool\u003e throws std::bad_variant_access on a non-bool property (consistent with existing 1102/1110, not newly introduced). get_if + a null check avoids the throw.",
+      "revId": "3e659e939ae5ee068d51f3b1e7c651ffa22c7ed3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
