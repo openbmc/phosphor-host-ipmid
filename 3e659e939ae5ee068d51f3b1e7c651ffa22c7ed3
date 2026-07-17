@@ -18,6 +18,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "b930a028_957cde74",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 335,
+      "author": {
+        "id": 1002970
+      },
+      "writtenOn": "2026-07-17T09:12:52Z",
+      "side": 1,
+      "message": "Implemented in the latest patch. I have refactored the repeated threshold find/visit/update flow into a helper plus a table-driven loop, so adding another threshold level is now a one-line entry in the config table.",
+      "parentUuid": "edf2c13a_3d810a3c",
+      "revId": "3e659e939ae5ee068d51f3b1e7c651ffa22c7ed3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d5efa522_4528dbd2",
@@ -35,6 +53,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "92d2450e_15e4a2db",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 337,
+      "author": {
+        "id": 1002970
+      },
+      "writtenOn": "2026-07-17T09:12:52Z",
+      "side": 1,
+      "message": "Updated as suggested. I now cache the interface map in a local variable and reuse it, removing repeated second access and aligning with the style used in nearby blocks.",
+      "parentUuid": "d5efa522_4528dbd2",
+      "revId": "3e659e939ae5ee068d51f3b1e7c651ffa22c7ed3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "2bc41be2_ce12fc4c",
@@ -48,6 +84,24 @@
       "writtenOn": "2026-07-17T02:53:08Z",
       "side": 1,
       "message": "nit : std::get\u003cbool\u003e throws std::bad_variant_access on a non-bool property (consistent with existing 1102/1110, not newly introduced). get_if + a null check avoids the throw.",
+      "revId": "3e659e939ae5ee068d51f3b1e7c651ffa22c7ed3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8bf06ad8_8dba08bd",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1156,
+      "author": {
+        "id": 1002970
+      },
+      "writtenOn": "2026-07-17T09:12:52Z",
+      "side": 1,
+      "message": "Fixed in the reviewed path. I have replaced direct bool extraction with a guarded helper that uses get_if and a null check, so non-bool variants no longer risk bad_variant_access.",
+      "parentUuid": "2bc41be2_ce12fc4c",
       "revId": "3e659e939ae5ee068d51f3b1e7c651ffa22c7ed3",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
