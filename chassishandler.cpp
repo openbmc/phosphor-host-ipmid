@@ -41,6 +41,7 @@
 #include <chrono>
 #include <cstring>
 #include <filesystem>
+#include <format>
 #include <fstream>
 #include <future>
 #include <map>
@@ -52,21 +53,20 @@ std::unique_ptr<sdbusplus::Timer> identifyTimer
 
 static ChassisIDState chassisIDState = ChassisIDState::reserved;
 
-constexpr size_t sizeVersion = 2;
 constexpr size_t DEFAULT_IDENTIFY_TIME_OUT = 15;
 
-// PetiBoot-Specific
-static constexpr uint8_t netConfInitialBytes[] = {0x80, 0x21, 0x70, 0x62,
-                                                  0x21, 0x00, 0x01, 0x06};
+// PetiBoot-specific network configuration header. The OPAL network settings
+// parameter begins with these fixed values, followed by the address size, MAC
+// address, a reserved byte, the address origin, and then the IP address, prefix
+// length and gateway.
+static constexpr uint8_t netConfValidByte = 0x80;
+static constexpr std::array<uint8_t, 4> netConfCookie = {
+    0x21, 0x70, 0x62, 0x21};
+static constexpr std::array<uint8_t, 2> netConfVersion = {0x00, 0x01};
+static constexpr uint8_t macAddrLen = 6;
+
 static constexpr uint8_t oemParmStart = 96;
 static constexpr uint8_t oemParmEnd = 127;
-
-static constexpr size_t cookieOffset = 1;
-static constexpr size_t versionOffset = 5;
-static constexpr size_t addrSizeOffset = 8;
-static constexpr size_t macOffset = 9;
-static constexpr size_t addrTypeOffset = 16;
-static constexpr size_t ipAddrOffset = 17;
 
 namespace ipmi
 {
@@ -181,178 +181,134 @@ constexpr auto minutesPerCount = 60;
 
 } // namespace poh
 
-int getHostNetworkData(ipmi::message::Payload& payload)
+int getHostNetworkData(ipmi::Context::ptr& ctx, ipmi::message::Payload& payload)
 {
     ipmi::PropertyMap properties;
     int rc = 0;
-    uint8_t addrSize = ipmi::network::IPV4_ADDRESS_SIZE_BYTE;
 
-    try
+    // TODO There may be cases where an interface is implemented by multiple
+    // objects,to handle such cases we are interested on that object
+    //  which are on interested busname.
+    //  Currently mapper doesn't give the readable busname(gives busid)
+    //  so we can't match with bus name so giving some object specific info
+    //  as SETTINGS_MATCH.
+    //  Later SETTINGS_MATCH will be replaced with busname.
+
+    boost::system::error_code ec{};
+    ipmi::DbusObjectInfo ipObjectInfo;
+    ec = ipmi::getDbusObject(ctx, NetworkIP::interface, SETTINGS_ROOT,
+                             SETTINGS_MATCH, ipObjectInfo);
+    ipmi::DbusObjectInfo macObjectInfo;
+    if (!ec)
     {
-        // TODO There may be cases where an interface is implemented by multiple
-        // objects,to handle such cases we are interested on that object
-        //  which are on interested busname.
-        //  Currently mapper doesn't give the readable busname(gives busid)
-        //  so we can't match with bus name so giving some object specific info
-        //  as SETTINGS_MATCH.
-        //  Later SETTINGS_MATCH will be replaced with busname.
-
-        sdbusplus::bus_t bus(ipmid_get_sd_bus_connection());
-
-        auto ipObjectInfo = ipmi::getDbusObject(bus, NetworkIP::interface,
-                                                SETTINGS_ROOT, SETTINGS_MATCH);
-
-        auto macObjectInfo = ipmi::getDbusObject(bus, MACAddress::interface,
-                                                 SETTINGS_ROOT, SETTINGS_MATCH);
-
-        properties = ipmi::getAllDbusProperties(
-            bus, ipObjectInfo.second, ipObjectInfo.first, NetworkIP::interface);
-        auto variant = ipmi::getDbusProperty(
-            bus, macObjectInfo.second, macObjectInfo.first,
-            MACAddress::interface, MACAddress::property_names::mac_address);
-
-        auto ipAddress = std::get<std::string>(
-            properties[NetworkIP::property_names::address]);
-
-        auto gateway = std::get<std::string>(
-            properties[NetworkIP::property_names::gateway]);
-
-        auto prefix = std::get<uint8_t>(
-            properties[NetworkIP::property_names::prefix_length]);
-
-        uint8_t isStatic =
-            (std::get<std::string>(
-                 properties[NetworkIP::property_names::origin]) ==
-             "xyz.openbmc_project.Network.IP.AddressOrigin.Static")
-                ? 1
-                : 0;
-
-        auto MACAddress = std::get<std::string>(variant);
-
-        // it is expected here that we should get the valid data
-        // but we may also get the default values.
-        // Validation of the data is done by settings.
-        //
-        // if mac address is default mac address then
-        // don't send blank override.
-        if ((MACAddress == ipmi::network::DEFAULT_MAC_ADDRESS))
-        {
-            rc = -1;
-            return rc;
-        }
-        // if addr is static then ipaddress,gateway,prefix
-        // should not be default one,don't send blank override.
-        if (isStatic)
-        {
-            if ((ipAddress == ipmi::network::DEFAULT_ADDRESS) ||
-                (gateway == ipmi::network::DEFAULT_ADDRESS) || (!prefix))
-            {
-                rc = -1;
-                return rc;
-            }
-        }
-
-        std::string token;
-        std::stringstream ss(MACAddress);
-
-        // First pack macOffset no of bytes in payload.
-        // Latter this PetiBoot-Specific data will be populated.
-        std::vector<uint8_t> payloadInitialBytes(macOffset);
-        payload.pack(payloadInitialBytes);
-
-        while (std::getline(ss, token, ':'))
-        {
-            uint8_t byte;
-            if (ipmi::tryParse(token, byte, 16))
-            {
-                payload.pack(byte);
-            }
-        }
-
-        payload.pack(0x00);
-
-        payload.pack(isStatic);
-
-        uint8_t addressFamily =
-            (std::get<std::string>(
-                 properties[NetworkIP::property_names::type]) ==
-             "xyz.openbmc_project.Network.IP.Protocol.IPv4")
-                ? AF_INET
-                : AF_INET6;
-
-        addrSize = (addressFamily == AF_INET)
-                       ? ipmi::network::IPV4_ADDRESS_SIZE_BYTE
-                       : ipmi::network::IPV6_ADDRESS_SIZE_BYTE;
-
-        // ipaddress and gateway would be in IPv4 format
-        std::vector<uint8_t> addrInBinary(addrSize);
-        inet_pton(addressFamily, ipAddress.c_str(),
-                  reinterpret_cast<void*>(addrInBinary.data()));
-
-        payload.pack(addrInBinary);
-
-        payload.pack(prefix);
-
-        std::vector<uint8_t> gatewayDetails(addrSize);
-        inet_pton(addressFamily, gateway.c_str(),
-                  reinterpret_cast<void*>(gatewayDetails.data()));
-        payload.pack(gatewayDetails);
+        ec = ipmi::getDbusObject(ctx, MACAddress::interface, SETTINGS_ROOT,
+                                 SETTINGS_MATCH, macObjectInfo);
     }
-    catch (const InternalFailure& e)
+    if (!ec)
+    {
+        ec = ipmi::getAllDbusProperties(ctx, ipObjectInfo.second,
+                                        ipObjectInfo.first,
+                                        NetworkIP::interface, properties);
+    }
+    std::string macAddress;
+    if (!ec)
+    {
+        ec = ipmi::getDbusProperty(
+            ctx, macObjectInfo.second, macObjectInfo.first,
+            MACAddress::interface, MACAddress::property_names::mac_address,
+            macAddress);
+    }
+
+    if (ec)
     {
         commit<InternalFailure>();
         rc = -1;
         return rc;
     }
 
-    // PetiBoot-Specific
-    // If success then copy the first 9 bytes to the payload message
-    // payload first 2 bytes contain the parameter values. Skip that 2 bytes.
-    uint8_t skipFirstTwoBytes = 2;
-    size_t payloadSize = payload.size();
-    uint8_t* configDataStartingAddress = payload.data() + skipFirstTwoBytes;
+    auto ipAddress =
+        std::get<std::string>(properties[NetworkIP::property_names::address]);
 
-    if (payloadSize < skipFirstTwoBytes + sizeof(netConfInitialBytes))
+    auto gateway =
+        std::get<std::string>(properties[NetworkIP::property_names::gateway]);
+
+    auto prefix =
+        std::get<uint8_t>(properties[NetworkIP::property_names::prefix_length]);
+
+    uint8_t isStatic =
+        (std::get<std::string>(properties[NetworkIP::property_names::origin]) ==
+         "xyz.openbmc_project.Network.IP.AddressOrigin.Static")
+            ? 1
+            : 0;
+
+    // it is expected here that we should get the valid data
+    // but we may also get the default values.
+    // Validation of the data is done by settings.
+    //
+    // if mac address is default mac address then
+    // don't send blank override.
+    if ((macAddress == ipmi::network::DEFAULT_MAC_ADDRESS))
     {
-        lg2::error("Invalid net config");
         rc = -1;
         return rc;
     }
-    std::copy(netConfInitialBytes,
-              netConfInitialBytes + sizeof(netConfInitialBytes),
-              configDataStartingAddress);
-
-    if (payloadSize < skipFirstTwoBytes + addrSizeOffset + sizeof(addrSize))
+    // if addr is static then ipaddress,gateway,prefix
+    // should not be default one,don't send blank override.
+    if (isStatic)
     {
-        lg2::error("Invalid length of address size");
-        rc = -1;
-        return rc;
+        if ((ipAddress == ipmi::network::DEFAULT_ADDRESS) ||
+            (gateway == ipmi::network::DEFAULT_ADDRESS) || (!prefix))
+        {
+            rc = -1;
+            return rc;
+        }
     }
-    std::copy(&addrSize, &(addrSize) + sizeof(addrSize),
-              configDataStartingAddress + addrSizeOffset);
 
-#ifdef _IPMI_DEBUG_
-    std::printf("\n===Printing the IPMI Formatted Data========\n");
+    // Determine the address family and size up front so the header can be
+    // packed in a single forward pass.
+    uint8_t addressFamily =
+        (std::get<std::string>(properties[NetworkIP::property_names::type]) ==
+         "xyz.openbmc_project.Network.IP.Protocol.IPv4")
+            ? AF_INET
+            : AF_INET6;
+    uint8_t addrSize = (addressFamily == AF_INET)
+                           ? ipmi::network::IPV4_ADDRESS_SIZE_BYTE
+                           : ipmi::network::IPV6_ADDRESS_SIZE_BYTE;
 
-    for (uint8_t pos = 0; pos < index; pos++)
-    {
-        std::printf("%02x ", payloadStartingAddress[pos]);
-    }
-#endif
+    // Convert the MAC address string (xx:xx:xx:xx:xx:xx) to raw bytes.
+    std::vector<std::string> macStrs = ipmi::split(macAddress, ':');
+    macStrs.resize(macAddrLen);
+    std::array<uint8_t, macAddrLen> macBytes{};
+    std::transform(macStrs.begin(), macStrs.end(), macBytes.begin(),
+                   [](const std::string& s) {
+                       uint8_t byte{};
+                       ipmi::tryParse(s, byte, 16);
+                       return byte;
+                   });
+
+    // Convert the IP address and gateway to their binary form.
+    std::vector<uint8_t> ipAddrBytes(addrSize);
+    inet_pton(addressFamily, ipAddress.c_str(),
+              reinterpret_cast<void*>(ipAddrBytes.data()));
+    std::vector<uint8_t> gatewayBytes(addrSize);
+    inet_pton(addressFamily, gateway.c_str(),
+              reinterpret_cast<void*>(gatewayBytes.data()));
+
+    // Pack the PetiBoot-specific header followed by the network settings.
+    constexpr uint8_t reserved{0};
+    payload.pack(netConfValidByte, netConfCookie, netConfVersion, macAddrLen,
+                 addrSize, macBytes, reserved, isStatic, ipAddrBytes, prefix,
+                 gatewayBytes);
 
     return rc;
 }
 
 /** @brief convert IPv4 and IPv6 addresses from binary to text form.
  *  @param[in] family - IPv4/Ipv6
- *  @param[in] data - req data pointer.
- *  @param[in] offset - offset in the data.
- *  @param[in] addrSize - size of the data which needs to be read from offset.
+ *  @param[in] data - binary address bytes (4 for IPv4, 16 for IPv6).
  *  @returns address in text form.
  */
-
-std::string getAddrStr(uint8_t family, uint8_t* data, uint8_t offset,
-                       uint8_t addrSize)
+std::string getAddrStr(uint8_t family, const std::vector<uint8_t>& data)
 {
     char ipAddr[INET6_ADDRSTRLEN] = {};
 
@@ -361,7 +317,8 @@ std::string getAddrStr(uint8_t family, uint8_t* data, uint8_t offset,
         case AF_INET:
         {
             struct sockaddr_in addr4{};
-            std::memcpy(&addr4.sin_addr.s_addr, &data[offset], addrSize);
+            std::memcpy(&addr4.sin_addr.s_addr, data.data(),
+                        std::min(sizeof(addr4.sin_addr.s_addr), data.size()));
 
             inet_ntop(AF_INET, &addr4.sin_addr, ipAddr, INET_ADDRSTRLEN);
 
@@ -370,7 +327,8 @@ std::string getAddrStr(uint8_t family, uint8_t* data, uint8_t offset,
         case AF_INET6:
         {
             struct sockaddr_in6 addr6{};
-            std::memcpy(&addr6.sin6_addr.s6_addr, &data[offset], addrSize);
+            std::memcpy(&addr6.sin6_addr.s6_addr, data.data(),
+                        std::min(sizeof(addr6.sin6_addr.s6_addr), data.size()));
 
             inet_ntop(AF_INET6, &addr6.sin6_addr, ipAddr, INET6_ADDRSTRLEN);
 
@@ -385,200 +343,150 @@ std::string getAddrStr(uint8_t family, uint8_t* data, uint8_t offset,
     return ipAddr;
 }
 
-ipmi::Cc setHostNetworkData(ipmi::message::Payload& data)
+ipmi::Cc setHostNetworkData(ipmi::Context::ptr& ctx,
+                            ipmi::message::Payload& data)
 {
     using namespace std::string_literals;
-    std::string hostNetworkConfig;
     std::string mac("00:00:00:00:00:00");
     std::string ipAddress, gateway;
-    std::string addrOrigin{0};
-    uint8_t addrSize{0};
     std::string addressOrigin =
         "xyz.openbmc_project.Network.IP.AddressOrigin.DHCP";
     std::string addressType = "xyz.openbmc_project.Network.IP.Protocol.IPv4";
     uint8_t prefix{0};
     uint8_t family = AF_INET;
 
-    // cookie starts from second byte
-    // version starts from sixth byte
-
-    try
+    do
     {
-        do
+        uint8_t validByte; // netConfValidByte
+        std::array<uint8_t, netConfCookie.size()> cookie;
+        if (data.unpack(validByte, cookie) != 0)
         {
-            // cookie ==  0x21 0x70 0x62 0x21
-            data.trailingOk = true;
-            auto msgLen = data.size();
-            std::vector<uint8_t> msgPayloadBytes(msgLen);
-            if (data.unpack(msgPayloadBytes) != 0 || !data.fullyUnpacked())
+            lg2::error("Error in cookie getting of setHostNetworkData");
+            return ipmi::ccReqDataLenInvalid;
+        }
+
+        // cookie == 0x21 0x70 0x62 0x21
+        if (cookie != netConfCookie)
+        {
+            constexpr std::array<uint8_t, netConfCookie.size()> zeroCookie = {
+                0, 0, 0, 0};
+            // an all-zero cookie means the network settings should be
+            // zeroed out; keep the defaults and stop parsing.
+            if (cookie == zeroCookie)
             {
-                lg2::error("Error in unpacking message of setHostNetworkData");
-                return ipmi::ccReqDataLenInvalid;
+                break;
             }
 
-            uint8_t* msgPayloadStartingPos = msgPayloadBytes.data();
-            constexpr size_t cookieSize = 4;
-            if (msgLen < cookieOffset + cookieSize)
-            {
-                lg2::error("Error in cookie getting of setHostNetworkData");
-                return ipmi::ccReqDataLenInvalid;
-            }
-            if (!std::equal(msgPayloadStartingPos + cookieOffset,
-                            msgPayloadStartingPos + cookieOffset + cookieSize,
-                            (netConfInitialBytes + cookieOffset)))
-            {
-                // all cookie == 0
-                if (std::all_of(msgPayloadStartingPos + cookieOffset,
-                                msgPayloadStartingPos + cookieOffset +
-                                    cookieSize,
-                                [](int i) { return i == 0; }) == true)
-                {
-                    // need to zero out the network settings.
-                    break;
-                }
+            lg2::error("Invalid Cookie");
+            elog<InternalFailure>();
+        }
 
-                lg2::error("Invalid Cookie");
-                elog<InternalFailure>();
-            }
+        std::array<uint8_t, netConfVersion.size()> version;
+        uint8_t macAddrLength; // MAC address length (0x06)
+        uint8_t addrSize;
+        std::array<uint8_t, macAddrLen> macAddr;
+        uint8_t reserved; // separator byte
+        uint8_t addrOrigin;
+        if (data.unpack(version, macAddrLength, addrSize, macAddr, reserved,
+                        addrOrigin) != 0)
+        {
+            lg2::error("Error in unpacking message of setHostNetworkData");
+            return ipmi::ccReqDataLenInvalid;
+        }
 
-            // version == 0x00 0x01
-            if (msgLen < versionOffset + sizeVersion)
-            {
-                lg2::error("Error in version getting of setHostNetworkData");
-                return ipmi::ccReqDataLenInvalid;
-            }
-            if (std::equal(msgPayloadStartingPos + versionOffset,
-                           msgPayloadStartingPos + versionOffset + sizeVersion,
-                           (netConfInitialBytes + versionOffset)) != 0)
-            {
-                lg2::error("Invalid Version");
-                elog<InternalFailure>();
-            }
+        // version == 0x00 0x01
+        if (version != netConfVersion)
+        {
+            lg2::error("Invalid Version");
+            elog<InternalFailure>();
+        }
 
-            if (msgLen < macOffset + 6)
-            {
-                lg2::error(
-                    "Error in mac address getting of setHostNetworkData");
-                return ipmi::ccReqDataLenInvalid;
-            }
-            std::stringstream result;
-            std::copy((msgPayloadStartingPos + macOffset),
-                      (msgPayloadStartingPos + macOffset + 5),
-                      std::ostream_iterator<int>(result, ":"));
-            mac = result.str();
+        mac = std::format("{:02x}:{:02x}:{:02x}:{:02x}:{:02x}:{:02x}",
+                          macAddr[0], macAddr[1], macAddr[2], macAddr[3],
+                          macAddr[4], macAddr[5]);
 
-            if (msgLen < addrTypeOffset + sizeof(decltype(addrOrigin)))
-            {
-                lg2::error(
-                    "Error in original address getting of setHostNetworkData");
-                return ipmi::ccReqDataLenInvalid;
-            }
-            std::copy(msgPayloadStartingPos + addrTypeOffset,
-                      msgPayloadStartingPos + addrTypeOffset +
-                          sizeof(decltype(addrOrigin)),
-                      std::ostream_iterator<int>(result, ""));
-            addrOrigin = result.str();
+        // a non-zero origin indicates a statically configured address
+        if (addrOrigin != 0)
+        {
+            addressOrigin =
+                "xyz.openbmc_project.Network.IP.AddressOrigin.Static";
+        }
 
-            if (!addrOrigin.empty())
-            {
-                addressOrigin =
-                    "xyz.openbmc_project.Network.IP.AddressOrigin.Static";
-            }
+        if (addrSize != ipmi::network::IPV4_ADDRESS_SIZE_BYTE)
+        {
+            addressType = "xyz.openbmc_project.Network.IP.Protocol.IPv6";
+            family = AF_INET6;
+        }
 
-            if (msgLen < addrSizeOffset + sizeof(decltype(addrSize)))
-            {
-                lg2::error(
-                    "Error in address size getting of setHostNetworkData");
-                return ipmi::ccReqDataLenInvalid;
-            }
-            // Get the address size
-            std::copy(msgPayloadStartingPos + addrSizeOffset,
-                      (msgPayloadStartingPos + addrSizeOffset +
-                       sizeof(decltype(addrSize))),
-                      &addrSize);
+        // The IP address, prefix and gateway sizes depend on addrSize.
+        std::vector<uint8_t> ipAddrBytes(addrSize);
+        std::vector<uint8_t> gatewayBytes(addrSize);
+        if (data.unpack(ipAddrBytes, prefix, gatewayBytes) != 0)
+        {
+            lg2::error("Error unpacking ip info for setHostNetworkData");
+            return ipmi::ccReqDataLenInvalid;
+        }
 
-            uint8_t prefixOffset = ipAddrOffset + addrSize;
-            if (msgLen < prefixOffset + sizeof(decltype(prefix)))
-            {
-                lg2::error("Error in prefix getting of setHostNetworkData");
-                return ipmi::ccReqDataLenInvalid;
-            }
-            // std::copy(msgPayloadStartingPos + prefixOffset,
-            //           msgPayloadStartingPos + prefixOffset +
-            //               sizeof(decltype(prefix)),
-            //           &prefix);
-            // Workaround compiler misdetecting out of bounds memcpy
-            prefix = msgPayloadStartingPos[prefixOffset];
+        ipAddress = getAddrStr(family, ipAddrBytes);
+        gateway = getAddrStr(family, gatewayBytes);
 
-            uint8_t gatewayOffset = prefixOffset + sizeof(decltype(prefix));
-            if (addrSize != ipmi::network::IPV4_ADDRESS_SIZE_BYTE)
-            {
-                addressType = "xyz.openbmc_project.Network.IP.Protocol.IPv6";
-                family = AF_INET6;
-            }
+    } while (0);
 
-            if (msgLen < ipAddrOffset + addrSize)
-            {
-                lg2::error("Error in IP address getting of setHostNetworkData");
-                return ipmi::ccReqDataLenInvalid;
-            }
-            ipAddress = getAddrStr(family, msgPayloadStartingPos, ipAddrOffset,
-                                   addrSize);
-
-            if (msgLen < gatewayOffset + addrSize)
-            {
-                lg2::error(
-                    "Error in gateway address getting of setHostNetworkData");
-                return ipmi::ccReqDataLenInvalid;
-            }
-            gateway = getAddrStr(family, msgPayloadStartingPos, gatewayOffset,
-                                 addrSize);
-
-        } while (0);
-
-        // Cookie == 0 or it is a valid cookie
-        hostNetworkConfig +=
-            "ipaddress="s + ipAddress + ",prefix="s + std::to_string(prefix) +
-            ",gateway="s + gateway + ",mac="s + mac + ",addressOrigin="s +
-            addressOrigin;
-
-        sdbusplus::bus_t bus(ipmid_get_sd_bus_connection());
-
-        auto ipObjectInfo = ipmi::getDbusObject(bus, NetworkIP::interface,
-                                                SETTINGS_ROOT, SETTINGS_MATCH);
-        auto macObjectInfo = ipmi::getDbusObject(bus, MACAddress::interface,
-                                                 SETTINGS_ROOT, SETTINGS_MATCH);
-        // set the dbus property
-        ipmi::setDbusProperty(
-            bus, ipObjectInfo.second, ipObjectInfo.first, NetworkIP::interface,
-            NetworkIP::property_names::address, std::string(ipAddress));
-        ipmi::setDbusProperty(bus, ipObjectInfo.second, ipObjectInfo.first,
-                              NetworkIP::interface,
-                              NetworkIP::property_names::prefix_length, prefix);
-        ipmi::setDbusProperty(bus, ipObjectInfo.second, ipObjectInfo.first,
-                              NetworkIP::interface,
-                              NetworkIP::property_names::origin, addressOrigin);
-        ipmi::setDbusProperty(
-            bus, ipObjectInfo.second, ipObjectInfo.first, NetworkIP::interface,
-            NetworkIP::property_names::gateway, std::string(gateway));
-        ipmi::setDbusProperty(
-            bus, ipObjectInfo.second, ipObjectInfo.first, NetworkIP::interface,
-            NetworkIP::property_names::type,
-            std::string("xyz.openbmc_project.Network.IP.Protocol.IPv4"));
-        ipmi::setDbusProperty(bus, macObjectInfo.second, macObjectInfo.first,
-                              MACAddress::interface,
-                              MACAddress::property_names::mac_address,
-                              std::string(mac));
-
-        lg2::debug("Network configuration changed: {NETWORKCONFIG}",
-                   "NETWORKCONFIG", hostNetworkConfig);
+    if (!data.fullyUnpacked())
+    {
+        lg2::error("Extra bytes in setHostNetworkData request");
+        return ipmi::ccReqDataLenInvalid;
     }
-    catch (const sdbusplus::exception_t& e)
+
+    // Cookie == 0 or it is a valid cookie
+    auto hostNetworkConfig =
+        "ipaddress="s + ipAddress + ",prefix="s + std::to_string(prefix) +
+        ",gateway="s + gateway + ",mac="s + mac + ",addressOrigin="s +
+        addressOrigin;
+
+    boost::system::error_code ec{};
+    ipmi::DbusObjectInfo ipObjectInfo;
+    ec = ipmi::getDbusObject(ctx, NetworkIP::interface, SETTINGS_ROOT,
+                             SETTINGS_MATCH, ipObjectInfo);
+    ipmi::DbusObjectInfo macObjectInfo;
+    if (!ec)
+    {
+        ec = ipmi::getDbusObject(ctx, MACAddress::interface, SETTINGS_ROOT,
+                                 SETTINGS_MATCH, macObjectInfo);
+    }
+
+    // set the dbus properties, stopping on the first failure
+    auto setNetProp = [&](const auto& property, auto&& value) {
+        if (!ec)
+        {
+            ec = ipmi::setDbusProperty(
+                ctx, ipObjectInfo.second, ipObjectInfo.first,
+                NetworkIP::interface, property,
+                std::forward<decltype(value)>(value));
+        }
+    };
+    setNetProp(NetworkIP::property_names::address, ipAddress);
+    setNetProp(NetworkIP::property_names::prefix_length, prefix);
+    setNetProp(NetworkIP::property_names::origin, addressOrigin);
+    setNetProp(NetworkIP::property_names::gateway, gateway);
+    setNetProp(NetworkIP::property_names::type, addressType);
+    if (!ec)
+    {
+        ec = ipmi::setDbusProperty(
+            ctx, macObjectInfo.second, macObjectInfo.first,
+            MACAddress::interface, MACAddress::property_names::mac_address,
+            std::string(mac));
+    }
+
+    if (ec)
     {
         commit<InternalFailure>();
         lg2::error("Error in ipmiChassisSetSysBootOptions call");
         return ipmi::ccUnspecifiedError;
     }
+
+    lg2::debug("Network configuration changed: {NETWORKCONFIG}",
+               "NETWORKCONFIG", hostNetworkConfig);
 
     return ipmi::ccSuccess;
 }
@@ -2151,10 +2059,9 @@ ipmi::RspType<ipmi::message::Payload> ipmiChassisGetSysBootOptions(
                 BootOptionParameter::opalNetworkSettings)
             {
                 response.pack(bootOptionParameter, reserved1);
-                int ret = getHostNetworkData(response);
+                int ret = getHostNetworkData(ctx, response);
                 if (ret < 0)
                 {
-                    response.trailingOk = true;
                     lg2::error(
                         "getHostNetworkData failed for GetSysBootOptions.");
                     return ipmi::responseUnspecifiedError();
@@ -2401,15 +2308,13 @@ ipmi::RspType<> ipmiChassisSetSysBootOptions(ipmi::Context::ptr ctx,
             if (types::enum_cast<BootOptionParameter>(parameterSelector) ==
                 BootOptionParameter::opalNetworkSettings)
             {
-                ipmi::Cc ret = setHostNetworkData(data);
+                ipmi::Cc ret = setHostNetworkData(ctx, data);
                 if (ret != ipmi::ccSuccess)
                 {
                     lg2::error("ipmiChassisSetSysBootOptions: Error in "
                                "setHostNetworkData");
-                    data.trailingOk = true;
                     return ipmi::response(ret);
                 }
-                data.trailingOk = true;
                 return ipmi::responseSuccess();
             }
             else
