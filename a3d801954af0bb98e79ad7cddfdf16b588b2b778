@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c1d40a9f_105625e3",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 676,
+      "author": {
+        "id": 1002810
+      },
+      "writtenOn": "2026-07-17T07:19:45Z",
+      "side": 1,
+      "message": "Suggest changing it to DelVendorOption to avoid confusing future debugging log.",
+      "revId": "a3d801954af0bb98e79ad7cddfdf16b588b2b778",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "900e5868_ff64e720",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 747,
+      "author": {
+        "id": 1002810
+      },
+      "writtenOn": "2026-07-17T07:19:45Z",
+      "side": 1,
+      "message": "setVendorClassIdentifier only acts on dhcp4 paths, but setVendorOption / delVendorOption / getDHCPVendorOption run over every object in objectTree without that filter. Is this asymmetry intentional?",
+      "revId": "a3d801954af0bb98e79ad7cddfdf16b588b2b778",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dedda3cd_b68f0eee",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1422,
+      "author": {
+        "id": 1002810
+      },
+      "writtenOn": "2026-07-17T07:19:45Z",
+      "side": 1,
+      "message": "The return values of setVendorClassIdentifier / setVendorOption / delVendorOption are ignored here. If the underlying D-Bus objects are absent (they return false), the Set command still reports success while nothing was actually set. Consider checking the return values and returning an appropriate error completion code so the caller sees the real outcome.",
+      "revId": "a3d801954af0bb98e79ad7cddfdf16b588b2b778",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
