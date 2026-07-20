@@ -685,6 +685,45 @@ TEST(Vectors, VectorUint8)
     ASSERT_EQ(v, k);
 }
 
+TEST(Vectors, VectorUint8WithSizeOk)
+{
+    // a vector of bytes will be unpacked verbatim, low-order element first
+    ipmi::SecureBuffer i = {0x03, 0x02, 0x00, 0x86, 0x04};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
+    uint8_t s{};
+    ASSERT_EQ(p.unpack(s), 0);
+    ASSERT_EQ(s, 3);
+    // request s bytes for the vector and a single trailing byte
+    std::vector<uint8_t> v{};
+    v.resize(s);
+    uint8_t b{};
+    // check that the number of bytes matches
+    ASSERT_EQ(p.unpack(v, b), 0);
+    // check that the payload was fully unpacked
+    ASSERT_TRUE(p.fullyUnpacked());
+    std::vector<uint8_t> k = {0x02, 0x00, 0x86};
+    // check that the bytes were correctly unpacked (in byte order)
+    ASSERT_EQ(v, k);
+    ASSERT_EQ(b, 0x04);
+}
+
+TEST(Vectors, VectorUint8WithSizeInsufficientBytes)
+{
+    // a vector of bytes will be unpacked verbatim, low-order element first
+    ipmi::SecureBuffer i = {0x06, 0x00, 0x86, 0x04};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
+    // check that the number of bytes matches
+    uint8_t s{};
+    ASSERT_EQ(p.unpack(s), 0);
+    ASSERT_EQ(s, 6);
+    // request s bytes for the vector and a single trailing byte
+    std::vector<uint8_t> v{};
+    v.resize(s);
+    ASSERT_EQ(p.unpack(v), 1);
+    // check that the payload was not fully unpacked
+    ASSERT_FALSE(p.fullyUnpacked());
+}
+
 TEST(Vectors, VectorEmptyOk)
 {
     // an empty input vector to show that unpacking elements is okay
@@ -725,9 +764,43 @@ TEST(Vectors, VectorOfTuplesInsufficientBytes)
     ASSERT_EQ(p.unpack(v), 0);
     // check that the payload was not fully unpacked
     ASSERT_FALSE(p.fullyUnpacked());
-    std::vector<std::tuple<uint8_t, uint8_t>> k = {{0x02, 0x00}, {0x86, 0x04}};
+}
+
+TEST(Vectors, VectorOfTuplesWithSizeOk)
+{
+    // a vector of bytes will be unpacked verbatim, low-order element first
+    ipmi::SecureBuffer i = {0x03, 0x02, 0x00, 0x86, 0x04, 0x17, 0x33, 0x88};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
+    uint8_t s{};
+    ASSERT_EQ(p.unpack(s), 0);
+    ASSERT_EQ(s, 3);
+    // request s bytes for the vector and a single trailing byte
+    std::vector<std::tuple<uint8_t, uint8_t>> v;
+    v.resize(s);
+    uint8_t b{};
+    // check that the number of bytes matches
+    ASSERT_EQ(p.unpack(v, b), 0);
+    std::vector<std::tuple<uint8_t, uint8_t>> k = {
+        {0x02, 0x00}, {0x86, 0x04}, {0x17, 0x33}};
     // check that the bytes were correctly unpacked (in byte order)
     ASSERT_EQ(v, k);
+    ASSERT_EQ(b, 0x88);
+}
+
+TEST(Vectors, VectorOfTuplesWithSizeInsufficientBytes)
+{
+    // a vector of bytes will be unpacked verbatim, low-order element first
+    ipmi::SecureBuffer i = {0x06, 0x02, 0x00, 0x86, 0x04, 0xb4};
+    ipmi::message::Payload p(std::forward<ipmi::SecureBuffer>(i));
+    uint8_t s{};
+    ASSERT_EQ(p.unpack(s), 0);
+    ASSERT_EQ(s, 6);
+    // check that the number of bytes matches
+    std::vector<std::tuple<uint8_t, uint8_t>> v;
+    v.resize(s);
+    ASSERT_EQ(p.unpack(v), 1);
+    // check that the payload was not fully unpacked
+    ASSERT_FALSE(p.fullyUnpacked());
 }
 
 // Cannot test TooManyBytes or InsufficientBytes for vector<uint8_t>
