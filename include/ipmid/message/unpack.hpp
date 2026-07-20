@@ -299,16 +299,44 @@ struct UnpackSingle<std::vector<T>>
 {
     static int op(Payload& p, std::vector<T>& t)
     {
+        size_t nrReqd = t.size();
+        size_t unpackIndex{0};
         while (p.rawIndex < p.raw.size())
         {
-            t.emplace_back();
-            if (UnpackSingle<T>::op(p, t.back()))
+            if (nrReqd && nrReqd == unpackIndex)
             {
-                t.pop_back();
+                // user requested exactly N items
                 break;
             }
+            if (unpackIndex == t.size())
+            {
+                t.emplace_back();
+            }
+            // empty T unpack will break out of loop
+            const size_t bitsBefore = p.bitCount;
+            const size_t indexBefore = p.rawIndex;
+
+            int unpackOK = UnpackSingle<T>::op(p, t[unpackIndex]);
+
+            bool emptyUpack = bitsBefore == p.bitCount &&
+                              indexBefore == p.rawIndex;
+            if (unpackOK || emptyUpack)
+            {
+                if (!nrReqd)
+                {
+                    t.pop_back();
+                }
+                break;
+            }
+            unpackIndex++;
         }
-        // unpacking a vector is always successful:
+        // if the user requested exactly N, return failure if
+        // not exactly N were extracted
+        if (nrReqd && nrReqd != unpackIndex)
+        {
+            return 1;
+        }
+        // Otherwise, unpacking a vector is always successful:
         // either stuff was unpacked successfully (return 0)
         // or stuff was not unpacked, but should still return
         // success because an empty vector or a not-fully-unpacked
@@ -323,10 +351,26 @@ struct UnpackSingle<std::vector<uint8_t>>
 {
     static int op(Payload& p, std::vector<uint8_t>& t)
     {
-        // copy out the remainder of the message
-        t.reserve(p.raw.size() - p.rawIndex);
-        t.insert(t.begin(), p.raw.begin() + p.rawIndex, p.raw.end());
-        p.rawIndex = p.raw.size();
+        size_t cpBytes = p.raw.size() - p.rawIndex;
+        // check for a request of a specific number of bytes
+        // allows for <count>, <count bytes> to be part of the request
+        if (t.size())
+        {
+            // only failure is when a specific number of bytes was requested
+            // but there are not that many bytes remaining in the raw request
+            if (cpBytes < t.size())
+            {
+                return 1;
+            }
+            cpBytes = t.size();
+        }
+        else
+        {
+            t.resize(cpBytes);
+        }
+        auto firstOut = p.raw.begin() + p.rawIndex;
+        std::copy_n(firstOut, cpBytes, t.begin());
+        p.rawIndex += cpBytes;
         return 0;
     }
 };
