@@ -16,6 +16,46 @@
       "message": "@vernon.mauery@gmail.com Could you please Review My changes",
       "revId": "b239d2e093d3ecb79f46dac6aa38c72bdea61299",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "58e20537_b0f0d8c3",
+        "filename": "transportconstants.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-07-20T18:33:22Z",
+      "side": 1,
+      "message": "not needed; see other comment.",
+      "range": {
+        "startLine": 73,
+        "startChar": 4,
+        "endLine": 73,
+        "endChar": 12
+      },
+      "revId": "b239d2e093d3ecb79f46dac6aa38c72bdea61299",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "248aaca1_48a52e5b",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 822,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-07-20T18:33:22Z",
+      "side": 1,
+      "message": "use default instead to capture all cases (the static_cast could be any uint8_t).",
+      "revId": "b239d2e093d3ecb79f46dac6aa38c72bdea61299",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
