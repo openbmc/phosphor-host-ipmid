@@ -50,6 +50,161 @@
       "message": "Gentle Reminder For Review",
       "revId": "855568f4c3cf7f3b737663373d235615b2a893b9",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "132f002c_dfcfc42d",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 8
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-07-20T17:58:29Z",
+      "side": 1,
+      "message": "Thank you for the updates. They are much closer to what I would expect. The biggest issue here is that there is no phosphor-dbus-interfaces interface defined yet. Once you have that added to PDI, then you can use the sdbusplus utils to do the enum translation.",
+      "revId": "855568f4c3cf7f3b737663373d235615b2a893b9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a0c33139_141f542e",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 1478,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-07-20T17:58:29Z",
+      "side": 1,
+      "message": "use getAllDbusProperties instead to limit the number of round-trips to the settings daemon.",
+      "range": {
+        "startLine": 1476,
+        "startChar": 4,
+        "endLine": 1478,
+        "endChar": 45
+      },
+      "revId": "855568f4c3cf7f3b737663373d235615b2a893b9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2ce87bc2_1f18a8f4",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 1529,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-07-20T17:58:29Z",
+      "side": 1,
+      "message": "use the sdbusplus enum tools to get the string value from the integer value",
+      "range": {
+        "startLine": 1516,
+        "startChar": 1,
+        "endLine": 1529,
+        "endChar": 1
+      },
+      "revId": "855568f4c3cf7f3b737663373d235615b2a893b9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d5e3c293_5e3010dc",
+        "filename": "dcmihandler.hpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-07-20T17:58:29Z",
+      "side": 1,
+      "message": "settingsBus",
+      "range": {
+        "startLine": 44,
+        "startChar": 22,
+        "endLine": 44,
+        "endChar": 32
+      },
+      "revId": "855568f4c3cf7f3b737663373d235615b2a893b9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5bbcdc59_98768807",
+        "filename": "dcmihandler.hpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-07-20T17:58:29Z",
+      "side": 1,
+      "message": "I don\u0027t see this in phosphor-dbus-interfaces",
+      "range": {
+        "startLine": 48,
+        "startChar": 0,
+        "endLine": 48,
+        "endChar": 2
+      },
+      "revId": "855568f4c3cf7f3b737663373d235615b2a893b9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "94467027_9612ce33",
+        "filename": "dcmihandler.hpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-07-20T17:58:29Z",
+      "side": 1,
+      "message": "should this be \"hardPowerOffAndLoggingSEL\"?",
+      "range": {
+        "startLine": 52,
+        "startChar": 12,
+        "endLine": 52,
+        "endChar": 37
+      },
+      "revId": "855568f4c3cf7f3b737663373d235615b2a893b9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c3acc609_42955f72",
+        "filename": "dcmihandler.hpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-07-20T17:58:29Z",
+      "side": 1,
+      "message": "rather than using a map like this to manually define things, you should use the tools that sdbusplus provides (convert_from_string\u003c\u003e convert_to_string\u003c\u003e).",
+      "range": {
+        "startLine": 49,
+        "startChar": 0,
+        "endLine": 56,
+        "endChar": 40
+      },
+      "revId": "855568f4c3cf7f3b737663373d235615b2a893b9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
