@@ -444,6 +444,27 @@ RetType callDbusMethod(ipmi::Context::ptr ctx, boost::system::error_code& ec,
     return rc;
 }
 
+/** @brief Given a PropertyMap, fetch a value by key or a default
+ *  @param[in] properties - a PropertyMap (from getAllDbusProperties)
+ *  @param[in] key - the property name
+ *  @param[in] defaultValue - what to return if the key is not present
+ *                            or the value is the wrong type
+ *  @return - the value in PropertyMap or the defaultValue
+ */
+template <typename T>
+T propertyValueOrDefault(const ipmi::PropertyMap& properties,
+                         const std::string& key, const T& defaultValue = T())
+{
+    if (auto kv = properties.find(key); kv != properties.end())
+    {
+        if (auto valPtr = std::get_if<T>(&kv->second); valPtr)
+        {
+            return *valPtr;
+        }
+    }
+    return defaultValue;
+}
+
 /** @brief Perform the low-level i2c bus write-read.
  *  @param[in] i2cBus - i2c bus device node name, such as /dev/i2c-2.
  *  @param[in] targetAddr - i2c device target address.
