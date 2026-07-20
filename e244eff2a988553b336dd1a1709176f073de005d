@@ -50,6 +50,63 @@
       "message": "@vernon.mauery@gmail.com Could you please Review My changes",
       "revId": "e244eff2a988553b336dd1a1709176f073de005d",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d561a5ac_dbf82a72",
+        "filename": "apphandler.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 818,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-07-20T18:12:49Z",
+      "side": 1,
+      "message": "Chain the errors together for a more concise execution/error condition:\n\n```\n    boost::system::error_code ec \u003d\n        ipmi::getService(ctx, selIntf, selObject, selService);\n    if (!ec.value())\n    {\n        ipmi::PropertyMap selProps;\n        ec \u003d ipmi::getAllDbusProperties(ctx, selService, selObject, selIntf,\n                                        selProps);\n    }\n    if (ec.value())\n    {\n        lg2::error(\"Cannot find SEL service. \"\n                   \"Object: {OBJECT}, Error: {ERROR}\",\n                   \"OBJECT\", selObject, \"ERROR\", ec.message());\n        selFail \u003d true;\n    }\n\n```",
+      "range": {
+        "startLine": 797,
+        "startChar": 0,
+        "endLine": 818,
+        "endChar": 5
+      },
+      "revId": "e244eff2a988553b336dd1a1709176f073de005d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9fd2c4c7_29207dd0",
+        "filename": "apphandler.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 820,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-07-20T18:12:49Z",
+      "side": 1,
+      "message": "go ahead and implement it.\n\nThis will need to be able to handle the pre-compiled SDRs, the dynamic SDRs, and the hybrid SDRs situations. But it should not be too difficult.",
+      "revId": "e244eff2a988553b336dd1a1709176f073de005d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "734a86fb_a8fd58bd",
+        "filename": "apphandler.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 824,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-07-20T18:12:49Z",
+      "side": 1,
+      "message": "same comment as above.",
+      "revId": "e244eff2a988553b336dd1a1709176f073de005d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
