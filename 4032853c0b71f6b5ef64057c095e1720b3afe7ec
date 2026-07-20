@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ca509c57_729c4739",
+        "filename": "apphandler.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 1557,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-07-20T18:29:04Z",
+      "side": 0,
+      "message": "while this is not correct (because it doesn\u0027t account for length or encoding, it is still needed it should be:\n\n```\ncount \u003d std::min(count, configData.size() - (fullChunkSize - smallChunkSize));\n```",
+      "revId": "4032853c0b71f6b5ef64057c095e1720b3afe7ec",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
