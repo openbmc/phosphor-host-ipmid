@@ -1,0 +1,166 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9ec50d54_ef7b52a1",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1002973
+      },
+      "writtenOn": "2026-07-22T17:31:50Z",
+      "side": 1,
+      "message": "There is now a design doc: https://gerrit.openbmc.org/c/openbmc/docs/+/92631 , and the D-Bus contract is published as a companion phosphor-dbus-interfaces change: https://gerrit.openbmc.org/c/openbmc/phosphor-dbus-interfaces/+/92632 (xyz.openbmc_project.PefManager and PefFilter). This change consumes exactly that contract. On the D-Bus handling: the translator is intentionally thin; the only state logic is provider-presence detection via the object mapper, so an absent provider returns Destination Unavailable (0xD3) instead of CC 0x00 with a stale payload.",
+      "parentUuid": "d05093ee_74637f4a",
+      "revId": "324d9228e08f45c5af3fdfbb66ff4c3af08fe925",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b1ee8494_7ea94b23",
+        "filename": "pefhandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1002973
+      },
+      "writtenOn": "2026-07-22T17:31:50Z",
+      "side": 1,
+      "message": "Done. Migrated the translation unit to lg2: dropped \u003cphosphor-logging/log.hpp\u003e and the using-directive, and converted every log\u003clevel::ERR\u003e(msg, entry(\"X\u003d%s\", x)) to lg2::error(\"msg {X}\", \"X\", x).",
+      "parentUuid": "1f7ca354_fd240f1e",
+      "revId": "324d9228e08f45c5af3fdfbb66ff4c3af08fe925",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ae2dc3b7_8f77b783",
+        "filename": "pefhandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1002973
+      },
+      "writtenOn": "2026-07-22T17:31:50Z",
+      "side": 1,
+      "message": "This is not a user-facing knob. The advertised action-support mask is duplicated across three independently-built components (this translator, the filter-table provider, and the SEL matcher) that cannot share a header; the -DPEF_ACTION_SUPPORT guard lets an integrator raise all of them in lockstep in the same series that wires the additional action, and it defaults to OEM-only when unset. If you would prefer it not be a preprocessor value at all, I can expose it as a meson option instead.",
+      "parentUuid": "8d3af7dc_8545c176",
+      "revId": "324d9228e08f45c5af3fdfbb66ff4c3af08fe925",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e6ed73a3_4be2c341",
+        "filename": "pefhandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1002973
+      },
+      "writtenOn": "2026-07-22T17:31:50Z",
+      "side": 1,
+      "message": "Correct, thanks - fixed to Table 30-6. I also tightened the command-section references: Get PEF Capabilities \u003d sec 30.1, Set \u003d 30.3, Get \u003d 30.4.",
+      "parentUuid": "52823f32_7dbd7636",
+      "revId": "324d9228e08f45c5af3fdfbb66ff4c3af08fe925",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d70a6403_279015a2",
+        "filename": "pefhandler.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1002973
+      },
+      "writtenOn": "2026-07-22T17:31:50Z",
+      "side": 1,
+      "message": "You are right. Corrected to Table 17-2: inserted the 2-byte Event Data 1 Offset Mask at [9]/[10], so Event Data 1/2/3 AND / Compare 1 / Compare 2 now occupy [11]-[19].",
+      "parentUuid": "d3b56f24_540f8887",
+      "revId": "324d9228e08f45c5af3fdfbb66ff4c3af08fe925",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c28cfdb0_909e23e5",
+        "filename": "pefhandler.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1002973
+      },
+      "writtenOn": "2026-07-22T17:31:50Z",
+      "side": 1,
+      "message": "Fixed - removed the \u0027[18] Alert String Set / Selector\u0027 line; it is not part of the 20-byte entry.",
+      "parentUuid": "dfbeed1c_c601dc01",
+      "revId": "324d9228e08f45c5af3fdfbb66ff4c3af08fe925",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "22c5129c_cf1df49e",
+        "filename": "pefhandler.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1002973
+      },
+      "writtenOn": "2026-07-22T17:31:50Z",
+      "side": 1,
+      "message": "Fixed - the group control selector is byte [2] bits [6:4], now annotated there; the incorrect standalone \u0027[19] Group Control Selector\u0027 is removed.",
+      "parentUuid": "a93ce6f2_b42d28bf",
+      "revId": "324d9228e08f45c5af3fdfbb66ff4c3af08fe925",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2d5f7275_c0937700",
+        "filename": "pefhandler.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1002973
+      },
+      "writtenOn": "2026-07-22T17:31:50Z",
+      "side": 1,
+      "message": "I would like to keep this. The OEM-action bit (0x10) is necessarily duplicated in the SEL matcher (pefActionsImplemented) because they live in separate recipes and cannot share a header. Each side pins its constant to the spec-defined bit with a static_assert, so a typo on either side fails that side\u0027s build instead of silently shipping a mask that advertises an action the consumer does not implement. Zero runtime cost.",
+      "parentUuid": "d30d88af_0ea90346",
+      "revId": "324d9228e08f45c5af3fdfbb66ff4c3af08fe925",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "13249250_f4f96824",
+        "filename": "pefhandler.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1002973
+      },
+      "writtenOn": "2026-07-22T17:31:50Z",
+      "side": 1,
+      "message": "Done - removed. RawData is read by the SEL matcher, not by this translator, so the constant had no consumer here.",
+      "parentUuid": "1a986df0_812eb41a",
+      "revId": "324d9228e08f45c5af3fdfbb66ff4c3af08fe925",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
