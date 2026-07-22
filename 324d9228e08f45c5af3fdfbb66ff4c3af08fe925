@@ -21,6 +21,24 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "7466ebb9_01883976",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1002973
+      },
+      "writtenOn": "2026-07-22T18:58:00Z",
+      "side": 1,
+      "message": "Addressed",
+      "parentUuid": "9ec50d54_ef7b52a1",
+      "revId": "324d9228e08f45c5af3fdfbb66ff4c3af08fe925",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "42e1ae5f_e0a191a6",
         "filename": "/PATCHSET_LEVEL",
         "patchSetId": 3
@@ -68,6 +86,24 @@
       "side": 1,
       "message": "This is not a user-facing knob. The advertised action-support mask is duplicated across three independently-built components (this translator, the filter-table provider, and the SEL matcher) that cannot share a header; the -DPEF_ACTION_SUPPORT guard lets an integrator raise all of them in lockstep in the same series that wires the additional action, and it defaults to OEM-only when unset. If you would prefer it not be a preprocessor value at all, I can expose it as a meson option instead.",
       "parentUuid": "8d3af7dc_8545c176",
+      "revId": "324d9228e08f45c5af3fdfbb66ff4c3af08fe925",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "07b71df6_9eba8728",
+        "filename": "pefhandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1002973
+      },
+      "writtenOn": "2026-07-22T18:58:00Z",
+      "side": 1,
+      "message": "Addressed",
+      "parentUuid": "ae2dc3b7_8f77b783",
       "revId": "324d9228e08f45c5af3fdfbb66ff4c3af08fe925",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -158,6 +194,24 @@
       "side": 1,
       "message": "I would like to keep this. The OEM-action bit (0x10) is necessarily duplicated in the SEL matcher (pefActionsImplemented) because they live in separate recipes and cannot share a header. Each side pins its constant to the spec-defined bit with a static_assert, so a typo on either side fails that side\u0027s build instead of silently shipping a mask that advertises an action the consumer does not implement. Zero runtime cost.",
       "parentUuid": "d30d88af_0ea90346",
+      "revId": "324d9228e08f45c5af3fdfbb66ff4c3af08fe925",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "893ddb6b_41bed8b5",
+        "filename": "pefhandler.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1002973
+      },
+      "writtenOn": "2026-07-22T18:58:00Z",
+      "side": 1,
+      "message": "Addressed",
+      "parentUuid": "2d5f7275_c0937700",
       "revId": "324d9228e08f45c5af3fdfbb66ff4c3af08fe925",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
