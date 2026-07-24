@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6e72ceaf_03bd91ab",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-07-24T09:51:09Z",
+      "side": 1,
+      "message": "Nit: emptyUpack -\u003e emptyUnpack (spelling/readability only, no behavior change).\n\nValidated locally:\nsaipavan@msgubuntu-Precision-3680:~/pavan_community/openbmc/build/evb-ast2600/workspace/sources/phosphor-ipmi-host$ rg \u0027\\[ RUN|\\[ *OK\u0027 build/meson-logs/testlog.txt\n17:[ RUN      ] Vectors.VectorUint8WithSizeOk\n18:[       OK ] Vectors.VectorUint8WithSizeOk (0 ms)\n19:[ RUN      ] Vectors.VectorUint8WithSizeInsufficientBytes\n20:[       OK ] Vectors.VectorUint8WithSizeInsufficientBytes (0 ms)\n21:[ RUN      ] Vectors.VectorOfTuplesWithSizeOk\n22:[       OK ] Vectors.VectorOfTuplesWithSizeOk (0 ms)\n23:[ RUN      ] Vectors.VectorOfTuplesWithSizeInsufficientBytes\n24:[       OK ] Vectors.VectorOfTuplesWithSizeInsufficientBytes (0 ms)\nsaipavan@msgubuntu-Precision-3680:~/pavan_community/openbmc/build/evb-ast2600/workspace/sources/phosphor-ipmi-host$",
+      "revId": "28e3f950bbfe42cd65aa3e18452c201a57539908",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7049761d_b3fc6276",
+        "filename": "include/ipmid/message/unpack.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 321,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-07-24T09:51:09Z",
+      "side": 1,
+      "message": "Nit: emptyUpack -\u003e emptyUnpack (spelling/readability only, no behavior change).",
+      "range": {
+        "startLine": 321,
+        "startChar": 17,
+        "endLine": 321,
+        "endChar": 28
+      },
+      "revId": "28e3f950bbfe42cd65aa3e18452c201a57539908",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6cc8b431_c155f635",
+        "filename": "include/ipmid/message/unpack.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 323,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-07-24T09:51:09Z",
+      "side": 1,
+      "message": "Nit: emptyUpack -\u003e emptyUnpack (spelling/readability only, no behavior change).",
+      "range": {
+        "startLine": 323,
+        "startChar": 16,
+        "endLine": 323,
+        "endChar": 25
+      },
+      "revId": "28e3f950bbfe42cd65aa3e18452c201a57539908",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
