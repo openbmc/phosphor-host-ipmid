@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "95f19e20_8f1c9616",
+        "filename": "OWNERS",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2026-07-28T08:10:49Z",
+      "side": 1,
+      "message": "sort",
+      "range": {
+        "startLine": 64,
+        "startChar": 2,
+        "endLine": 64,
+        "endChar": 9
+      },
+      "revId": "6bf46698d374211b0dd17a3b7dbcaa494aa5de1b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
