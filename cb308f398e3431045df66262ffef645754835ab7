@@ -33,6 +33,86 @@
       "message": "Ready for next review.",
       "revId": "cb308f398e3431045df66262ffef645754835ab7",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9277fbc9_092c035b",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 14
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-07-29T19:21:17Z",
+      "side": 1,
+      "message": "still needs some work to make it more robust.",
+      "revId": "cb308f398e3431045df66262ffef645754835ab7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d8fcd5cd_047dd78e",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-07-29T19:21:17Z",
+      "side": 1,
+      "message": "if this fails, we should have a retry count to try again before ultimately abandoning the commit with an error message. This should allow for busy I2C buses and not let failed writes fall silently through the cracks.",
+      "revId": "cb308f398e3431045df66262ffef645754835ab7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f7e61c3d_615836d2",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 340,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-07-29T19:21:17Z",
+      "side": 1,
+      "message": "check the response of writeFru so we don\u0027t drop failed writes.\n```\nif (writeFru(wctx.bus, wctx.addr, wctx.data))\n{\n    it \u003d fruWriteCtxMap.erase(it);\n}\nelse\n{\n    ++it;\n}\n```",
+      "range": {
+        "startLine": 339,
+        "startChar": 0,
+        "endLine": 340,
+        "endChar": 38
+      },
+      "revId": "cb308f398e3431045df66262ffef645754835ab7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "55273ae9_6c0f1cd4",
+        "filename": "dbus-sdr/storagecommands.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 594,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-07-29T19:21:17Z",
+      "side": 1,
+      "message": "this needs to be reworked so we don\u0027t drop the failed writes without a retry. Maybe returning 0x81 (device busy) here would be appropriate instead of invalid field.",
+      "range": {
+        "startLine": 588,
+        "startChar": 1,
+        "endLine": 594,
+        "endChar": 9
+      },
+      "revId": "cb308f398e3431045df66262ffef645754835ab7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
