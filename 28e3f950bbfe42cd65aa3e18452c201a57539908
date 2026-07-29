@@ -41,6 +41,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "53cc14ad_4ecfb06c",
+        "filename": "include/ipmid/message/unpack.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 321,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-07-29T17:28:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7049761d_b3fc6276",
+      "range": {
+        "startLine": 321,
+        "startChar": 17,
+        "endLine": 321,
+        "endChar": 28
+      },
+      "revId": "28e3f950bbfe42cd65aa3e18452c201a57539908",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "6cc8b431_c155f635",
@@ -54,6 +78,30 @@
       "writtenOn": "2026-07-24T09:51:09Z",
       "side": 1,
       "message": "Nit: emptyUpack -\u003e emptyUnpack (spelling/readability only, no behavior change).",
+      "range": {
+        "startLine": 323,
+        "startChar": 16,
+        "endLine": 323,
+        "endChar": 25
+      },
+      "revId": "28e3f950bbfe42cd65aa3e18452c201a57539908",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8b7abf2b_d3cf1e90",
+        "filename": "include/ipmid/message/unpack.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 323,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-07-29T17:28:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6cc8b431_c155f635",
       "range": {
         "startLine": 323,
         "startChar": 16,
