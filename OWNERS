@@ -44,7 +44,6 @@ matchers:
 - partial_regex: oem/example
   owners:
   - vernon.mauery@gmail.com
-- partial_regex: oem/nvidia
   owners:
   - prithvi24pai@gmail.com
 
