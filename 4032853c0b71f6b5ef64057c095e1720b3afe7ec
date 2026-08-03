@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "87971b47_603b9682",
+        "filename": "ipmid-new.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 585,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-08-03T20:09:35Z",
+      "side": 0,
+      "message": "I am unclear on what you think is happening here. With the move, the buffer inside of the std::vector (parent of SecureBuffer) gets moved to the new owning SecureBuffer, setting the source SecureBuffer\u0027s size to 0 and buffer pointer to nullptr. This means that there is nothing that can be done with the source. The destination SecureBuffer will clean up the original buffer on destruction.\n\nThis is just causing an extra copy that is not needed.",
+      "revId": "4032853c0b71f6b5ef64057c095e1720b3afe7ec",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
