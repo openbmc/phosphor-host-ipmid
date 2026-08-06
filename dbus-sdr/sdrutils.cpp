@@ -447,7 +447,7 @@ std::map<std::string, Value> getEntityManagerProperties(const char* path,
 }
 
 // Fetch the ipmiDecoratorPaths to get the list of dbus objects that
-// have ipmi decorator to prevent unnessary dbus call to fetch the info
+// have ipmi decorator to prevent unnecessary dbus call to fetch the info
 std::optional<std::unordered_set<std::string>>& getIpmiDecoratorPaths(
     const std::optional<ipmi::Context::ptr>& ctx)
 {

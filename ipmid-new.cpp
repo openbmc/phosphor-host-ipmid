@@ -799,7 +799,7 @@ void handleLegacyIpmiCommand(sdbusplus::message_t& m)
             if (ec)
             {
                 lg2::error(
-                    "Failed to send response to requestor ({NETFN}/{CMD}): {ERROR}",
+                    "Failed to send response to requester ({NETFN}/{CMD}): {ERROR}",
                     "ERROR", ec.message(), "SENDER", dest, "NETFN", lg2::hex,
                     netFn, "CMD", lg2::hex, cmd);
             }

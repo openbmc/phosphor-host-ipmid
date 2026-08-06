@@ -735,7 +735,7 @@ static void unpackFinal(message::Payload& req)
  *      cp -f ${PROJECT_SRC_DIR}/transporthandler_oem.cpp ${S}
  *   }
  *
- *   # Clean up after complilation has completed
+ *   # Clean up after compilation has completed
  *   do_install:append(){
  *      rm -f ${S}/transporthandler_oem.cpp
  *   }
@@ -1179,7 +1179,7 @@ RspType<message::Payload> getLan(Context::ptr ctx, uint4_t channelBits,
 
     if (!isLanChannel(channel).value_or(false))
     {
-        lg2::error("Set Lan - Not a LAN channel");
+        lg2::error("Get Lan - Not a LAN channel");
         return responseInvalidFieldRequest();
     }
 
@@ -1652,7 +1652,7 @@ RspType<message::Payload> getSolConfParams(
 
     if (ipmi::getService(ctx, solInterface, solPathWitheEthName, solService))
     {
-        lg2::error("Set Sol Config - Invalid solInterface, service: {SERVICE}, "
+        lg2::error("Get Sol Config - Invalid solInterface, service: {SERVICE}, "
                    "object path: {OBJPATH}, interface: {INTERFACE}",
                    "SERVICE", solService, "OBJPATH", solPathWitheEthName,
                    "INTERFACE", solInterface);
@@ -1733,7 +1733,7 @@ RspType<message::Payload> getSolConfParams(
         }
         case SolConfParam::Retry:
         {
-            // 3bits, cast when cast
+            // 3bits, cast when pack
             uint8_t count{};
             uint8_t interval{};
 
