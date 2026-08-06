@@ -110,7 +110,7 @@ std::unique_ptr<sdbusplus::match> sensorsOwnerMatch
 ipmi::sensor::SensorCacheMap sensorCacheMap __attribute__((init_priority(101)));
 
 // It is needed to know which objects belong to which service, so that when a
-// service exits without interfacesRemoved signal, we could invaildate the cache
+// service exits without interfacesRemoved signal, we could invalidate the cache
 // that is related to the service. It uses below two variables:
 // - idToServiceMap records which sensors are known to have a related service;
 // - serviceToIdMap maps a service to the sensors.
@@ -958,7 +958,7 @@ ipmi::RspType<> ipmiSenSetSensorThresholds(
     constexpr uint8_t propertyName = 0;
     constexpr uint8_t thresholdValue = 1;
     constexpr uint8_t interface = 2;
-    // verifiy all needed fields are present
+    // verify all needed fields are present
     if (lowerCriticalThreshMask || upperCriticalThreshMask)
     {
         ipmi::PropertyMap findThreshold;

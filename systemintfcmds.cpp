@@ -61,7 +61,7 @@ ipmi::RspType<uint16_t,              // id
 
     constexpr uint32_t timestamp{0};
 
-    // per IPMI spec NetFuntion for OEM
+    // per IPMI spec NetFunction for OEM
     constexpr uint8_t netfun = 0x3a;
 
     // Read from the Command Manager queue. What gets returned is a

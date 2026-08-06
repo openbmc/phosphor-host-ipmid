@@ -119,7 +119,7 @@ int PasswdMgr::updateUserEntry(const std::string& userName,
         }
     }
 
-    // Write passwdMap to Encryted file
+    // Write passwdMap to Encrypted file
     if (updatePasswdSpecialFile(userName, newUserName) != 0)
     {
         lg2::debug("Passwd file update failed");

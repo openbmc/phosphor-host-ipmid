@@ -115,7 +115,7 @@ option(
 option(
     'libuserlayer',
     type: 'feature',
-    description: 'Option to exclue exclude libuserlayer',
+    description: 'Option to exclude libuserlayer',
 )
 
 # When transport-oem is enabled, the transporthandler_oem.cpp contents
