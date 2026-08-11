@@ -18,6 +18,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "69ac53d7_71ab0f25",
+        "filename": "globalhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-08-11T06:49:15Z",
+      "side": 1,
+      "message": "Done, please check",
+      "parentUuid": "dcf5d3b6_95c7b575",
+      "revId": "ff52109728b8ca93bd3734c17ce0795af3d5c3b0",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "2789b356_35298126",
@@ -35,6 +53,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "d005d089_dd226123",
+        "filename": "globalhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-08-11T06:49:15Z",
+      "side": 1,
+      "message": "Done, please check",
+      "parentUuid": "2789b356_35298126",
+      "revId": "ff52109728b8ca93bd3734c17ce0795af3d5c3b0",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "59f72e4a_7a7af522",
@@ -48,6 +84,24 @@
       "writtenOn": "2026-07-29T16:01:53Z",
       "side": 1,
       "message": "ipmid is single threaded. Use the post_work helper function to have the function called from outside the handler context. Also, there\u0027s no need for a delay; the reset should be invoked immediately.",
+      "revId": "ff52109728b8ca93bd3734c17ce0795af3d5c3b0",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "cbfe8a00_8d46c05d",
+        "filename": "globalhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-08-11T06:49:15Z",
+      "side": 1,
+      "message": "Done, please check",
+      "parentUuid": "59f72e4a_7a7af522",
       "revId": "ff52109728b8ca93bd3734c17ce0795af3d5c3b0",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
