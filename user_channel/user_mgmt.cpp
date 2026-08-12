@@ -522,7 +522,7 @@ static int pamFunctionConversation(int numMsg, const struct pam_message** msg,
         }
 
         /* Assume PAM is only prompting for the password as hidden input */
-        /* Allocate memory only when PAM_PROMPT_ECHO_OFF is encounterred */
+        /* Allocate memory only when PAM_PROMPT_ECHO_OFF is encountered */
 
         char* appPass = reinterpret_cast<char*>(appdataPtr);
         size_t appPassSize = std::strlen(appPass);
@@ -1697,7 +1697,7 @@ void UserAccess::cacheUserDataFile()
         }
     }
 
-    // Walk through remnaining managedObj users list
+    // Walk through remaining managedObj users list
     // Add them to ipmi data base
     for (const auto& usrObj : managedObjs)
     {

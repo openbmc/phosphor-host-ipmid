@@ -49,7 +49,7 @@ class PasswdMgr
      */
     SecureString getPasswdByUserName(const std::string& userName);
 
-    /** @brief Update / clear  username and password entry for the specified
+    /** @brief Update / clear username and password entry for the specified
      * user
      *
      *  @param[in] userName - user name that has to be renamed / deleted

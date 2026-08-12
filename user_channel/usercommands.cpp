@@ -108,7 +108,7 @@ ipmi::RspType<> ipmiSetUserAccess(
                                    privAccess, static_cast<bool>(bitsUpdate)));
 }
 
-/** @brief implements the set user access command
+/** @brief implements the get user access command
  *  @param ctx - IPMI context pointer (for channel)
  *  @param channel - channel number
  *  @param reserved1 - skip 4 bits
@@ -124,7 +124,7 @@ ipmi::RspType<> ipmiSetUserAccess(
  *   - reserved2 - skip 2 bits
  *   - privilege - user privilege
  *   - ipmiEnabled - ipmi messaging state
- *   - linkAuthEnabled - link authenticatin state
+ *   - linkAuthEnabled - link authentication state
  *   - accessCallback - callback state
  *   - reserved - skip 1 bit
  */
@@ -208,7 +208,7 @@ ipmi::RspType<uint6_t, // max channel users
         static_cast<uint1_t>(privAccess.reserved));
 }
 
-/** @brief implements the get user name command
+/** @brief implements the set user name command
  *  @param[in] ctx - ipmi command context
  *  @param[in] userId - 6-bit user ID
  *  @param[in] reserved - 2-bits reserved
@@ -275,7 +275,7 @@ ipmi::RspType<std::array<uint8_t, ipmi::ipmiMaxUserName>> // user name
     return ipmi::responseSuccess(std::move(userNameFixed));
 }
 
-/** @brief implements the get user name command
+/** @brief implements the set user password command
  *  @param[in] ctx - ipmi command context
  *  @param[in] userId - 6-bit user ID
  *  @param[in] reserved - 2-bits reserved

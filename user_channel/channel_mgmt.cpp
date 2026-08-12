@@ -757,7 +757,7 @@ std::string ChannelConfig::convertToPrivLimitString(const uint8_t value)
 {
     if (privList.size() <= value)
     {
-        lg2::error("Invalid privilege: {PRIV_IDX.", "PRIV_IDX", value);
+        lg2::error("Invalid privilege: {PRIV_IDX}.", "PRIV_IDX", value);
         throw std::invalid_argument("Invalid privilege.");
     }
 

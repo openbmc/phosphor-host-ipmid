@@ -385,7 +385,7 @@ class ChannelConfig
      *
      *  @param[in] value - protocol type in string
      *
-     *  @return channel protocol  type
+     *  @return channel protocol type
      */
     EChannelProtocolType convertToProtocolTypeIndex(const std::string& value);
 
