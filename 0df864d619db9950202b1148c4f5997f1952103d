@@ -1,6 +1,52 @@
 {
   "comments": [
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "fbc69b87_557192aa",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-08-12T11:10:03Z",
+      "side": 1,
+      "message": "By using the ipmitool get and set command we can set thresholds?\n\nEx: 1. ipmitool sensor thresh \u003cname\u003e unr 95\n    2. ipmitool sensor thresh \u003cname\u003e lnr 5\n    3. ipmitool sensor get \u003cname\u003e",
+      "range": {
+        "startLine": 19,
+        "startChar": 38,
+        "endLine": 19,
+        "endChar": 39
+      },
+      "revId": "0df864d619db9950202b1148c4f5997f1952103d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a2d48320_79669673",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-08-12T11:10:03Z",
+      "side": 1,
+      "message": "Will ipmitool sensor get \u003cname\u003e show the NonRecoverable threshold values with this patch?\n\nor\n\nWith this patch, does ipmitool sensor list show the NonRecoverable values",
+      "range": {
+        "startLine": 30,
+        "startChar": 2,
+        "endLine": 30,
+        "endChar": 7
+      },
+      "revId": "0df864d619db9950202b1148c4f5997f1952103d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": false,
       "key": {
         "uuid": "bf6bfa5e_e23f9126",
@@ -14,6 +60,29 @@
       "writtenOn": "2026-07-21T02:25:52Z",
       "side": 1,
       "message": "LGTM",
+      "revId": "0df864d619db9950202b1148c4f5997f1952103d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cfb82b3f_faf9a05c",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 2226,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-08-12T11:10:03Z",
+      "side": 1,
+      "message": "Should NonRecoverable thresholds also be populated here, similar to Critical/Warning above?",
+      "range": {
+        "startLine": 2226,
+        "startChar": 0,
+        "endLine": 2226,
+        "endChar": 5
+      },
       "revId": "0df864d619db9950202b1148c4f5997f1952103d",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
