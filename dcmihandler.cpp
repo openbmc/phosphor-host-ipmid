@@ -1227,7 +1227,20 @@ ipmi::RspType<> setDCMIConfParams(ipmi::Context::ptr& ctx, uint8_t parameter,
             {
                 return ipmi::responseUnspecifiedError();
             }
+<<<<<<< PATCH SET (9cb5eb dcmihandler: Reject DHCP activation when both IPv4 and IPv6 )
+            if (activate &&
+                ((dhcpEnabled.value() ==
+                  EthernetInterface::DHCPConf::v6stateless) ||
+                 (dhcpEnabled.value() == EthernetInterface::DHCPConf::v6) ||
+                 (dhcpEnabled.value() == EthernetInterface::DHCPConf::none)))
+            {
+                return ipmi::responseCommandNotAvailable();
+            }
+            if (activate &&
+                (dhcpEnabled.value() != EthernetInterface::DHCPConf::none))
+=======
             if (dhcpEnabled.value() != EthernetInterface::DHCPConf::none)
+>>>>>>> BASE      (069b26 user_channel: Don't fail channel access set when ChannelAcce)
             {
                 // When these conditions are met we have to trigger DHCP
                 // protocol restart using the latest parameter settings,
