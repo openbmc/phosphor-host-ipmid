@@ -86,7 +86,7 @@ void PasswdMgr::restrictFilesPermission(void)
         {
             if (chmod(encryptKeyFileName, S_IRUSR | S_IWUSR) == -1)
             {
-                lg2::debug("Error setting chmod for ipmi_pass file");
+                lg2::debug("Error setting chmod for key_file file");
             }
         }
     }
@@ -301,7 +301,7 @@ int PasswdMgr::readPasswdFileData(SecureString& outBytes)
     passwdFile.read(reinterpret_cast<char*>(input.data()), fileSize);
     if (passwdFile.fail())
     {
-        lg2::debug("Error in reading encryption key file");
+        lg2::debug("Error in reading ipmi password file");
         return -EIO;
     }
 
@@ -517,7 +517,7 @@ int PasswdMgr::updatePasswdSpecialFile(const std::string& userName,
     // Generate IV values
     if (RAND_bytes(iv.data(), ivLen) != 1)
     {
-        lg2::debug("UV generation failed, bailing out");
+        lg2::debug("IV generation failed, bailing out");
         return -EIO;
     }
 
@@ -584,7 +584,7 @@ int PasswdMgr::updatePasswdSpecialFile(const std::string& userName,
 
     OPENSSL_cleanse(iv.data(), ivLen);
 
-    // Rename the tmp  file to actual file
+    // Rename the tmp file to actual file
     if (std::rename(strTempFileName.data(), passwdFileName) != 0)
     {
         lg2::debug("Failed to rename tmp file to ipmi-pass");

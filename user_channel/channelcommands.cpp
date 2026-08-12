@@ -257,7 +257,7 @@ RspType<uint4_t,  // chNum
 {
     if (reserved)
     {
-        lg2::debug("Get channel access - Invalid field in request");
+        lg2::debug("Get channel info - Invalid field in request");
         return responseInvalidFieldRequest();
     }
 
