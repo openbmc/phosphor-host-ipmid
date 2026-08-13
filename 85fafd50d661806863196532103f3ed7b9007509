@@ -24,6 +24,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "67808fe2_bb137b4b",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1002754
+      },
+      "writtenOn": "2026-08-13T09:57:02Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "639fc32e_53ee76d6",
+      "range": {
+        "startLine": 55,
+        "startChar": 40,
+        "endLine": 55,
+        "endChar": 44
+      },
+      "revId": "85fafd50d661806863196532103f3ed7b9007509",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "0f3a06e4_ce4cfbb9",
@@ -47,6 +71,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "e929ce37_e09085ff",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1221,
+      "author": {
+        "id": 1002754
+      },
+      "writtenOn": "2026-08-13T09:57:02Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "0f3a06e4_ce4cfbb9",
+      "range": {
+        "startLine": 1221,
+        "startChar": 0,
+        "endLine": 1221,
+        "endChar": 13
+      },
+      "revId": "85fafd50d661806863196532103f3ed7b9007509",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "6d5fa495_8d3a8b23",
@@ -60,6 +108,30 @@
       "writtenOn": "2026-08-13T06:12:22Z",
       "side": 1,
       "message": "if (dhcpEnabled.value() !\u003d none) block is empty — no code runs inside it. Since we already reject everything except 0x01 above,Is this really required?",
+      "range": {
+        "startLine": 1230,
+        "startChar": 36,
+        "endLine": 1230,
+        "endChar": 37
+      },
+      "revId": "85fafd50d661806863196532103f3ed7b9007509",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6c10540a_f6b506f4",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1230,
+      "author": {
+        "id": 1002754
+      },
+      "writtenOn": "2026-08-13T09:57:02Z",
+      "side": 1,
+      "message": "The block is kept intentionally — it documents the spec\u0027s condition: DHCP restart should only be triggered when DHCP is actually enabled . Removing it would lose that context for future developers.",
+      "parentUuid": "6d5fa495_8d3a8b23",
       "range": {
         "startLine": 1230,
         "startChar": 36,
