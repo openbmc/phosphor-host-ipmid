@@ -24,6 +24,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "c5de9e1c_2ba0a1e5",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1002970
+      },
+      "writtenOn": "2026-08-13T15:26:40Z",
+      "side": 1,
+      "message": "Yes. NonRecoverable thresholds can be set and retrieved using ipmitool.\nipmitool sensor thresh \u003cname\u003e unr \u003cvalue\u003e - set upper threshold\nipmitool sensor thresh \u003cname\u003e lnr \u003cvalue\u003e - set lower threshold\nipmitool sensor get \u003cname\u003e - view all thresholds\"",
+      "parentUuid": "fbc69b87_557192aa",
+      "range": {
+        "startLine": 19,
+        "startChar": 38,
+        "endLine": 19,
+        "endChar": 39
+      },
+      "revId": "0df864d619db9950202b1148c4f5997f1952103d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "a2d48320_79669673",
@@ -37,6 +61,30 @@
       "writtenOn": "2026-08-12T11:10:03Z",
       "side": 1,
       "message": "Will ipmitool sensor get \u003cname\u003e show the NonRecoverable threshold values with this patch?\n\nor\n\nWith this patch, does ipmitool sensor list show the NonRecoverable values",
+      "range": {
+        "startLine": 30,
+        "startChar": 2,
+        "endLine": 30,
+        "endChar": 7
+      },
+      "revId": "0df864d619db9950202b1148c4f5997f1952103d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8b596015_59c7f290",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1002970
+      },
+      "writtenOn": "2026-08-13T15:26:40Z",
+      "side": 1,
+      "message": "Yes, both work. ipmitool sensor list shows sensors, and ipmitool sensor get \u003cname\u003e displays NonRecoverable threshold values. Full IPMI sensor command support for NonRecoverable thresholds.",
+      "parentUuid": "a2d48320_79669673",
       "range": {
         "startLine": 30,
         "startChar": 2,
@@ -77,6 +125,30 @@
       "writtenOn": "2026-08-12T11:10:03Z",
       "side": 1,
       "message": "Should NonRecoverable thresholds also be populated here, similar to Critical/Warning above?",
+      "range": {
+        "startLine": 2226,
+        "startChar": 0,
+        "endLine": 2226,
+        "endChar": 5
+      },
+      "revId": "0df864d619db9950202b1148c4f5997f1952103d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "99b348f1_ea03576a",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 2226,
+      "author": {
+        "id": 1002970
+      },
+      "writtenOn": "2026-08-13T15:26:40Z",
+      "side": 1,
+      "message": "Yes, NonRecoverable thresholds are now populated in SDR construction (dbus-sdr/sensorcommands.cpp), with support for upper/lower thresholds and alarm events—matching Critical/Warning threshold behavior.\"",
+      "parentUuid": "cfb82b3f_faf9a05c",
       "range": {
         "startLine": 2226,
         "startChar": 0,
