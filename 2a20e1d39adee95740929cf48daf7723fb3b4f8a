@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e970dd9b_05551853",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-08-13T10:42:56Z",
+      "side": 1,
+      "message": "Change aligns with the DCMI 1.5 specification (Table 6-6, Activate DHCP parameter): only 0x01 is defined as a valid write value to trigger DHCP restart. Rejecting all other values including 0x00 is the correct behavior per spec.",
+      "revId": "2a20e1d39adee95740929cf48daf7723fb3b4f8a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
