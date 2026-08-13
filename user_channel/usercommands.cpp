@@ -510,8 +510,6 @@ ipmi::RspType<> ipmiSetUserPayloadAccess(
     // Validate the reserved args. Only SOL payload is supported as on date.
     if (reserved || stdPayload0ipmiReserved || stdPayload2 || stdPayload3 ||
         stdPayload4 || stdPayload5 || stdPayload6 || stdPayload7 ||
-        oemPayload0 || oemPayload1 || oemPayload2 || oemPayload3 ||
-        oemPayload4 || oemPayload5 || oemPayload6 || oemPayload7 ||
         stdPayloadEnables2Reserved || oemPayloadEnables2Reserved ||
         !isValidChannel(chNum))
     {
@@ -533,6 +531,15 @@ ipmi::RspType<> ipmiSetUserPayloadAccess(
 
     PayloadAccess payloadAccess = {};
     payloadAccess.stdPayloadEnables1[1] = stdPayload1SOL;
+
+    payloadAccess.oemPayloadEnables1[0] = oemPayload0;
+    payloadAccess.oemPayloadEnables1[1] = oemPayload1;
+    payloadAccess.oemPayloadEnables1[2] = oemPayload2;
+    payloadAccess.oemPayloadEnables1[3] = oemPayload3;
+    payloadAccess.oemPayloadEnables1[4] = oemPayload4;
+    payloadAccess.oemPayloadEnables1[5] = oemPayload5;
+    payloadAccess.oemPayloadEnables1[6] = oemPayload6;
+    payloadAccess.oemPayloadEnables1[7] = oemPayload7;
 
     return ipmi::response(ipmiUserSetUserPayloadAccess(
         chNum, static_cast<uint8_t>(operation), static_cast<uint8_t>(userId),
