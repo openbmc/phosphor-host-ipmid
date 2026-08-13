@@ -475,14 +475,7 @@ ipmi::RspType<uint8_t,  // channel number
  *  @param stdPayload6 -                  (1 bit)
  *  @param stdPayload7 -                  (1 bit)
  *  @param stdPayloadEnables2Reserved -   (8 bits)
- *  @param oemPayload0 -                  (1 bit)
- *  @param oemPayload1 -                  (1 bit)
- *  @param oemPayload2 -                  (1 bit)
- *  @param oemPayload3 -                  (1 bit)
- *  @param oemPayload4 -                  (1 bit)
- *  @param oemPayload5 -                  (1 bit)
- *  @param oemPayload6 -                  (1 bit)
- *  @param oemPayload7 -                  (1 bit)
+ *  @param oemPayload - OEM payload enables (8 bits)
  *  @param oemPayloadEnables2Reserved -   (8 bits)
  *
  *  @returns IPMI completion code
@@ -500,8 +493,7 @@ ipmi::RspType<> ipmiSetUserPayloadAccess(
 
     uint8_t stdPayloadEnables2Reserved,
 
-    bool oemPayload0, bool oemPayload1, bool oemPayload2, bool oemPayload3,
-    bool oemPayload4, bool oemPayload5, bool oemPayload6, bool oemPayload7,
+    std::bitset<payloadsPerByte> oemPayload,
 
     uint8_t oemPayloadEnables2Reserved)
 {
@@ -510,8 +502,6 @@ ipmi::RspType<> ipmiSetUserPayloadAccess(
     // Validate the reserved args. Only SOL payload is supported as on date.
     if (reserved || stdPayload0ipmiReserved || stdPayload2 || stdPayload3 ||
         stdPayload4 || stdPayload5 || stdPayload6 || stdPayload7 ||
-        oemPayload0 || oemPayload1 || oemPayload2 || oemPayload3 ||
-        oemPayload4 || oemPayload5 || oemPayload6 || oemPayload7 ||
         stdPayloadEnables2Reserved || oemPayloadEnables2Reserved ||
         !isValidChannel(chNum))
     {
@@ -533,6 +523,8 @@ ipmi::RspType<> ipmiSetUserPayloadAccess(
 
     PayloadAccess payloadAccess = {};
     payloadAccess.stdPayloadEnables1[1] = stdPayload1SOL;
+
+    payloadAccess.oemPayloadEnables1 = oemPayload;
 
     return ipmi::response(ipmiUserSetUserPayloadAccess(
         chNum, static_cast<uint8_t>(operation), static_cast<uint8_t>(userId),
