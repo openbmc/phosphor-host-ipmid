@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "92d85fad_00b0bbda",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-08-14T07:25:01Z",
+      "side": 1,
+      "message": "NonRecoverable threshold support looks correct across all IPMI paths. LGTM.",
+      "revId": "cbddb8b541df04f1935c3570a604596d4c7e9384",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
