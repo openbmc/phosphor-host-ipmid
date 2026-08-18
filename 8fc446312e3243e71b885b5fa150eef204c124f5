@@ -1,6 +1,29 @@
 {
   "comments": [
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "3ece3429_b695c7a9",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-08-18T06:16:01Z",
+      "side": 1,
+      "message": "Could you add a Tested: section in the commit message with the commands used to verify? It helps other reviewers reproduce the validation and serves as a reference for anyone testing this on a different platform.",
+      "range": {
+        "startLine": 12,
+        "startChar": 48,
+        "endLine": 12,
+        "endChar": 49
+      },
+      "revId": "8fc446312e3243e71b885b5fa150eef204c124f5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": false,
       "key": {
         "uuid": "34b1ece8_3797ad2c",
@@ -14,6 +37,52 @@
       "writtenOn": "2026-08-18T04:25:31Z",
       "side": 1,
       "message": "Looks good in conjunction with the pam changes you have submitted, thanks!",
+      "revId": "8fc446312e3243e71b885b5fa150eef204c124f5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b29a058f_8ec114cc",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 576,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-08-18T06:16:01Z",
+      "side": 1,
+      "message": "I notice pamUpdatePasswd() at line 576 still uses pam_start(\"passwd\", ...). Since password changes via IPMI Set User Password command also originate from IPMI network traffic, should that also be updated to use \"ipmi\" for consistent audit attribution?",
+      "range": {
+        "startLine": 576,
+        "startChar": 39,
+        "endLine": 576,
+        "endChar": 56
+      },
+      "revId": "8fc446312e3243e71b885b5fa150eef204c124f5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ae3b2337_a2c53505",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 601,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-08-18T06:16:01Z",
+      "side": 1,
+      "message": "My understanding: Before this patch, pamUserCheckAuthenticate() used \"dropbear\" as the PAM service, which caused IPMI auth events to appear as SSH sessions in audit logs and shared the same PAM config/lockout counters with dropbear. This patch fixes that by giving IPMI its own PAM service identity.\n\nPlease Correct me if my understanding is wrong ?",
+      "range": {
+        "startLine": 601,
+        "startChar": 0,
+        "endLine": 601,
+        "endChar": 62
+      },
       "revId": "8fc446312e3243e71b885b5fa150eef204c124f5",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
