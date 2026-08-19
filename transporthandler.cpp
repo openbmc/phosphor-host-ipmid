@@ -931,10 +931,9 @@ RspType<> setLanInt(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
         }
         case LanParam::Gateway1MAC:
         {
-            auto gatewayMAC = unpackT<stdplus::EtherAddr>(req);
-            unpackFinal(req);
-            channelCall<reconfigureGatewayMAC<AF_INET>>(channel, gatewayMAC);
-            return responseSuccess();
+            // Gateway MAC is auto-resolved by phosphor-network
+            req.trailingOk = true;
+            return responseCommandNotAvailable();
         }
         case LanParam::VLANId:
         {
