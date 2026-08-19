@@ -1,0 +1,164 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4eecb95f_b20a8b75",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-08-19T18:43:11Z",
+      "side": 1,
+      "message": "move these down inside the functions where they are used to reduce scope.",
+      "range": {
+        "startLine": 44,
+        "startChar": 0,
+        "endLine": 45,
+        "endChar": 47
+      },
+      "revId": "9ee480869f71390b622b54582f5526cac7c31889",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5340813e_b894fee5",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-08-19T18:43:11Z",
+      "side": 1,
+      "message": "move this down into the function where it is used to reduce scope.",
+      "revId": "9ee480869f71390b622b54582f5526cac7c31889",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4fee4a3e_02a8817e",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-08-19T18:43:11Z",
+      "side": 1,
+      "message": "where is this requirement coming from? It seems like any host interface should be sufficient. It could be kcs, bt, smbus, usb, etc. Blocking network-based media seems like a good idea.",
+      "range": {
+        "startLine": 70,
+        "startChar": 2,
+        "endLine": 73,
+        "endChar": 5
+      },
+      "revId": "9ee480869f71390b622b54582f5526cac7c31889",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ccc7a33e_4a3f4f0c",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-08-19T18:43:11Z",
+      "side": 1,
+      "message": "Move cnBuffer and cnBufferLen down to where they are used.\n\nUse a vector instead to eliminate the copy:\n```\nstd::vector\u003cuint8_t\u003e cnBuffer(EVP_MAX_MD_SIZE);\n```\nthen resize using cnBufferLen after the digest call.",
+      "range": {
+        "startLine": 138,
+        "startChar": 0,
+        "endLine": 138,
+        "endChar": 2
+      },
+      "revId": "9ee480869f71390b622b54582f5526cac7c31889",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3e5995d1_4735abf3",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-08-19T18:43:11Z",
+      "side": 1,
+      "message": "These checks are not needed since the filter has already done this.",
+      "range": {
+        "startLine": 147,
+        "startChar": 0,
+        "endLine": 160,
+        "endChar": 1
+      },
+      "revId": "9ee480869f71390b622b54582f5526cac7c31889",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3ef75322_32b51600",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-08-19T18:43:11Z",
+      "side": 1,
+      "message": "cnBuffer.data()",
+      "revId": "9ee480869f71390b622b54582f5526cac7c31889",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f168d884_33375e28",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-08-19T18:43:11Z",
+      "side": 1,
+      "message": "cnBuffer.resize(cnBufferLen);",
+      "revId": "9ee480869f71390b622b54582f5526cac7c31889",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8837b967_bb3cf221",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-08-19T18:43:11Z",
+      "side": 1,
+      "message": "with cnBuffer as a vector we can skip this and just return the resized vector.",
+      "revId": "9ee480869f71390b622b54582f5526cac7c31889",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
