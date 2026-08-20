@@ -92,6 +92,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "a3dd855d_b2422751",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 1478,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-08-20T08:17:02Z",
+      "side": 1,
+      "message": "Done, Please Check",
+      "parentUuid": "a0c33139_141f542e",
+      "range": {
+        "startLine": 1476,
+        "startChar": 4,
+        "endLine": 1478,
+        "endChar": 45
+      },
+      "revId": "855568f4c3cf7f3b737663373d235615b2a893b9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "2ce87bc2_1f18a8f4",
@@ -105,6 +129,30 @@
       "writtenOn": "2026-07-20T17:58:29Z",
       "side": 1,
       "message": "use the sdbusplus enum tools to get the string value from the integer value",
+      "range": {
+        "startLine": 1516,
+        "startChar": 1,
+        "endLine": 1529,
+        "endChar": 1
+      },
+      "revId": "855568f4c3cf7f3b737663373d235615b2a893b9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b438c034_e1ee10a5",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 1529,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-08-20T08:17:02Z",
+      "side": 1,
+      "message": "Done, Please Check",
+      "parentUuid": "2ce87bc2_1f18a8f4",
       "range": {
         "startLine": 1516,
         "startChar": 1,
@@ -138,6 +186,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "1c74d2a4_49a8186a",
+        "filename": "dcmihandler.hpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-08-20T08:17:02Z",
+      "side": 1,
+      "message": "Done, Please Check",
+      "parentUuid": "d5e3c293_5e3010dc",
+      "range": {
+        "startLine": 44,
+        "startChar": 22,
+        "endLine": 44,
+        "endChar": 32
+      },
+      "revId": "855568f4c3cf7f3b737663373d235615b2a893b9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "5bbcdc59_98768807",
@@ -151,6 +223,30 @@
       "writtenOn": "2026-07-20T17:58:29Z",
       "side": 1,
       "message": "I don\u0027t see this in phosphor-dbus-interfaces",
+      "range": {
+        "startLine": 48,
+        "startChar": 0,
+        "endLine": 48,
+        "endChar": 2
+      },
+      "revId": "855568f4c3cf7f3b737663373d235615b2a893b9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "99ddf3f4_f01fe333",
+        "filename": "dcmihandler.hpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-08-20T08:17:02Z",
+      "side": 1,
+      "message": "Done, Please Check",
+      "parentUuid": "5bbcdc59_98768807",
       "range": {
         "startLine": 48,
         "startChar": 0,
@@ -184,6 +280,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "5bb03fa1_b9045a17",
+        "filename": "dcmihandler.hpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-08-20T08:17:02Z",
+      "side": 1,
+      "message": "Done, Please Check",
+      "parentUuid": "94467027_9612ce33",
+      "range": {
+        "startLine": 52,
+        "startChar": 12,
+        "endLine": 52,
+        "endChar": 37
+      },
+      "revId": "855568f4c3cf7f3b737663373d235615b2a893b9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "c3acc609_42955f72",
@@ -197,6 +317,30 @@
       "writtenOn": "2026-07-20T17:58:29Z",
       "side": 1,
       "message": "rather than using a map like this to manually define things, you should use the tools that sdbusplus provides (convert_from_string\u003c\u003e convert_to_string\u003c\u003e).",
+      "range": {
+        "startLine": 49,
+        "startChar": 0,
+        "endLine": 56,
+        "endChar": 40
+      },
+      "revId": "855568f4c3cf7f3b737663373d235615b2a893b9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1bd7ab06_03f85516",
+        "filename": "dcmihandler.hpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-08-20T08:17:02Z",
+      "side": 1,
+      "message": "Done, Please Check",
+      "parentUuid": "c3acc609_42955f72",
       "range": {
         "startLine": 49,
         "startChar": 0,
