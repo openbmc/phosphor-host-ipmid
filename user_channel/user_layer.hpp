@@ -208,6 +208,25 @@ Cc ipmiUserUpdateEnabledState(const uint8_t userId, const bool& state);
  */
 Cc ipmiUserCheckEnabled(const uint8_t userId, bool& state);
 
+/** @brief determines whether user is locked for failed login attempts
+ *
+ *  @param[in] userName - user name
+ *  @param[out] locked  - true if locked, false otherwise
+ *
+ *  @return ccSuccess for success, others for failure.
+ */
+Cc ipmiUserCheckLockedForFailedAttempt(const std::string& userName,
+                                       bool& locked);
+
+/** @brief determines whether user's password has expired
+ *
+ *  @param[in] userName - user name
+ *  @param[out] expired - true if password has expired, false otherwise
+ *
+ *  @return ccSuccess for success, others for failure.
+ */
+Cc ipmiUserCheckPasswordExpired(const std::string& userName, bool& expired);
+
 /** @brief provides user privilege access data
  *
  *  @param[in] userId - user id
@@ -231,17 +250,6 @@ Cc ipmiUserGetPrivilegeAccess(const uint8_t userId, const uint8_t chNum,
 Cc ipmiUserSetPrivilegeAccess(const uint8_t userId, const uint8_t chNum,
                               const PrivAccess& privAccess,
                               const bool& otherPrivUpdate);
-
-/** @brief check for user pam authentication. This is to determine, whether user
- * is already locked out for failed login attempt
- *
- *  @param[in] username - username
- *  @param[in] password - password
- *
- *  @return status
- */
-bool ipmiUserPamAuthenticate(std::string_view userName,
-                             std::string_view userPassword);
 
 /** @brief sets user payload access data
  *

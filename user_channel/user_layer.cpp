@@ -141,6 +141,44 @@ Cc ipmiUserCheckEnabled(const uint8_t userId, bool& state)
     return ccSuccess;
 }
 
+namespace
+{
+Cc getUserBoolProperty(const std::string& userName,
+                       const std::string& propertyName, bool& value)
+{
+    sdbusplus::bus_t bus(ipmid_get_sd_bus_connection());
+    std::string userPath = std::string(userObjBasePath) + "/" + userName;
+    try
+    {
+        auto method = bus.new_method_call(userMgrService, userPath.c_str(),
+                                          dBusPropertiesInterface, "Get");
+        method.append(usersInterface, propertyName);
+        auto reply = bus.call(method);
+        std::variant<bool> variantValue;
+        reply.read(variantValue);
+        value = std::get<bool>(variantValue);
+    }
+    catch (const sdbusplus::exception_t& e)
+    {
+        lg2::error("Failed to get {PROP} for user: {USER}, error: {ERROR}",
+                   "PROP", propertyName, "USER", userName, "ERROR", e.what());
+        return ccUnspecifiedError;
+    }
+    return ccSuccess;
+}
+} // namespace
+
+Cc ipmiUserCheckLockedForFailedAttempt(const std::string& userName,
+                                       bool& locked)
+{
+    return getUserBoolProperty(userName, "UserLockedForFailedAttempt", locked);
+}
+
+Cc ipmiUserCheckPasswordExpired(const std::string& userName, bool& expired)
+{
+    return getUserBoolProperty(userName, "UserPasswordExpired", expired);
+}
+
 Cc ipmiUserGetPrivilegeAccess(const uint8_t userId, const uint8_t chNum,
                               PrivAccess& privAccess)
 {
@@ -177,12 +215,6 @@ Cc ipmiUserSetPrivilegeAccess(const uint8_t userId, const uint8_t chNum,
     }
     return getUserAccessObject().setUserPrivilegeAccess(
         userId, chNum, userPrivAccess, otherPrivUpdates);
-}
-
-bool ipmiUserPamAuthenticate(std::string_view userName,
-                             std::string_view userPassword)
-{
-    return pamUserCheckAuthenticate(userName, userPassword);
 }
 
 Cc ipmiUserSetUserPayloadAccess(const uint8_t chNum, const uint8_t operation,
