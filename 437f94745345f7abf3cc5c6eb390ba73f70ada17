@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7db8ff60_90e23e89",
+        "filename": "user_channel/usercommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 504,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-08-21T17:04:28Z",
+      "side": 1,
+      "message": "The unpacker understands std::bitsets:\n```\nstd::bitset\u003cpayloadsPerByte\u003e oemPayload,\n```",
+      "range": {
+        "startLine": 503,
+        "startChar": 4,
+        "endLine": 504,
+        "endChar": 75
+      },
+      "revId": "437f94745345f7abf3cc5c6eb390ba73f70ada17",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3e0d58fe_10dea5ae",
+        "filename": "user_channel/usercommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 542,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-08-21T17:04:28Z",
+      "side": 1,
+      "message": "payloadAccess.oemPayloadEnables1 \u003d oemPayload;",
+      "range": {
+        "startLine": 535,
+        "startChar": 3,
+        "endLine": 542,
+        "endChar": 54
+      },
+      "revId": "437f94745345f7abf3cc5c6eb390ba73f70ada17",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
