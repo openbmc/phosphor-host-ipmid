@@ -16,6 +16,8 @@
 #pragma once
 #include "user_layer.hpp"
 
+#include <sys/types.h>
+
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/interprocess/sync/named_recursive_mutex.hpp>
 #include <ipmid/api.hpp>
@@ -172,6 +174,30 @@ struct UsersTbl
 {
     //+1 to map with UserId directly. UserId 0 is reserved.
     UserInfo user[ipmiMaxUsers + 1];
+};
+
+/** @struct UserDataFileId
+ *
+ *  Struct for user data file identity
+ */
+struct UserDataFileId
+{
+    ino_t inode = 0;
+    off_t size = 0;
+    std::timespec mtime = {0, 0};
+
+    bool operator==(const UserDataFileId& rhs) const
+    {
+        return inode == rhs.inode && size == rhs.size &&
+               mtime.tv_sec == rhs.mtime.tv_sec &&
+               mtime.tv_nsec == rhs.mtime.tv_nsec;
+    }
+
+    /** @brief a zero inode means the file could not be stat()'ed */
+    bool valid() const
+    {
+        return inode != 0;
+    }
 };
 
 /** @brief PAM User Authentication check
@@ -471,16 +497,17 @@ class UserAccess
     std::vector<std::string> availablePrivileges;
     std::vector<std::string> availableGroups;
     sdbusplus::bus_t bus;
-    std::timespec fileLastUpdatedTime;
+    UserDataFileId fileLastUpdatedId;
     bool signalHndlrObject = false;
     boost::interprocess::file_lock sigHndlrLock;
     boost::interprocess::file_lock mutexCleanupLock;
 
-    /** @brief function to get user configuration file timestamp
+    /** @brief function to get the user configuration file identity
      *
-     *  @return time stamp or -EIO for failure
+     *  @return file identity, or a default-constructed (invalid) value on
+     *          failure to stat the file
      */
-    std::timespec getUpdatedFileTime();
+    UserDataFileId getUserDataFileId();
 
     /** @brief function to available system privileges and groups
      *
