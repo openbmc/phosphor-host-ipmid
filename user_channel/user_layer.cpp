@@ -141,6 +141,31 @@ Cc ipmiUserCheckEnabled(const uint8_t userId, bool& state)
     return ccSuccess;
 }
 
+Cc ipmiUserCheckLockedForFailedAttempt(const std::string& userName,
+                                       bool& locked)
+{
+    sdbusplus::bus_t bus(ipmid_get_sd_bus_connection());
+    std::string userPath = std::string(userObjBasePath) + "/" + userName;
+    try
+    {
+        auto method = bus.new_method_call(userMgrService, userPath.c_str(),
+                                          dBusPropertiesInterface, "Get");
+        method.append(usersInterface, "UserLockedForFailedAttempt");
+        auto reply = bus.call(method);
+        std::variant<bool> value;
+        reply.read(value);
+        locked = std::get<bool>(value);
+    }
+    catch (const sdbusplus::exception_t& e)
+    {
+        lg2::error("Failed to get UserLockedForFailedAttempt for user: {USER}, "
+                   "error: {ERROR}",
+                   "USER", userName, "ERROR", e.what());
+        return ccUnspecifiedError;
+    }
+    return ccSuccess;
+}
+
 Cc ipmiUserGetPrivilegeAccess(const uint8_t userId, const uint8_t chNum,
                               PrivAccess& privAccess)
 {
@@ -177,12 +202,6 @@ Cc ipmiUserSetPrivilegeAccess(const uint8_t userId, const uint8_t chNum,
     }
     return getUserAccessObject().setUserPrivilegeAccess(
         userId, chNum, userPrivAccess, otherPrivUpdates);
-}
-
-bool ipmiUserPamAuthenticate(std::string_view userName,
-                             std::string_view userPassword)
-{
-    return pamUserCheckAuthenticate(userName, userPassword);
 }
 
 Cc ipmiUserSetUserPayloadAccess(const uint8_t chNum, const uint8_t operation,
