@@ -1107,6 +1107,8 @@ void UserAccess::readUserData()
     boost::interprocess::scoped_lock<boost::interprocess::named_recursive_mutex>
         userLock{*userMutex};
 
+    UserDataFileId readFileId = getUserDataFileId();
+
     std::ifstream iUsrData(ipmiUserDataFile, std::ios::in | std::ios::binary);
     if (!iUsrData.good())
     {
@@ -1233,8 +1235,8 @@ void UserAccess::readUserData()
 
     lg2::debug("User data read from IPMI data file");
     iUsrData.close();
-    // Update the timestamp
-    fileLastUpdatedTime = getUpdatedFileTime();
+
+    fileLastUpdatedId = readFileId;
     return;
 }
 
@@ -1314,8 +1316,8 @@ void UserAccess::writeUserData()
         lg2::error("Error in renaming temporary IPMI user data file");
         throw std::runtime_error("Error in renaming IPMI user data file");
     }
-    // Update the timestamp
-    fileLastUpdatedTime = getUpdatedFileTime();
+
+    fileLastUpdatedId = getUserDataFileId();
     return;
 }
 
@@ -1391,10 +1393,9 @@ void UserAccess::deleteUserIndex(const size_t& usrIdx)
 
 void UserAccess::checkAndReloadUserData()
 {
-    std::timespec updateTime = getUpdatedFileTime();
-    if ((updateTime.tv_sec != fileLastUpdatedTime.tv_sec ||
-         updateTime.tv_nsec != fileLastUpdatedTime.tv_nsec) ||
-        (updateTime.tv_sec == 0 && updateTime.tv_nsec == 0))
+    UserDataFileId currentFileId = getUserDataFileId();
+
+    if (!(currentFileId.valid() && currentFileId == fileLastUpdatedId))
     {
         try
         {
@@ -1463,15 +1464,15 @@ void UserAccess::getSystemPrivAndGroups()
     return;
 }
 
-std::timespec UserAccess::getUpdatedFileTime()
+UserDataFileId UserAccess::getUserDataFileId()
 {
     struct stat fileStat;
     if (stat(ipmiUserDataFile, &fileStat) != 0)
     {
-        lg2::debug("Error in getting last updated time stamp");
-        return std::timespec{0, 0};
+        lg2::debug("Error in getting user data file identity");
+        return UserDataFileId{};
     }
-    return fileStat.st_mtim;
+    return UserDataFileId{fileStat.st_ino, fileStat.st_size, fileStat.st_mtim};
 }
 
 void UserAccess::getUserProperties(const DbusUserObjProperties& properties,
