@@ -24,6 +24,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "1b3070c5_f0245a66",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1002307
+      },
+      "writtenOn": "2026-08-25T06:19:40Z",
+      "side": 1,
+      "message": "addressed",
+      "parentUuid": "4eecb95f_b20a8b75",
+      "range": {
+        "startLine": 44,
+        "startChar": 0,
+        "endLine": 45,
+        "endChar": 47
+      },
+      "revId": "9ee480869f71390b622b54582f5526cac7c31889",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "5340813e_b894fee5",
@@ -41,6 +65,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "c13d4a76_c654cfc8",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1002307
+      },
+      "writtenOn": "2026-08-25T06:19:40Z",
+      "side": 1,
+      "message": "addressed",
+      "parentUuid": "5340813e_b894fee5",
+      "revId": "9ee480869f71390b622b54582f5526cac7c31889",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "4fee4a3e_02a8817e",
@@ -54,6 +96,30 @@
       "writtenOn": "2026-08-19T18:43:11Z",
       "side": 1,
       "message": "where is this requirement coming from? It seems like any host interface should be sufficient. It could be kcs, bt, smbus, usb, etc. Blocking network-based media seems like a good idea.",
+      "range": {
+        "startLine": 70,
+        "startChar": 2,
+        "endLine": 73,
+        "endChar": 5
+      },
+      "revId": "9ee480869f71390b622b54582f5526cac7c31889",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d4de2b81_94ec4303",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1002307
+      },
+      "writtenOn": "2026-08-25T06:19:40Z",
+      "side": 1,
+      "message": "addressed",
+      "parentUuid": "4fee4a3e_02a8817e",
       "range": {
         "startLine": 70,
         "startChar": 2,
@@ -87,6 +153,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "db96194a_416b751d",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1002307
+      },
+      "writtenOn": "2026-08-25T06:19:40Z",
+      "side": 1,
+      "message": "addressed",
+      "parentUuid": "ccc7a33e_4a3f4f0c",
+      "range": {
+        "startLine": 138,
+        "startChar": 0,
+        "endLine": 138,
+        "endChar": 2
+      },
+      "revId": "9ee480869f71390b622b54582f5526cac7c31889",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "3e5995d1_4735abf3",
@@ -100,6 +190,30 @@
       "writtenOn": "2026-08-19T18:43:11Z",
       "side": 1,
       "message": "These checks are not needed since the filter has already done this.",
+      "range": {
+        "startLine": 147,
+        "startChar": 0,
+        "endLine": 160,
+        "endChar": 1
+      },
+      "revId": "9ee480869f71390b622b54582f5526cac7c31889",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "617a5586_91640d69",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1002307
+      },
+      "writtenOn": "2026-08-25T06:19:40Z",
+      "side": 1,
+      "message": "addressed",
+      "parentUuid": "3e5995d1_4735abf3",
       "range": {
         "startLine": 147,
         "startChar": 0,
@@ -127,6 +241,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "516d28cf_58b99bb3",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1002307
+      },
+      "writtenOn": "2026-08-25T06:19:40Z",
+      "side": 1,
+      "message": "addressed",
+      "parentUuid": "3ef75322_32b51600",
+      "revId": "9ee480869f71390b622b54582f5526cac7c31889",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "f168d884_33375e28",
@@ -144,6 +276,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "07b2d407_101dca38",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1002307
+      },
+      "writtenOn": "2026-08-25T06:19:40Z",
+      "side": 1,
+      "message": "addressed",
+      "parentUuid": "f168d884_33375e28",
+      "revId": "9ee480869f71390b622b54582f5526cac7c31889",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "8837b967_bb3cf221",
@@ -157,6 +307,24 @@
       "writtenOn": "2026-08-19T18:43:11Z",
       "side": 1,
       "message": "with cnBuffer as a vector we can skip this and just return the resized vector.",
+      "revId": "9ee480869f71390b622b54582f5526cac7c31889",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b284b58d_3cfca09d",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1002307
+      },
+      "writtenOn": "2026-08-25T06:19:40Z",
+      "side": 1,
+      "message": "addressed",
+      "parentUuid": "8837b967_bb3cf221",
       "revId": "9ee480869f71390b622b54582f5526cac7c31889",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
