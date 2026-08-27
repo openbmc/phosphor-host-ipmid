@@ -22,6 +22,30 @@
       },
       "revId": "cdd6e47a425e1086021041d23ecd34fde600fc00",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dfaf4ef9_55b68e96",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1002746
+      },
+      "writtenOn": "2026-08-27T14:29:46Z",
+      "side": 1,
+      "message": "I tested it on HPE DL320 G11, and the overlay filesystem is JFFS2.\nThis was a trick one to reproduce because the command sequence must execute within the same second. It was caught by our automated testing system, flagging a fail randomly. Running each command separately it\u0027s very unlike to reproduce.",
+      "parentUuid": "8a7d6c5f_18d9b7c0",
+      "range": {
+        "startLine": 80,
+        "startChar": 0,
+        "endLine": 80,
+        "endChar": 65
+      },
+      "revId": "cdd6e47a425e1086021041d23ecd34fde600fc00",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
