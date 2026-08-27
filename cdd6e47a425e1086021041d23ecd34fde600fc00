@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8a7d6c5f_18d9b7c0",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-08-27T08:06:02Z",
+      "side": 1,
+      "message": "I could not reproduce the reported issue on the EVB-AST2600 platform. Could you please confirm which platform and filesystem were used to reproduce it?\n\nFYI:\n\n1.megarac@megarac-desktop:~$ ipmitool -H 172.16.97.99 -U root -P 0penBmc -I lanplus -C 17 raw \\\n\u003e 0x06 0x45 0x02 \\\n\u003e 0x66 0x77 0x63 0x69 0x74 0x65 0x73 0x74 \\\n\u003e 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00\n\n2.megarac@megarac-desktop:~$ ipmitool -H 172.16.97.99 -U root -P 0penBmc -I lanplus -C 17 user list 1\nID  Name             Callin  Link Auth  IPMI Msg   Channel Priv Limit\n1   root             false   true       true       ADMINISTRATOR\n2   fwcitest         true    false      false      USER\n3                    true    false      false      NO ACCESS\n4                    true    false      false      NO ACCESS\n5                    true    false      false      NO ACCESS\n6                    true    false      false      NO ACCESS\n7                    true    false      false      NO ACCESS\n8                    true    false      false      NO ACCESS\n9                    true    false      false      NO ACCESS\n10                   true    false      false      NO ACCESS\n11                   true    false      false      NO ACCESS\n12                   true    false      false      NO ACCESS\n13                   true    false      false      NO ACCESS\n14                   true    false      false      NO ACCESS\n15                   true    false      false      NO ACCESS\n3.megarac@megarac-desktop:~$ ipmitool -I lanplus -H 172.16.97.99 -U root -P 0penBmc -C 17 raw \\\n\u003e 0x06 0x45 0x02 0x66 0x77 0x63 0x69 0x74 0x65 0x73 0x74 \\\n\u003e 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00\n\n4.megarac@megarac-desktop:~$ ipmitool -I lanplus -H 172.16.97.99 -U root -P 0penBmc -C 17 raw \\\n\u003e 0x06 0x47 0x82 0x02 0x54 0x65 0x73 0x74 0x70 0x61 0x73 0x73 \\\n\u003e 0x31 0x32 0x33 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00\n\n5.megarac@megarac-desktop:~$ ipmitool -I lanplus -H 172.16.97.99 -U root -P 0penBmc -C 17 raw \\\n\u003e 0x06 0x43 0xB1 0x02 0x04 0x00\n\n6.megarac@megarac-desktop:~$ ipmitool -I lanplus -H 172.16.97.99 -U root -P 0penBmc -C 17 raw \\\n\u003e 0x06 0x47 0x82 0x01\n\n7.megarac@megarac-desktop:~$ ipmitool -I lanplus -H 172.16.97.99 -U root -P 0penBmc -C 17 user list 1\nID  Name             Callin  Link Auth  IPMI Msg   Channel Priv Limit\n1   root             false   true       true       ADMINISTRATOR\n2   fwcitest         true    true       true       ADMINISTRATOR\n3                    true    false      false      NO ACCESS\n4                    true    false      false      NO ACCESS\n5                    true    false      false      NO ACCESS\n6                    true    false      false      NO ACCESS\n7                    true    false      false      NO ACCESS\n8                    true    false      false      NO ACCESS\n9                    true    false      false      NO ACCESS\n10                   true    false      false      NO ACCESS\n11                   true    false      false      NO ACCESS\n12                   true    false      false      NO ACCESS\n13                   true    false      false      NO ACCESS\n14                   true    false      false      NO ACCESS\n15                   true    false      false      NO ACCESS\n8.megarac@megarac-desktop:~$ ipmitool -I lanplus -H 172.16.97.99 -U fwcitest -P Testpass123 \\\n\u003e -C 17 -L Administrator mc info\nDevice ID                 : 0\nDevice Revision           : 0\nFirmware Revision         : 3.01\nIPMI Version              : 2.0\nManufacturer ID           : 0\nManufacturer Name         : Unknown\nProduct ID                : 0 (0x0000)\nProduct Name              : Unknown (0x0)\nDevice Available          : no\nProvides Device SDRs      : no\nAdditional Device Support :\nAux Firmware Rev Info     :\n    0x00\n    0x00\n    0x00\n    0x00\nmegarac@megarac-desktop:~$",
+      "range": {
+        "startLine": 80,
+        "startChar": 0,
+        "endLine": 80,
+        "endChar": 65
+      },
+      "revId": "cdd6e47a425e1086021041d23ecd34fde600fc00",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
