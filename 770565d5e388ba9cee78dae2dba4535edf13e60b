@@ -18,6 +18,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "08e57531_45b3f2ce",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 1464,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-08-27T07:29:33Z",
+      "side": 1,
+      "message": "Done, Please Check",
+      "parentUuid": "2d4a88ea_886e3e38",
+      "revId": "770565d5e388ba9cee78dae2dba4535edf13e60b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "6770b6c2_cedc2c79",
@@ -31,6 +49,30 @@
       "writtenOn": "2026-08-21T16:43:00Z",
       "side": 1,
       "message": "rather than duplicate the map in the inverse mapping, use std::find_if on the original map to match the value instead of the key.",
+      "range": {
+        "startLine": 1511,
+        "startChar": 1,
+        "endLine": 1516,
+        "endChar": 10
+      },
+      "revId": "770565d5e388ba9cee78dae2dba4535edf13e60b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7098350e_6fcc0ce0",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 1516,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-08-27T07:29:33Z",
+      "side": 1,
+      "message": "Done, Please Check",
+      "parentUuid": "6770b6c2_cedc2c79",
       "range": {
         "startLine": 1511,
         "startChar": 1,
