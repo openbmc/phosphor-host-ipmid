@@ -18,6 +18,23 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "a5eca550_aa53458c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002746
+      },
+      "writtenOn": "2026-08-28T16:47:50Z",
+      "side": 1,
+      "message": "Hi @zhangjian3032@gmail.com\nI came across the same issue with the time resolution on JFFS2 filesystem, and submitted the patch (https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/93943) before discovering your patch. Although I propose a different solution to the issue at hand.",
+      "revId": "feaf2cf949fae2fae0a95dc51cefdfa138c7b664",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "2359d333_3408ef0b",
