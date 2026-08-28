@@ -70,6 +70,23 @@
       },
       "revId": "cdd6e47a425e1086021041d23ecd34fde600fc00",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1ebae73e_692efa5e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-08-28T16:39:25Z",
+      "side": 1,
+      "message": "CLGTM",
+      "revId": "cdd6e47a425e1086021041d23ecd34fde600fc00",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
