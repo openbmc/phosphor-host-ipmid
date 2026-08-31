@@ -52,7 +52,7 @@ constexpr uint8_t specMinorVersion = 5;
 constexpr uint8_t configParameterRevision = 1;
 constexpr auto option12Mask = 0x01;
 constexpr auto activateDhcpReply = 0x00;
-constexpr uint8_t activateDhcpValue = 0x01;
+constexpr uint8_t activateDhcpCommand = 0x01;
 constexpr uint8_t dhcpTiming1 = 0x04;  // 4 sec
 constexpr uint16_t dhcpTiming2 = 0x78; // 120 sec
 constexpr uint16_t dhcpTiming3 = 0x40; // 60 sec
@@ -1068,7 +1068,7 @@ ipmi::RspType<ipmi::message::Payload> getDCMICapabilities(uint8_t parameter)
         default:
         {
             lg2::error("Invalid input parameter");
-            return ipmi::responseInvalidFieldRequest();
+            return ipmi::responseParmOutOfRange();
         }
     }
 
@@ -1226,7 +1226,7 @@ ipmi::RspType<> setDCMIConfParams(ipmi::Context::ptr& ctx, uint8_t parameter,
                 return ipmi::responseReqDataLenInvalid();
             }
             // Only 0x01 is defined by the DCMI spec; reject any other value
-            if (activateByte != dcmi::activateDhcpValue)
+            if (activateByte != dcmi::activateDhcpCommand)
             {
                 return ipmi::responseInvalidFieldRequest();
             }
@@ -1280,8 +1280,9 @@ ipmi::RspType<> setDCMIConfParams(ipmi::Context::ptr& ctx, uint8_t parameter,
         case dcmi::DCMIConfigParameters::DHCPTiming1:
         case dcmi::DCMIConfigParameters::DHCPTiming2:
         case dcmi::DCMIConfigParameters::DHCPTiming3:
+            return ipmi::responseInvalidCommand();
         default:
-            return ipmi::responseInvalidFieldRequest();
+            return ipmi::responseParmOutOfRange();
     }
     return ipmi::responseSuccess();
 }
@@ -1330,7 +1331,7 @@ ipmi::RspType<ipmi::message::Payload> getDCMIConfParams(
             payload.pack(dcmi::dhcpTiming3);
             break;
         default:
-            return ipmi::responseInvalidFieldRequest();
+            return ipmi::responseParmOutOfRange();
     }
 
     return ipmi::responseSuccess(payload);
