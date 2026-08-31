@@ -52,7 +52,11 @@ constexpr uint8_t specMinorVersion = 5;
 constexpr uint8_t configParameterRevision = 1;
 constexpr auto option12Mask = 0x01;
 constexpr auto activateDhcpReply = 0x00;
+<<<<<<< PATCH SET (fe794f fix dcmi response issue)
+constexpr uint8_t activateDhcpCommand = 0x01;
+=======
 constexpr uint8_t activateDhcpValue = 0x01;
+>>>>>>> BASE      (069b26 user_channel: Don't fail channel access set when ChannelAcce)
 constexpr uint8_t dhcpTiming1 = 0x04;  // 4 sec
 constexpr uint16_t dhcpTiming2 = 0x78; // 120 sec
 constexpr uint16_t dhcpTiming3 = 0x40; // 60 sec
@@ -1059,7 +1063,7 @@ ipmi::RspType<ipmi::message::Payload> getDCMICapabilities(uint8_t parameter)
         default:
         {
             lg2::error("Invalid input parameter");
-            return ipmi::responseInvalidFieldRequest();
+            return ipmi::responseParmOutOfRange();
         }
     }
 
@@ -1198,10 +1202,29 @@ ipmi::RspType<uint8_t,                // total instances for entity id
     return ipmi::responseSuccess(totalInstances, numInstances, temps);
 }
 
+static bool isValidDCMIConfigParameter(uint8_t parameter)
+{
+    switch (static_cast<dcmi::DCMIConfigParameters>(parameter))
+    {
+        case dcmi::DCMIConfigParameters::ActivateDHCP:
+        case dcmi::DCMIConfigParameters::DiscoveryConfig:
+        case dcmi::DCMIConfigParameters::DHCPTiming1:
+        case dcmi::DCMIConfigParameters::DHCPTiming2:
+        case dcmi::DCMIConfigParameters::DHCPTiming3:
+            return true;
+        default:
+            return false;
+    }
+}
+
 ipmi::RspType<> setDCMIConfParams(ipmi::Context::ptr& ctx, uint8_t parameter,
                                   uint8_t setSelector,
                                   ipmi::message::Payload& payload)
 {
+    if (!isValidDCMIConfigParameter(parameter))
+    {
+        return ipmi::responseParmOutOfRange();
+    }
     if (setSelector)
     {
         return ipmi::responseInvalidFieldRequest();
@@ -1217,7 +1240,11 @@ ipmi::RspType<> setDCMIConfParams(ipmi::Context::ptr& ctx, uint8_t parameter,
                 return ipmi::responseReqDataLenInvalid();
             }
             // Only 0x01 is defined by the DCMI spec; reject any other value
+<<<<<<< PATCH SET (fe794f fix dcmi response issue)
+            if (activateByte != dcmi::activateDhcpCommand)
+=======
             if (activateByte != dcmi::activateDhcpValue)
+>>>>>>> BASE      (069b26 user_channel: Don't fail channel access set when ChannelAcce)
             {
                 return ipmi::responseInvalidFieldRequest();
             }
@@ -1227,6 +1254,15 @@ ipmi::RspType<> setDCMIConfParams(ipmi::Context::ptr& ctx, uint8_t parameter,
             {
                 return ipmi::responseUnspecifiedError();
             }
+<<<<<<< PATCH SET (fe794f fix dcmi response issue)
+            if ((dhcpEnabled.value() ==
+                 EthernetInterface::DHCPConf::v6stateless) ||
+                (dhcpEnabled.value() == EthernetInterface::DHCPConf::none))
+            {
+                return ipmi::responseCommandNotAvailable();
+            }
+=======
+>>>>>>> BASE      (069b26 user_channel: Don't fail channel access set when ChannelAcce)
             if (dhcpEnabled.value() != EthernetInterface::DHCPConf::none)
             {
                 // When these conditions are met we have to trigger DHCP
@@ -1264,8 +1300,9 @@ ipmi::RspType<> setDCMIConfParams(ipmi::Context::ptr& ctx, uint8_t parameter,
         case dcmi::DCMIConfigParameters::DHCPTiming1:
         case dcmi::DCMIConfigParameters::DHCPTiming2:
         case dcmi::DCMIConfigParameters::DHCPTiming3:
+            return ipmi::responseInvalidCommand();
         default:
-            return ipmi::responseInvalidFieldRequest();
+            return ipmi::responseParmOutOfRange();
     }
     return ipmi::responseSuccess();
 }
@@ -1273,6 +1310,10 @@ ipmi::RspType<> setDCMIConfParams(ipmi::Context::ptr& ctx, uint8_t parameter,
 ipmi::RspType<ipmi::message::Payload> getDCMIConfParams(
     ipmi::Context::ptr& ctx, uint8_t parameter, uint8_t setSelector)
 {
+    if (!isValidDCMIConfigParameter(parameter))
+    {
+        return ipmi::responseParmOutOfRange();
+    }
     if (setSelector)
     {
         return ipmi::responseInvalidFieldRequest();
@@ -1314,7 +1355,7 @@ ipmi::RspType<ipmi::message::Payload> getDCMIConfParams(
             payload.pack(dcmi::dhcpTiming3);
             break;
         default:
-            return ipmi::responseInvalidFieldRequest();
+            return ipmi::responseParmOutOfRange();
     }
 
     return ipmi::responseSuccess(payload);
