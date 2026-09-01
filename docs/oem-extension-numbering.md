@@ -95,7 +95,7 @@ Notes
 
 - Intent is to handle
   [Linux Kernel SMBus Protocol](https://www.kernel.org/doc/Documentation/i2c/smbus-protocol),
-  with com generalized to m byte sequence - e.g., at24c64 uses 2 address bytes,
+  with the command generalized to an m-byte sequence - e.g., at24c64 uses 2 address bytes,
   and n bytes of received data, rather than specific operations for various
   sizes.
 

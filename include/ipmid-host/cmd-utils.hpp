@@ -42,7 +42,7 @@ using CallBack = std::function<void(IpmiCmdData, bool)>;
 /** @detail Tuple encapsulating above 2 to enable using Manager by
  *          different implementations. Users of Manager will supply
  *          <Ipmi command, Data> along with the callback handler.
- *          Manager will invoke the handler onveying the status of
+ *          Manager will invoke the handler conveying the status of
  *          the command.
  */
 using CommandHandler = std::tuple<IpmiCmdData, CallBack>;

@@ -265,7 +265,7 @@ int convertVersion(std::string s, Revision& rev)
             }
 
             if (i != 4)
-            { // something wrong durign converting aux bytes
+            { // something wrong during converting aux bytes
                 return -1;
             }
         }
@@ -387,7 +387,7 @@ ipmi::RspType<uint8_t,  // Device ID
                     }
                 }
 
-                // Set the availablitity of the BMC.
+                // Set the availability of the BMC.
                 defaultActivationSetting = data.value("availability", true);
 
                 // Don't read the file every time if successful

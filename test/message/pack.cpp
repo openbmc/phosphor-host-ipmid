@@ -385,7 +385,7 @@ TEST(PackAdvanced, VariantArray)
     p.pack(variant);
     ASSERT_EQ(p.size(), sizeof(data));
 
-    // check that the bytes were correctly packed packed (LSB first)
+    // check that the bytes were correctly packed (LSB first)
     ipmi::SecureBuffer k = {2, 4};
     ASSERT_EQ(p.raw, k);
 }
