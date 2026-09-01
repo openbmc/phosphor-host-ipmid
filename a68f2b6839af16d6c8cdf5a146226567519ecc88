@@ -16,6 +16,75 @@
       "message": "@vernon.mauery@gmail.com @liuxiwei@ieisystem.com can you please review ?",
       "revId": "a68f2b6839af16d6c8cdf5a146226567519ecc88",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "58e1b97c_d16978bd",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-09-01T08:58:24Z",
+      "side": 1,
+      "message": "Could you clarify how renaming a non-IPMI user updates listNoneIpmiGroupUsers?",
+      "range": {
+        "startLine": 227,
+        "startChar": 40,
+        "endLine": 227,
+        "endChar": 41
+      },
+      "revId": "a68f2b6839af16d6c8cdf5a146226567519ecc88",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "89002a0d_a6ed7f0b",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 1757,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-09-01T08:58:24Z",
+      "side": 1,
+      "message": "Should this return value be checked? If it returns ccOutOfSpace, the D-Bus group update has already completed and this method still returns ccSuccess. ?",
+      "range": {
+        "startLine": 1757,
+        "startChar": 8,
+        "endLine": 1757,
+        "endChar": 42
+      },
+      "revId": "a68f2b6839af16d6c8cdf5a146226567519ecc88",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6ba878f7_6b70c454",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 1775,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-09-01T08:58:24Z",
+      "side": 1,
+      "message": "Could you clarify how listNoneIpmiGroupUsers is restored after ipmid restarts?",
+      "range": {
+        "startLine": 1775,
+        "startChar": 18,
+        "endLine": 1775,
+        "endChar": 40
+      },
+      "revId": "a68f2b6839af16d6c8cdf5a146226567519ecc88",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
