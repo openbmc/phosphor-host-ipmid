@@ -70,7 +70,7 @@ constexpr Number toOemNumber(const Group& oeg)
     return (oeg[2] << 16) | (oeg[1] << 8) | oeg[0];
 }
 
-/// Given an OEN, conver to the OEM Group.
+/// Given an OEN, convert to the OEM Group.
 ///
 /// @param[in] oen - the OEM Number.
 /// @return the OEM Group.

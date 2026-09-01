@@ -131,7 +131,7 @@ enum ipmi_return_codes
 // we can't differentiate between LAN1 & LAN2 for netipmid in this logic.
 // As our current design will not be able to support the same. This is done
 // so that in all the places where ever we need to use the self channel can be
-// be implemented properly and based on new architecture.this can be updated.
+// implemented properly and based on new architecture.this can be updated.
 typedef enum
 {
     interfaceKCS = 0,
