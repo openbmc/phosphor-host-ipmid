@@ -1,5 +1,6 @@
 gtest = dependency('gtest', main: true, disabler: true, required: false)
 gmock = dependency('gmock', disabler: true, required: false)
+
 if not gtest.found() or not gmock.found()
     gtest_opts = import('cmake').subproject_options()
     gtest_opts.add_cmake_defines({'CMAKE_CXX_FLAGS': '-Wno-pedantic'})
@@ -99,5 +100,34 @@ test(
         build_by_default: false,
         implicit_include_directories: false,
         dependencies: [sensorutils_dep, gtest, gmock],
+    ),
+)
+
+test(
+    'dcmi_mgmt_id_str_bounds',
+    executable(
+        'dcmi_mgmt_id_str_bounds',
+        'dcmi_mgmt_id_str_bounds_unittest.cpp',
+        'dcmi_mgmt_id_str_bounds_stub.cpp',
+        '../dcmihandler.cpp',
+        include_directories: root_inc,
+        build_by_default: false,
+        implicit_include_directories: false,
+        # Compile the handler source directly and stub every daemon-supplied
+        # D-Bus helper it calls (see dcmi_mgmt_id_str_bounds_stub.cpp), so
+        # the test binary links no project DSOs. This mirrors the
+        # transport_serial test layout and avoids the ASAN odr-violation
+        # between libstdc++/stdexec inline globals instantiated in multiple
+        # DSOs under -Db_sanitize=address.
+        dependencies: [
+            sdbusplus_dep,
+            phosphor_logging_dep,
+            phosphor_dbus_interfaces_dep,
+            boost,
+            crypto,
+            nlohmann_json_dep,
+            gmock,
+            gtest,
+        ],
     ),
 )
