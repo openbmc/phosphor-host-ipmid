@@ -1,5 +1,6 @@
 gtest = dependency('gtest', main: true, disabler: true, required: false)
 gmock = dependency('gmock', disabler: true, required: false)
+
 if not gtest.found() or not gmock.found()
     gtest_opts = import('cmake').subproject_options()
     gtest_opts.add_cmake_defines({'CMAKE_CXX_FLAGS': '-Wno-pedantic'})
@@ -99,5 +100,22 @@ test(
         build_by_default: false,
         implicit_include_directories: false,
         dependencies: [sensorutils_dep, gtest, gmock],
+    ),
+)
+
+test(
+    'dcmi_mgmt_id_str_bounds',
+    executable(
+        'dcmi_mgmt_id_str_bounds',
+        'dcmi_mgmt_id_str_bounds_unittest.cpp',
+        'dcmi_mgmt_id_str_bounds_stub.cpp',
+        '../dcmihandler.cpp',
+        include_directories: root_inc,
+        build_by_default: false,
+        implicit_include_directories: false,
+        # Compile the handler source directly instead of linking the libipmi20
+        # provider plugin: the plugin expects the daemon main binary to supply
+        # registration symbols and a live D-Bus connection at load time.
+        dependencies: [ipmid_pre, nlohmann_json_dep, gmock, gtest],
     ),
 )
