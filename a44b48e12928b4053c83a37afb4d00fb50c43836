@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5334d0fd_7e0e1928",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 12
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-09-02T22:19:45Z",
+      "side": 1,
+      "message": "This part looks good, but we need to get the PDI commit merged first.",
+      "revId": "a44b48e12928b4053c83a37afb4d00fb50c43836",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
