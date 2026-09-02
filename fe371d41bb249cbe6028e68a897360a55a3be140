@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "29d21416_7f089889",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-09-02T08:07:16Z",
+      "side": 1,
+      "message": "Commit Message Should not cross the 72 characters.",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 9,
+        "endChar": 188
+      },
+      "revId": "fe371d41bb249cbe6028e68a897360a55a3be140",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f36da295_eec9f1df",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-09-02T08:07:16Z",
+      "side": 1,
+      "message": "Can You Add the steps to reproduce the issue and response before and After ?",
+      "range": {
+        "startLine": 11,
+        "startChar": 0,
+        "endLine": 11,
+        "endChar": 161
+      },
+      "revId": "fe371d41bb249cbe6028e68a897360a55a3be140",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "da35fb80_d2173750",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 850,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-09-02T08:07:16Z",
+      "side": 1,
+      "message": "I am Not able to reproduce the issue: \n\nroot@evb-ast2600:~# ipmitool raw 0x2c 0x08 0xdc 0x00 0x10 0x31 0x32 0x33 0x34 0x35 0x36 0x37 0x38 0x39 0x30 0x31 0x32 0x33 0x34 0x35 0x36\n dc 10\nroot@evb-ast2600:~# ipmitool raw 0x2c 0x08 0xdc 0x10 0x10 0x31 0x31 0x31 0x31 0x31 0x31 0x31 0x31 0x31 0x31 0x32 0x32 0x32 0x32 0x32 0x32\n dc 20\nroot@evb-ast2600:~# ipmitool raw 0x2c 0x08 0xdc 0x20 0x10 0x61 0x61 0x61 0x61 0x61 0x61 0x61 0x61 0x61 0x61 0x62 0x62 0x62 0x62 0x62 0x62\n dc 30\nroot@evb-ast2600:~#\n\n\nmegarac@megarac-desktop:~$ ipmitool -H 172.16.97.99 -U root -P \u00270penBmc\u0027 -I lanplus -C 17 raw 0x2c 0x08 0xdc 0x00 0x10 0x31 0x32 0x33 0x34 0x35 0x36 0x37 0x38 0x39 0x30 0x31 0x32 0x33 0x34 0x35 0x36\n dc 10\nmegarac@megarac-desktop:~$ ipmitool -H 172.16.97.99 -U root -P \u00270penBmc\u0027 -I lanplus -C 17 raw 0x2c 0x08 0xdc 0x10 0x10 0x31 0x31 0x31 0x31 0x31 0x31 0x31 0x31 0x31 0x31 0x32 0x32 0x32 0x32 0x32 0x32\n dc 20\nmegarac@megarac-desktop:~$ ipmitool -H 172.16.97.99 -U root -P \u00270penBmc\u0027 -I lanplus -C 17 raw 0x2c 0x08 0xdc 0x20 0x10 0x61 0x61 0x61 0x61 0x61 0x61 0x61 0x61 0x61 0x61 0x62 0x62 0x62 0x62 0x62 0x62\n dc 30\nmegarac@megarac-desktop:~$\n\nPlease Tell me if my understanding is wrong ?",
+      "range": {
+        "startLine": 850,
+        "startChar": 21,
+        "endLine": 850,
+        "endChar": 26
+      },
+      "revId": "fe371d41bb249cbe6028e68a897360a55a3be140",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
