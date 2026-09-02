@@ -26,6 +26,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "ac9b41ee_2d7b60af",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-09-02T08:08:20Z",
+      "side": 1,
+      "message": "Each line should not cross 72 characters",
+      "parentUuid": "29d21416_7f089889",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 9,
+        "endChar": 188
+      },
+      "revId": "fe371d41bb249cbe6028e68a897360a55a3be140",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "f36da295_eec9f1df",
         "filename": "/COMMIT_MSG",
         "patchSetId": 2
