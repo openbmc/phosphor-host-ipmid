@@ -627,7 +627,7 @@ Cc ChannelConfig::setChannelAccessPersistData(const uint8_t chNum,
     }
     if (setFlag & setPrivLimit)
     {
-        // Send Update to network channel config interfaces over dbus
+        // Best-effort mirror; the persist data written below is authoritative.
         std::string privStr = convertToPrivLimitString(chAccessData.privLimit);
         std::string networkIntfObj = std::string(networkIntfObjectBasePath) +
                                      "/" + channelData[chNum].chName;
@@ -637,15 +637,15 @@ Cc ChannelConfig::setChannelAccessPersistData(const uint8_t chNum,
                                      networkChConfigIntfName,
                                      privilegePropertyString, privStr))
             {
-                lg2::debug("Network interface '{INTERFACE}' does not exist",
+                lg2::debug("Network interface '{INTERFACE}' does not expose "
+                           "ChannelAccess; skipping sync",
                            "INTERFACE", channelData[chNum].chName);
-                return ccUnspecifiedError;
             }
         }
         catch (const sdbusplus::exception_t& e)
         {
-            lg2::error("Exception: Network interface does not exist");
-            return ccInvalidFieldRequest;
+            lg2::debug("ChannelAccess sync skipped for '{INTERFACE}': {MSG}",
+                       "INTERFACE", channelData[chNum].chName, "MSG", e);
         }
         signalFlag |= (1 << chNum);
         channelData[chNum].chAccess.chNonVolatileData.privLimit =
