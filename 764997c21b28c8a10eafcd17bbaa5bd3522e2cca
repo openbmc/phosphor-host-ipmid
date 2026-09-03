@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "95733f39_2569dae3",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 1431,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-09-03T00:43:57Z",
+      "side": 1,
+      "message": "I don\u0027t love that this just returns a ref to the groups. Maybe a const ref would be more appropriate?",
+      "revId": "764997c21b28c8a10eafcd17bbaa5bd3522e2cca",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "73843872_4496f358",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 1805,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-09-03T00:43:57Z",
+      "side": 1,
+      "message": "if the user already had ipmiEnabled set to false, but the new group access had ipmi enabled, this would not enable it. Shouldn\u0027t it be something like:\n\n```\nuserInfo-\u003euserPrivAccess[chNum].ipmiEnabled \u003d (std::find(\n              groupAccess.begin(), groupAccess.end(), ipmiGrpName) !\u003d\n                   groupAccess.end());\n```",
+      "range": {
+        "startLine": 1801,
+        "startChar": 0,
+        "endLine": 1805,
+        "endChar": 5
+      },
+      "revId": "764997c21b28c8a10eafcd17bbaa5bd3522e2cca",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
