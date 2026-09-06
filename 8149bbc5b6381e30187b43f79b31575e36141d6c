@@ -22,6 +22,30 @@
       },
       "revId": "8149bbc5b6381e30187b43f79b31575e36141d6c",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5677c27b_4d14149b",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 1813,
+      "author": {
+        "id": 1002977
+      },
+      "writtenOn": "2026-09-06T13:33:19Z",
+      "side": 1,
+      "message": "Fixed in PS18: setDbusProperty is now wrapped in try/catch. If it throws, the groups were never changed on D-Bus, so the slot reserved just before the call is released via removeUserFromNoneIpmiGroupUsers() and ccUnspecifiedError is returned. The release is guarded — it only happens when this call actually inserted the entry, so a user who was already in listNoneIpmiGroupUsers (already non-IPMI) keeps their valid entry if a later group change fails.\n\n\ngetUserInfo()/writeUserData() failures need no rollback: they occur after setDbusProperty succeeded, so the user\u0027s groups really changed and the list entry is accurate. Reconciliation for actual group changes is handled by the PropertiesChanged signal path; removing the entry here would only fight that.",
+      "parentUuid": "5338fb04_964444c4",
+      "range": {
+        "startLine": 1813,
+        "startChar": 16,
+        "endLine": 1813,
+        "endChar": 42
+      },
+      "revId": "8149bbc5b6381e30187b43f79b31575e36141d6c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
