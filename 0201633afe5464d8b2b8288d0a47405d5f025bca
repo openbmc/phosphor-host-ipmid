@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "952298b9_e70412c3",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 17
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-09-08T08:54:25Z",
+      "side": 1,
+      "message": "Please add a Tested: section to the commit message describing how the new pre-timeout interrupt handling was validated. At minimum, include the IPMI Set Watchdog Timer command, the expected PreTimeoutInterrupt D-Bus property value, and the IPMI Get Watchdog Timer result.",
+      "range": {
+        "startLine": 13,
+        "startChar": 51,
+        "endLine": 13,
+        "endChar": 61
+      },
+      "revId": "0201633afe5464d8b2b8288d0a47405d5f025bca",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e3191842_6a470ea7",
+        "filename": "app/watchdog.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-09-08T08:54:25Z",
+      "side": 1,
+      "message": "preTimeoutInterrupt is a 3-bit field. This rejects only 0x4, but reserved values 0x5–0x7 are accepted and then mapped to valid actions by the \u0026 0x3 mask below. Please reject all values \u003e\u003d 0x4 so reserved encodings return Invalid Field Request.",
+      "range": {
+        "startLine": 253,
+        "startChar": 32,
+        "endLine": 253,
+        "endChar": 55
+      },
+      "revId": "0201633afe5464d8b2b8288d0a47405d5f025bca",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "aafceb11_7e53917f",
+        "filename": "app/watchdog.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 475,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-09-08T08:54:25Z",
+      "side": 1,
+      "message": "Set Watchdog Timer now stores this action in D-Bus, but Get Watchdog Timer still returns the process-local timerPreTimeoutInterrupt. After phosphor-ipmi-host restarts, or if another D-Bus client updates the property, this response can be stale. Please read PreTimeoutInterrupt from the watchdog D-Bus properties and convert it back to the IPMI encoding.",
+      "range": {
+        "startLine": 475,
+        "startChar": 15,
+        "endLine": 475,
+        "endChar": 39
+      },
+      "revId": "0201633afe5464d8b2b8288d0a47405d5f025bca",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
