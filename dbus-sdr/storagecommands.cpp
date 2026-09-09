@@ -454,6 +454,16 @@ ipmi::RspType<uint8_t> ipmiStorageWriteFruData(
             // Walk the MultiRecord headers until the last record
             while (!endOfList)
             {
+                // Multi-Record Area Header size is of 5 bytes that keeps
+                // information about the current record information. It also
+                // contains offset information needed to find any additional
+                // following records. So, All 5 bytes of Record Header should
+                // not contain garbage values. Also, below check ensures that
+                // the header is within the FRU size limits.
+                if (lastRecordStart + 4 >= fru.size())
+                {
+                    break;
+                }
                 // The MSB in the second byte of the MultiRecord header signals
                 // "End of list"
                 endOfList = fru[lastRecordStart + 1] & 0x80;
