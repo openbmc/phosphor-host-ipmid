@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4b75e9f1_be24a5be",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 21
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-09-10T08:21:01Z",
+      "side": 1,
+      "message": "Please provide test steps, functionality-check commands, expected results, and test evidence. This will make the behavior and D-Bus/IPMI state synchronization clear to reviewers.",
+      "range": {
+        "startLine": 13,
+        "startChar": 0,
+        "endLine": 13,
+        "endChar": 54
+      },
+      "revId": "6631f371bbd7280e12bc94c98f3172c2f3f52751",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "51ab1ace_334d3bd9",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 1784,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-09-10T08:21:01Z",
+      "side": 1,
+      "message": "isValidUserId() validates only the numeric range. For an unused but numerically valid ID, ipmiUserGetUserName() can return success with an empty username. This can produce an invalid D-Bus path before calling setDbusProperty(). Please verify that userName is non-empty, or that the user slot is active, before constructing and using userPath.\n\nPlease Correct me if My understanding is wrong ?",
+      "range": {
+        "startLine": 1784,
+        "startChar": 0,
+        "endLine": 1784,
+        "endChar": 57
+      },
+      "revId": "6631f371bbd7280e12bc94c98f3172c2f3f52751",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "faacd7fa_3318cf91",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 1788,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-09-10T08:21:01Z",
+      "side": 1,
+      "message": "Please catch the exception and return an appropriate completion code",
+      "range": {
+        "startLine": 1788,
+        "startChar": 4,
+        "endLine": 1788,
+        "endChar": 19
+      },
+      "revId": "6631f371bbd7280e12bc94c98f3172c2f3f52751",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
