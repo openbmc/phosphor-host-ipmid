@@ -22,6 +22,30 @@
       },
       "revId": "ea8690334b8da2e9a4ab4ea0032227b4d75b8a92",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "76df5ffa_e475ec7f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1002630
+      },
+      "writtenOn": "2026-09-10T11:47:35Z",
+      "side": 1,
+      "message": "\u003e whether IPMI is intentionally expected only to consume the existing lockout state\n\nYes.\nhttps://github.com/openbmc/phosphor-net-ipmid/blob/759f0500a4d9f9e2063206ea64d60079175b7d75/command/rakp12.cpp#L210\n\n\u003e whether IPMI failures should also update the lockout counter.\n\nIPMI failures do not, and did not before this patch.",
+      "parentUuid": "e1ce654d_9842b142",
+      "range": {
+        "startLine": 30,
+        "startChar": 0,
+        "endLine": 30,
+        "endChar": 40
+      },
+      "revId": "ea8690334b8da2e9a4ab4ea0032227b4d75b8a92",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
