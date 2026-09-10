@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d3bca0a2_73f98218",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 620,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-09-10T07:41:47Z",
+      "side": 0,
+      "message": "The old implementation called pam_acct_mgmt() after pam_authenticate(), but the new implementation checks only UserLockedForFailedAttempt. How are account expiration, password expiration, disabled-account, and other PAM account-policy checks",
+      "range": {
+        "startLine": 620,
+        "startChar": 8,
+        "endLine": 620,
+        "endChar": 21
+      },
+      "revId": "b94aefd8bb4dc218c4db6f55e1c7b4aeec0b9ee5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f952a263_f69aa7d9",
+        "filename": "user_channel/user_mgmt.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-09-10T07:41:47Z",
+      "side": 0,
+      "message": "The old implementation called pam_acct_mgmt() after pam_authenticate(), but the new implementation checks only UserLockedForFailedAttempt. How are account expiration, password expiration, disabled-account, and other PAM account-policy checks",
+      "range": {
+        "startLine": 184,
+        "startChar": 5,
+        "endLine": 184,
+        "endChar": 29
+      },
+      "revId": "b94aefd8bb4dc218c4db6f55e1c7b4aeec0b9ee5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
