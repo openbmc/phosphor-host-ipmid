@@ -24,6 +24,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "8b1acf04_a567daa7",
+        "filename": "user_channel/user_layer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1002630
+      },
+      "writtenOn": "2026-09-11T07:30:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "630a3235_8f3b5bcf",
+      "range": {
+        "startLine": 144,
+        "startChar": 3,
+        "endLine": 144,
+        "endChar": 38
+      },
+      "revId": "9312192fca1bed15256da2a9c8a2b5f0e6dc7673",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "89427a27_1663967f",
@@ -37,6 +61,30 @@
       "writtenOn": "2026-09-11T04:30:53Z",
       "side": 1,
       "message": "ipmiUserCheckLockedForFailedAttempt/ipmiUserCheckPasswordExpired are near-duplicate code — consider a shared helper",
+      "range": {
+        "startLine": 169,
+        "startChar": 3,
+        "endLine": 169,
+        "endChar": 31
+      },
+      "revId": "9312192fca1bed15256da2a9c8a2b5f0e6dc7673",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a18b057c_4cd8b007",
+        "filename": "user_channel/user_layer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1002630
+      },
+      "writtenOn": "2026-09-11T07:30:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "89427a27_1663967f",
       "range": {
         "startLine": 169,
         "startChar": 3,
