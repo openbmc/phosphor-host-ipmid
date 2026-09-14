@@ -51,6 +51,7 @@ static constexpr const char* ipmiUserSignalLockFile =
     "/run/ipmi/ipmi_usr_signal_mutex";
 static constexpr const char* ipmiUserDataFile = "/var/lib/ipmi/ipmi_user.json";
 static constexpr const char* ipmiGrpName = "ipmi";
+static constexpr const char* redfishGrpName = "redfish";
 static constexpr size_t privNoAccess = 0xF;
 static constexpr size_t privMask = 0xF;
 
@@ -79,6 +80,9 @@ static constexpr const char* userPrivProperty = "UserPrivilege";
 static constexpr const char* userGrpProperty = "UserGroups";
 static constexpr const char* userEnabledProperty = "UserEnabled";
 static constexpr const char* userIsBootStrapProperty = "BootStrapAccount";
+
+/* Default name of first bootStrap account */
+static constexpr const char* firstUserName = "bootstrap0";
 
 static std::array<std::string, (PRIVILEGE_OEM + 1)> ipmiPrivIndex = {
     "priv-reserved", // PRIVILEGE_RESERVED - 0
@@ -298,10 +302,38 @@ class UserAccess
      *
      *  @param[in] userId - user id
      *  @param[in] userName - user name
+     *  @param[in] privilege - system privilege the user is created with, empty
+     *                         to create with the default IPMI user privilege
      *
      *  @return ccSuccess for success, others for failure.
      */
     Cc setUserName(const uint8_t userId, const std::string& userName);
+
+    /** @brief to set user name, creating the user with the given privilege
+     *
+     *  @param[in] userId - user id
+     *  @param[in] userName - user name
+     *  @param[in] privilege - system privilege the user is created with, empty
+     *                         to create with the default IPMI user privilege
+     *
+     *  @return ccSuccess for success, others for failure.
+     */
+    Cc setUserName(const uint8_t userId, const std::string& userName,
+                   const std::string& privilege);
+
+    /** @brief to create a user with groups, privilege and enabled state
+     *
+     *  @param[in] userId - user id
+     *  @param[in] userName - user name
+     *  @param[in] groups - groups the user belongs to
+     *  @param[in] privilege - system privilege of the user
+     *  @param[in] enabled - enabled state of the user
+     *
+     *  @return ccSuccess for success, others for failure.
+     */
+    Cc createUser(const uint8_t userId, const std::string& userName,
+                  const std::vector<std::string>& groups,
+                  const std::string& privilege, const bool& enabled);
 
     /** @brief to set user enabled state
      *
@@ -496,6 +528,18 @@ class UserAccess
      */
     Cc addUserToNonIpmiGroupUsers(const std::string& userName);
 
+    /** @brief check wherether the `bootstrap0` account is used
+     *
+     * @return true if account is used, false for others
+     */
+    bool isbootstrap0InUsed();
+
+    /** @brief set the `bootstrap0` account is used state
+     *
+     * @return true if the state is updated successfully, false for others
+     */
+    bool setbootstrap0InUsed(const bool& inUsed);
+
     /** @brief remove userName to list of None Ipmi group users
      *
      * @param[in] userName - user name
@@ -528,6 +572,9 @@ class UserAccess
         nullptr};
 
     std::vector<std::string> listNoneIpmiGroupUsers{};
+
+    /* Identify the used state of the bootstrap account name bootstrap0 */
+    bool bootstrap0InUse;
 
   private:
     UsersTbl usersTbl;
