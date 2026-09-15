@@ -160,6 +160,24 @@
       "parentUuid": "749fc6f6_a0a8a279",
       "revId": "0906e19a82fde89e9c8d13852a2b93f20d32e9a5",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e34f9f79_8f19257a",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 621,
+      "author": {
+        "id": 1002977
+      },
+      "writtenOn": "2026-09-15T05:32:18Z",
+      "side": 1,
+      "message": "Hi @bradleyb@fuzziesquirrel.com\n\nReduced User-manager D-Bus calls from 4 to 2 in ps20. The account is created in one CreateUser call with its groups, privilege and enabled state, then only the BootStrapAccount property is set.\n\nI tested ps20 with the unmodified 500 ms driver timeout. The bootstrap account is now created in about 260-470 ms and the host logs in, but it is not guaranteed:\n4 of 28 requests still went over 500 ms.\n\ncan you please help to test it once?",
+      "parentUuid": "0d6ab082_82a6d356",
+      "revId": "0906e19a82fde89e9c8d13852a2b93f20d32e9a5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
