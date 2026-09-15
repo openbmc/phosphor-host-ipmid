@@ -1019,6 +1019,10 @@ RspType<> setLanInt(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
             {
                 return responseInvalidFieldRequest();
             }
+            if (set >= MAX_IPV6_STATIC_ADDRESSES)
+            {
+                return responseParmOutOfRange();
+            }
             if (enabled)
             {
                 if (prefix < MIN_IPV6_PREFIX_LENGTH ||
