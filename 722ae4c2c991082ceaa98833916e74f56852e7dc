@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3e6281cf_ff74fb96",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-09-16T03:25:25Z",
+      "side": 1,
+      "message": "The selector range validation is correct. IPv6 static-address selectors 0–14 are valid, while selector 15 and above correctly return 0xC9 (Parameter out of range). The GET path already has equivalent validation, and this change adds the missing validation to the SET path.",
+      "revId": "722ae4c2c991082ceaa98833916e74f56852e7dc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
