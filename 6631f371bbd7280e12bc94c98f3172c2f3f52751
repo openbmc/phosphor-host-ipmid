@@ -24,6 +24,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "ecaed9ab_3a5780f9",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 21
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1002977
+      },
+      "writtenOn": "2026-09-16T14:53:45Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "4b75e9f1_be24a5be",
+      "range": {
+        "startLine": 13,
+        "startChar": 0,
+        "endLine": 13,
+        "endChar": 54
+      },
+      "revId": "6631f371bbd7280e12bc94c98f3172c2f3f52751",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "51ab1ace_334d3bd9",
@@ -47,6 +71,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "7d1e4e92_c0c1850d",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 1784,
+      "author": {
+        "id": 1002977
+      },
+      "writtenOn": "2026-09-16T14:53:45Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "51ab1ace_334d3bd9",
+      "range": {
+        "startLine": 1784,
+        "startChar": 0,
+        "endLine": 1784,
+        "endChar": 57
+      },
+      "revId": "6631f371bbd7280e12bc94c98f3172c2f3f52751",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "faacd7fa_3318cf91",
@@ -60,6 +108,30 @@
       "writtenOn": "2026-09-10T08:21:01Z",
       "side": 1,
       "message": "Please catch the exception and return an appropriate completion code",
+      "range": {
+        "startLine": 1788,
+        "startChar": 4,
+        "endLine": 1788,
+        "endChar": 19
+      },
+      "revId": "6631f371bbd7280e12bc94c98f3172c2f3f52751",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "cd806482_3ce20723",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 1788,
+      "author": {
+        "id": 1002977
+      },
+      "writtenOn": "2026-09-16T14:53:45Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "faacd7fa_3318cf91",
       "range": {
         "startLine": 1788,
         "startChar": 4,
