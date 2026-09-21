@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "bcde7e59_6f822fd6",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-09-21T08:45:36Z",
+      "side": 1,
+      "message": "@vernon.mauery@gmail.com Addressed Comments, Please Review from Yourside.Thanks",
+      "revId": "39bf65508a84d80bbbf1b3e8db3e50805d72e3f8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
