@@ -913,7 +913,15 @@ RspType<> setLanInt(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
             {
                 return responseCommandNotAvailable();
             }
-            auto pfx = stdplus::maskToPfx(unpackT<stdplus::In4Addr>(req));
+            uint8_t pfx;
+            try
+            {
+                pfx = stdplus::maskToPfx(unpackT<stdplus::In4Addr>(req));
+            }
+            catch (const std::invalid_argument&)
+            {
+                return responseInvalidFieldRequest();
+            }
             unpackFinal(req);
             channelCall<reconfigureIfAddr4>(channel, std::nullopt, pfx);
             return responseSuccess();
