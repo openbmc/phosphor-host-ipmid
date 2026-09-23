@@ -16,6 +16,52 @@
       "message": "@vernon.mauery@gmail.com\nPlease review",
       "revId": "6d636392699443a4e24b02ab845837de6c6d4b68",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7e71fea5_ca9bd26e",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 19
+      },
+      "lineNbr": 1868,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-09-23T10:53:28Z",
+      "side": 1,
+      "message": "Is GetBootStrapAccount the only path that creates non-IPMI users, or must direct D-Bus user creation also enforce the 15-user limit? If the limit is reached, who rejects the creation and how is ccOutOfSpace propagated?",
+      "range": {
+        "startLine": 1868,
+        "startChar": 15,
+        "endLine": 1868,
+        "endChar": 41
+      },
+      "revId": "6d636392699443a4e24b02ab845837de6c6d4b68",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5031a793_ab4d972b",
+        "filename": "user_channel/user_mgmt.hpp",
+        "patchSetId": 19
+      },
+      "lineNbr": 519,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-09-23T10:53:28Z",
+      "side": 1,
+      "message": "Is listNoneIpmiGroupUsers intentionally only an in-memory cache? What is the expected recovery behavior after restart or crash? Should the list always be rebuilt from D-Bus, or should it be persisted?",
+      "range": {
+        "startLine": 519,
+        "startChar": 21,
+        "endLine": 519,
+        "endChar": 27
+      },
+      "revId": "6d636392699443a4e24b02ab845837de6c6d4b68",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
