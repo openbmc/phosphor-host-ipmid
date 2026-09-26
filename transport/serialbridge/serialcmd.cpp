@@ -232,7 +232,7 @@ int SerialChannel::write(stdplus::Fd& uart, uint8_t rsAddr, uint8_t rqAddr,
  * @brief Read function
  */
 void SerialChannel::read(stdplus::Fd& uart, sdbusplus::bus_t& bus,
-                         sdbusplus::slot_t& outstanding)
+                         sdbusplus::slot& outstanding)
 {
     std::array<uint8_t, ipmiSerialMaxBufferSize> buffer;
     auto ipmiSerialPacket = stdplus::fd::read(uart, buffer);
@@ -245,7 +245,7 @@ void SerialChannel::read(stdplus::Fd& uart, sdbusplus::bus_t& bus,
     if (outstanding)
     {
         lg2::error("Canceling outstanding request \n");
-        outstanding = sdbusplus::slot_t(nullptr);
+        outstanding = sdbusplus::slot(nullptr);
     }
 
     // process ipmi serial packet
@@ -322,7 +322,7 @@ void SerialChannel::read(stdplus::Fd& uart, sdbusplus::bus_t& bus,
     outstanding = m.call_async(stdplus::exception::ignore(
         [&outstanding, this, &uart, _rsAddr{rsAddr}, _rqAddr{rqAddr},
          _seq{seq}](sdbusplus::message_t&& m) {
-            outstanding = sdbusplus::slot_t(nullptr);
+            outstanding = sdbusplus::slot(nullptr);
 
             if (write(uart, _rsAddr, _rqAddr, _seq, std::move(m)) < 0)
             {

@@ -40,7 +40,7 @@ class SerialChannel
     int write(stdplus::Fd& uart, uint8_t rsAddr, uint8_t rqAddr, uint8_t seq,
               sdbusplus::message_t&& m);
     void read(stdplus::Fd& serial, sdbusplus::bus_t& bus,
-              sdbusplus::slot_t& outstanding);
+              sdbusplus::slot& outstanding);
     uint8_t calculateChecksum(std::span<uint8_t> data);
     uint8_t getUnescapedCharacter(uint8_t c);
     int consumeIpmiSerialPacket(std::span<uint8_t>& escapedDataBytes,

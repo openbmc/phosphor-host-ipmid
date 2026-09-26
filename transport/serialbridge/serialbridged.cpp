@@ -44,7 +44,7 @@ int execute(const std::string& channel, const bool& verbose)
     stdplus::ManagedFd uart = stdplus::fd::open(
         std::format("/dev/{}", channel.c_str()),
         OpenFlags(OpenAccess::ReadWrite).set(OpenFlag::NonBlock));
-    sdbusplus::slot_t slot(nullptr);
+    sdbusplus::slot slot(nullptr);
 
     std::unique_ptr<SerialChannel> serialchannel =
         std::make_unique<SerialChannel>(verbose);
