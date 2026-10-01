@@ -43,6 +43,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "3b0f7809_7e03255a",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 19
+      },
+      "lineNbr": 1868,
+      "author": {
+        "id": 1002977
+      },
+      "writtenOn": "2026-10-01T05:46:17Z",
+      "side": 1,
+      "message": "GetBootStrapAccount is the only ipmid path that creates non-IPMI users, but Redfish (AccountTypes without IPMI) and direct D-Bus CreateUser also create them, and all share the same pool.\n\nphosphor-user-manager enforces the limit for every path: throwForMaxGrpUserCount() runs in CreateUser and on UserGroups changes and throws xyz.openbmc_project.User.Common.Error.NoResource. This list mirrors that count so GetBootStrapAccount can return ccOutOfSpace early without a D-Bus round trip; it is not the enforcer. If user-manager rejects anyway, createUser() returns ccUnspecifiedError, the same as any other D-Bus failure in this file.",
+      "parentUuid": "7e71fea5_ca9bd26e",
+      "range": {
+        "startLine": 1868,
+        "startChar": 15,
+        "endLine": 1868,
+        "endChar": 41
+      },
+      "revId": "6d636392699443a4e24b02ab845837de6c6d4b68",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "5031a793_ab4d972b",
         "filename": "user_channel/user_mgmt.hpp",
         "patchSetId": 19
@@ -54,6 +78,30 @@
       "writtenOn": "2026-09-23T10:53:28Z",
       "side": 1,
       "message": "Is listNoneIpmiGroupUsers intentionally only an in-memory cache? What is the expected recovery behavior after restart or crash? Should the list always be rebuilt from D-Bus, or should it be persisted?",
+      "range": {
+        "startLine": 519,
+        "startChar": 21,
+        "endLine": 519,
+        "endChar": 27
+      },
+      "revId": "6d636392699443a4e24b02ab845837de6c6d4b68",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "13488af1_a3af4d9b",
+        "filename": "user_channel/user_mgmt.hpp",
+        "patchSetId": 19
+      },
+      "lineNbr": 519,
+      "author": {
+        "id": 1002977
+      },
+      "writtenOn": "2026-10-01T05:46:17Z",
+      "side": 1,
+      "message": "Yes, it is intentionally in-memory only. phosphor-user-manager is the source of truth for group membership, so persisting a copy here would duplicate state that can drift; the list is always rebuilt from D-Bus, never persisted.\n\nRecovery: on every ipmid start, cacheUserDataFile() rebuilds it from user-manager with GetManagedObjects (around line 1640). At runtime the InterfacesAdded/InterfacesRemoved, UserRenamed and PropertiesChanged(UserGroups) handlers keep it in sync. After a restart or crash the constructor runs again, so the list is recovered the same way. If it were ever out of date, user-manager still enforces the limit.",
+      "parentUuid": "5031a793_ab4d972b",
       "range": {
         "startLine": 519,
         "startChar": 21,
