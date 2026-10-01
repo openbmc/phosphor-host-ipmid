@@ -275,6 +275,21 @@ void createIfAddr(sdbusplus::bus_t& bus, const ChannelParams& params,
     bus.call_noreply(newreq);
 }
 
+/** @brief Rejects non-unicast and loopback addresses
+ *
+ *  @param[in] address - The address to validate
+ */
+template <typename Addr>
+void validateIfAddr(Addr address)
+{
+    if (!address.isUnicast() || address.isLoopback())
+    {
+        lg2::error("Invalid IP address {NET_IP}", "NET_IP",
+                   stdplus::toStr(address));
+        throw ccInvalidFieldRequest;
+    }
+}
+
 /** @brief Trivial helper for getting the IPv4 address from getIfAddrs()
  *
  *  @param[in] bus    - The bus object used for lookups
@@ -338,9 +353,16 @@ void reconfigureIfAddr4(sdbusplus::bus_t& bus, const ChannelParams& params,
     {
         addr = ifaddr->address;
         fallbackPrefix = ifaddr->prefix;
-        deleteObjectIfExists(bus, params.service, ifaddr->path);
     }
     addr = address.value_or(addr);
+    if (addr != stdplus::In4Addr{})
+    {
+        validateIfAddr(addr);
+    }
+    if (ifaddr)
+    {
+        deleteObjectIfExists(bus, params.service, ifaddr->path);
+    }
     if (addr != stdplus::In4Addr{})
     {
         createIfAddr<AF_INET>(bus, params, addr,
@@ -419,6 +441,7 @@ void deconfigureIfAddr6(sdbusplus::bus_t& bus, const ChannelParams& params,
 void reconfigureIfAddr6(sdbusplus::bus_t& bus, const ChannelParams& params,
                         uint8_t idx, stdplus::In6Addr address, uint8_t prefix)
 {
+    validateIfAddr(address);
     deconfigureIfAddr6(bus, params, idx);
     createIfAddr<AF_INET6>(bus, params, address, prefix);
 }
