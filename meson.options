@@ -111,6 +111,13 @@ option(
 
 # Features
 
+option(
+    'experimental-bypass-self-test',
+    type: 'feature',
+    value: 'disabled',
+    description: 'Experimental: bypass Get Self Test Results device checks and always report no error',
+)
+
 # When libuserlayer is disabled, libuserlayer won't be included in the build.
 option(
     'libuserlayer',

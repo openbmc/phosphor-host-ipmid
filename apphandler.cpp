@@ -775,6 +775,13 @@ auto ipmiAppGetSelfTestResults(ipmi::Context::ptr ctx)
                      bool,    // [6] Cannot access SDR Repository
                      bool>    // [7] Cannot access SEL device
 {
+    constexpr uint8_t gstNoError = 0x55;
+    if constexpr (EXPERIMENTAL_BYPASS_SELF_TEST)
+    {
+        return ipmi::responseSuccess(gstNoError, false, false, false, false,
+                                     false, false, false, false);
+    }
+
     constexpr auto selObject = "/xyz/openbmc_project/Logging/IPMI";
     constexpr auto selIntf = "xyz.openbmc_project.Logging.IPMI";
     constexpr auto sensorRoot = "/xyz/openbmc_project/sensors";
@@ -784,7 +791,6 @@ auto ipmiAppGetSelfTestResults(ipmi::Context::ptr ctx)
     constexpr auto fruObject = "/xyz/openbmc_project/FruDevice";
     constexpr auto fruIntf = "xyz.openbmc_project.FruDeviceManager";
 
-    constexpr uint8_t gstNoError = 0x55;
     constexpr uint8_t gstCorruptedDevices = 0x57;
 
     bool fwCorrupt = false;
