@@ -32,6 +32,18 @@ meson builddir -Dbuildtype=debug
 ninja -C builddir
 ```
 
+## Experimental self-test bypass
+
+For platforms whose BIOS delays host boot on Get Self Test Results, enable:
+
+```sh
+meson setup builddir -Dexperimental-bypass-self-test=enabled
+```
+
+The command (Application NetFn `0x06`, command `0x04`) then returns completion
+code `0x00` and data `55 00` immediately. This intentionally masks self-test
+failures to avoid delaying or blocking host boot.
+
 ## Generate test coverage report
 
 ```ascii

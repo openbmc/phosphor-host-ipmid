@@ -47,6 +47,10 @@ conf_data.set_quoted('HOST_NAME', get_option('host-name'))
 conf_data.set_quoted('POWER_READING_SENSOR', get_option('power-reading-sensor'))
 conf_data.set_quoted('HOST_IPMI_LIB_PATH', get_option('host-ipmi-lib-path'))
 conf_data.set_quoted('FW_VER_REGEX', get_option('fw-ver-regex'))
+conf_data.set10(
+    'EXPERIMENTAL_BYPASS_SELF_TEST',
+    get_option('experimental-bypass-self-test').enabled(),
+)
 
 if get_option('shortname-remove-suffix').allowed()
     conf_data.set_quoted('SHORTNAME_REMOVE_SUFFIX', '1')

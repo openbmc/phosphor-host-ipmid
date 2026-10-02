@@ -787,6 +787,12 @@ auto ipmiAppGetSelfTestResults(ipmi::Context::ptr ctx)
     constexpr uint8_t gstNoError = 0x55;
     constexpr uint8_t gstCorruptedDevices = 0x57;
 
+    if constexpr (EXPERIMENTAL_BYPASS_SELF_TEST)
+    {
+        return ipmi::responseSuccess(gstNoError, false, false, false, false,
+                                     false, false, false, false);
+    }
+
     bool fwCorrupt = false;
     bool bootBlockCorrupt = false;
     bool fruCorrupt = false;
