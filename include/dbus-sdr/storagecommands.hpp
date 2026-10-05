@@ -15,6 +15,7 @@
 */
 
 #pragma once
+#include "dbus-sdr/fruwrite.hpp"
 #include "sensorhandler.hpp"
 
 #include <cstdint>
@@ -63,20 +64,6 @@ enum class SensorUnits : uint8_t
     joules = 0x7,
     rpm = 0x12,
 };
-
-#pragma pack(push, 1)
-struct FRUHeader
-{
-    uint8_t commonHeaderFormat;
-    uint8_t internalOffset;
-    uint8_t chassisOffset;
-    uint8_t boardOffset;
-    uint8_t productOffset;
-    uint8_t multiRecordOffset;
-    uint8_t pad;
-    uint8_t checksum;
-};
-#pragma pack(pop)
 
 #pragma pack(push, 1)
 struct Type12Record

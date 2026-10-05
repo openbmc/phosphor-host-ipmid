@@ -39,6 +39,17 @@ dbus_sdr_src = [
     'dbus-sdr/sdrutils.cpp',
     'dbus-sdr/sensorcommands.cpp',
     'dbus-sdr/storagecommands.cpp',
+    'dbus-sdr/fruwrite.cpp',
     hybrid_src,
     sensorsoem_src,
 ]
+
+if get_option('tests').allowed()
+    fruwrite_lib = static_library(
+        'fruwrite',
+        'fruwrite.cpp',
+        include_directories: root_inc,
+        implicit_include_directories: false,
+    )
+    fruwrite_dep = declare_dependency(link_with: fruwrite_lib)
+endif
