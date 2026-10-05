@@ -101,3 +101,15 @@ test(
         dependencies: [sensorutils_dep, gtest, gmock],
     ),
 )
+
+test(
+    'dbus-sdr/fruwrite',
+    executable(
+        'dbus-sdr_fruwrite',
+        'dbus-sdr/fruwrite_unittest.cpp',
+        include_directories: root_inc,
+        build_by_default: false,
+        implicit_include_directories: false,
+        dependencies: [fruwrite_dep, gtest, gmock],
+    ),
+)
