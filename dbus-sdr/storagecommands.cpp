@@ -442,6 +442,7 @@ ipmi::RspType<uint8_t> ipmiStorageWriteFruData(
         FRUHeader* header = reinterpret_cast<FRUHeader*>(fru.data());
 
         size_t areaLength = 0;
+        bool completeArea = true;
         size_t lastRecordStart = std::max(
             {header->internalOffset, header->chassisOffset, header->boardOffset,
              header->productOffset, header->multiRecordOffset});
@@ -450,17 +451,30 @@ ipmi::RspType<uint8_t> ipmiStorageWriteFruData(
         if (header->multiRecordOffset)
         {
             // This FRU has a MultiRecord Area
+            constexpr size_t multiRecordHeaderSize = 5;
+            lastRecordStart = header->multiRecordOffset * 8;
             uint8_t endOfList = 0;
             // Walk the MultiRecord headers until the last record
             while (!endOfList)
             {
+                if (lastRecordStart > fru.size() ||
+                    fru.size() - lastRecordStart < multiRecordHeaderSize)
+                {
+                    completeArea = false;
+                    break;
+                }
                 // The MSB in the second byte of the MultiRecord header signals
                 // "End of list"
                 endOfList = fru[lastRecordStart + 1] & 0x80;
                 // Third byte in the MultiRecord header is the length
                 areaLength = fru[lastRecordStart + 2];
                 // This length is in bytes (not 8 bytes like other headers)
-                areaLength += 5; // The length omits the 5 byte header
+                areaLength += multiRecordHeaderSize;
+                if (areaLength > fru.size() - lastRecordStart)
+                {
+                    completeArea = false;
+                    break;
+                }
                 if (!endOfList)
                 {
                     // Next MultiRecord header
@@ -479,7 +493,7 @@ ipmi::RspType<uint8_t> ipmiStorageWriteFruData(
                 areaLength *= 8; // it is in multiples of 8 bytes
             }
         }
-        if (lastWriteAddr >= (areaLength + lastRecordStart))
+        if (completeArea && lastWriteAddr >= (areaLength + lastRecordStart))
         {
             atEnd = true;
         }
