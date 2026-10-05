@@ -916,7 +916,7 @@ ipmi::RspType<uint8_t> setMgmntCtrlIdStr(ipmi::Context::ptr& ctx,
     {
         return ipmi::responseParmOutOfRange();
     }
-    if (data.size() != count)
+    if (count == 0 || data.size() != count)
     {
         return ipmi::responseReqDataLenInvalid();
     }
