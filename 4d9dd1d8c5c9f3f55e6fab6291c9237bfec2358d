@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3eb83679_eda57c70",
+        "filename": "apphandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 794,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-10-06T10:11:05Z",
+      "side": 1,
+      "message": "nit: Could these constants be moved to the start of the function for consistency",
+      "range": {
+        "startLine": 785,
+        "startChar": 4,
+        "endLine": 794,
+        "endChar": 49
+      },
+      "revId": "4d9dd1d8c5c9f3f55e6fab6291c9237bfec2358d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5adb3622_a97b88c9",
+        "filename": "meson.build",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-10-06T10:11:05Z",
+      "side": 1,
+      "message": "Could this use .enabled() instead of .allowed()? .allowed() also returns true when the option is set to auto, which would activate the self-test bypass without it being explicitly enabled. Since this bypass masks self-test failures, it seems safer to require -Dexperimental-bypass-self-test\u003denabled.\n\nplease Correct me if I am wrong ?",
+      "range": {
+        "startLine": 52,
+        "startChar": 48,
+        "endLine": 52,
+        "endChar": 55
+      },
+      "revId": "4d9dd1d8c5c9f3f55e6fab6291c9237bfec2358d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
