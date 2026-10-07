@@ -352,7 +352,7 @@ ipmi::RspType<uint16_t,            // Next Record ID
     std::vector<uint8_t> buffer;
     if (readLength == ipmi::sel::entireRecord)
     {
-        buffer.resize(sizeof(record));
+        buffer.resize(sizeof(record.event));
         std::memcpy(buffer.data(), &record.event, sizeof(record.event));
     }
     else
