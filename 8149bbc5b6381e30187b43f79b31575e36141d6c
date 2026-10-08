@@ -3,6 +3,29 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "dc5db903_58e132d5",
+        "filename": "user_channel/user_layer.hpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 299,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-10-08T22:34:15Z",
+      "side": 1,
+      "message": "check the whole commit for none vs non IPMI (including the commit message). It should be Non-IPMI group, not none.",
+      "range": {
+        "startLine": 283,
+        "startChar": 2,
+        "endLine": 299,
+        "endChar": 63
+      },
+      "revId": "8149bbc5b6381e30187b43f79b31575e36141d6c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "5338fb04_964444c4",
         "filename": "user_channel/user_mgmt.cpp",
         "patchSetId": 17
