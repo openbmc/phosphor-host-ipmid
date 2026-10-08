@@ -164,15 +164,15 @@ RspType<> ipmiSetChannelAccess(
  *  - privLimit - channel privilege limit
  *  - reserved - skip 4 bits
  * */
-ipmi ::RspType<uint3_t, // access mode,
-               bool,    // user authentication status,
-               bool,    // message authentication status,
-               bool,    // alerting status,
-               uint2_t, // reserved,
+ipmi::RspType<uint3_t, // access mode,
+              bool,    // user authentication status,
+              bool,    // message authentication status,
+              bool,    // alerting status,
+              uint2_t, // reserved,
 
-               uint4_t, // channel privilege,
-               uint4_t  // reserved
-               >
+              uint4_t, // channel privilege,
+              uint4_t  // reserved
+              >
     ipmiGetChannelAccess(Context::ptr ctx, uint4_t channel, uint4_t reserved1,
                          uint6_t reserved2, uint2_t accessSetMode)
 {
