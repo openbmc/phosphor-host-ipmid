@@ -22,6 +22,30 @@
       },
       "revId": "4dc01621a5d6105389bc1f6bbc02721ce147c7ac",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ed31c738_237067de",
+        "filename": "transporthandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 358,
+      "author": {
+        "id": 1002754
+      },
+      "writtenOn": "2026-10-08T08:49:09Z",
+      "side": 1,
+      "message": "Yes, it\u0027s intentional. Setting 0.0.0.0 clears the configured IPv4 address, and that is existing behavior, This patch doesn\u0027t change it.",
+      "parentUuid": "4d9daafd_63932f5d",
+      "range": {
+        "startLine": 358,
+        "startChar": 15,
+        "endLine": 358,
+        "endChar": 16
+      },
+      "revId": "4dc01621a5d6105389bc1f6bbc02721ce147c7ac",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
