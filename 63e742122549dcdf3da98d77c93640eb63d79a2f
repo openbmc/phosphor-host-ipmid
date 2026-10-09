@@ -16,6 +16,24 @@
       "message": "Do any of the recipes need to change?",
       "revId": "63e742122549dcdf3da98d77c93640eb63d79a2f",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "06d18931_202268b9",
+        "filename": "meson.options",
+        "patchSetId": 1
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2026-10-09T03:01:10Z",
+      "side": 1,
+      "message": "I checked the meta layers and found that meta-ieisystem is already passing matches-map as a comma-separated string:\n```\n$ git grep \"matches-map\" meta-*/\nmeta-ieisystem/meta-fp5280g3/recipes-phosphor/ipmi/phosphor-ipmi-host_%.bbappend:        -Dmatches-map\u003d\"1,2,5,6,7,8\" \\\n```\n\nChanging the option type to string aligns with this existing usage and preserves the default behavior for other platforms, so no recipe changes are needed.",
+      "parentUuid": "a411f766_bd78397f",
+      "revId": "63e742122549dcdf3da98d77c93640eb63d79a2f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
