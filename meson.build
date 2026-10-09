@@ -58,13 +58,13 @@ if get_option('open-power').allowed()
     conf_data.set_quoted('OPEN_POWER_SUPPORT', '1')
 endif
 
-matches_map = get_option('matches-map')
-conf_data.set('MAJOR_MATCH_INDEX', matches_map[0])
-conf_data.set('MINOR_MATCH_INDEX', matches_map[1])
-conf_data.set('AUX_0_MATCH_INDEX', matches_map[2])
-conf_data.set('AUX_1_MATCH_INDEX', matches_map[3])
-conf_data.set('AUX_2_MATCH_INDEX', matches_map[4])
-conf_data.set('AUX_3_MATCH_INDEX', matches_map[5])
+matches_map = get_option('matches-map').split(',')
+conf_data.set('MAJOR_MATCH_INDEX', matches_map[0].strip())
+conf_data.set('MINOR_MATCH_INDEX', matches_map[1].strip())
+conf_data.set('AUX_0_MATCH_INDEX', matches_map[2].strip())
+conf_data.set('AUX_1_MATCH_INDEX', matches_map[3].strip())
+conf_data.set('AUX_2_MATCH_INDEX', matches_map[4].strip())
+conf_data.set('AUX_3_MATCH_INDEX', matches_map[5].strip())
 
 conf_h = configure_file(output: 'config.h', configuration: conf_data)
 
