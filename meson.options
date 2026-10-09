@@ -222,9 +222,9 @@ option(
 )
 option(
     'matches-map',
-    type: 'array',
-    value: ['1', '2', '0', '0', '0', '0'],
-    description: 'An array of integers',
+    type: 'string',
+    value: '1,2,0,0,0,0',
+    description: 'Comma-separated array of integers for match indices',
 )
 
 # libipmi20.so library
