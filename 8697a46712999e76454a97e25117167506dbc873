@@ -1,0 +1,290 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c7850e94_440a3ba2",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 22
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-10-09T23:46:30Z",
+      "side": 1,
+      "message": "use std::string_view",
+      "range": {
+        "startLine": 253,
+        "startChar": 5,
+        "endLine": 256,
+        "endChar": 57
+      },
+      "revId": "8697a46712999e76454a97e25117167506dbc873",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f220faad_dcd3f98b",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 22
+      },
+      "lineNbr": 257,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-10-09T23:46:30Z",
+      "side": 1,
+      "message": "this fails to check for the first character being a lower/upper alpha.",
+      "revId": "8697a46712999e76454a97e25117167506dbc873",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "75e90c17_ffbde296",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 22
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-10-09T23:46:30Z",
+      "side": 1,
+      "message": "add check for numbers?",
+      "revId": "8697a46712999e76454a97e25117167506dbc873",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "77d2bf6e_b89c2ff2",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 22
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-10-09T23:46:30Z",
+      "side": 1,
+      "message": "move this check into the loop for an early break out of the loop",
+      "revId": "8697a46712999e76454a97e25117167506dbc873",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a011a414_28403da0",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 22
+      },
+      "lineNbr": 299,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-10-09T23:46:30Z",
+      "side": 1,
+      "message": "use std::string_view instead:\n```\nstd::string_view lowCharacters{ipmi::lowCharacters};\nstd::string_view upCharacters{ipmi::upCharacters};\nstd::string_view numberCharacters{ipmi::numberCharacters};\n```",
+      "range": {
+        "startLine": 296,
+        "startChar": 0,
+        "endLine": 299,
+        "endChar": 57
+      },
+      "revId": "8697a46712999e76454a97e25117167506dbc873",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "74a89d91_952d9a09",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 22
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-10-09T23:46:30Z",
+      "side": 1,
+      "message": "Use SecureBuffer to eliminate copy at the end of the ipmi function and to have automatic memory wiping at the end of the life cycle.",
+      "revId": "8697a46712999e76454a97e25117167506dbc873",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e3a01cda_8a9e4090",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 22
+      },
+      "lineNbr": 393,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-10-09T23:46:30Z",
+      "side": 1,
+      "message": "use std::string_view",
+      "range": {
+        "startLine": 387,
+        "startChar": 0,
+        "endLine": 393,
+        "endChar": 1
+      },
+      "revId": "8697a46712999e76454a97e25117167506dbc873",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "00e2a1fb_4c7e23a8",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 22
+      },
+      "lineNbr": 418,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-10-09T23:46:30Z",
+      "side": 1,
+      "message": "move this check into the loop so there is an early break out option",
+      "revId": "8697a46712999e76454a97e25117167506dbc873",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6add218a_c99334f7",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 22
+      },
+      "lineNbr": 432,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-10-09T23:46:30Z",
+      "side": 1,
+      "message": "if this is a SecureBuffer instead of a std::string, there is no need to copy it at the end and it will get wiped from memory at the end of its use.",
+      "revId": "8697a46712999e76454a97e25117167506dbc873",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e57ef0c5_583eb6be",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 22
+      },
+      "lineNbr": 442,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-10-09T23:46:30Z",
+      "side": 1,
+      "message": "SecureBuffer password(passwordLength);",
+      "range": {
+        "startLine": 442,
+        "startChar": 9,
+        "endLine": 442,
+        "endChar": 15
+      },
+      "revId": "8697a46712999e76454a97e25117167506dbc873",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4597c855_548e5cf4",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 22
+      },
+      "lineNbr": 448,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-10-09T23:46:30Z",
+      "side": 1,
+      "message": "use std::string_view",
+      "range": {
+        "startLine": 443,
+        "startChar": 1,
+        "endLine": 448,
+        "endChar": 58
+      },
+      "revId": "8697a46712999e76454a97e25117167506dbc873",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a09e9ad7_d173627f",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 22
+      },
+      "lineNbr": 500,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-10-09T23:46:30Z",
+      "side": 1,
+      "message": "SecureBuffer password;",
+      "range": {
+        "startLine": 500,
+        "startChar": 9,
+        "endLine": 500,
+        "endChar": 15
+      },
+      "revId": "8697a46712999e76454a97e25117167506dbc873",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8bdbe021_4ab62c81",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 22
+      },
+      "lineNbr": 579,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-10-09T23:46:30Z",
+      "side": 1,
+      "message": "return SecureBuffer instead of std::vector\u003cuint8_t\u003e",
+      "range": {
+        "startLine": 578,
+        "startChar": 0,
+        "endLine": 579,
+        "endChar": 40
+      },
+      "revId": "8697a46712999e76454a97e25117167506dbc873",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9d863148_f6cb54b0",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 22
+      },
+      "lineNbr": 742,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-10-09T23:46:30Z",
+      "side": 1,
+      "message": "by dealing in SecureBuffer all along the path, there is no need for this copy and the memory will get wiped after it is sent out on the wire.",
+      "range": {
+        "startLine": 739,
+        "startChar": 4,
+        "endLine": 742,
+        "endChar": 67
+      },
+      "revId": "8697a46712999e76454a97e25117167506dbc873",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
