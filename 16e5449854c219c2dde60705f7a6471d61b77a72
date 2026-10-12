@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f7be8d6d_d2021586",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 23
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-10-12T08:00:16Z",
+      "side": 1,
+      "message": "Could you please rebase your change onto the latest master branch and upload a new patch set? The changes this depends on have recently been merged.\n\nFYI: \n[clang-format: update latest spec and reformat with clang-23 (95376) · Gerrit Code Review](https://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/95376)",
+      "revId": "16e5449854c219c2dde60705f7a6471d61b77a72",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
