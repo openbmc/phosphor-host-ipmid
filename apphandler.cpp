@@ -665,7 +665,15 @@ ipmi::RspType<uint8_t,  // Device ID
 
             rev.minor = (rev.minor > 99 ? 99 : rev.minor);
             devId.fw[1] = rev.minor % 10 + (rev.minor / 10) * 16;
-            std::memcpy(&devId.aux, rev.aux, sizeof(rev.aux));
+
+            // The matches map decides whether the aux bytes come from the
+            // firmware version or from dev_id.json.
+            if (AUX_0_MATCH_INDEX || AUX_1_MATCH_INDEX || AUX_2_MATCH_INDEX ||
+                AUX_3_MATCH_INDEX)
+            {
+                std::memcpy(&devId.aux, rev.aux, sizeof(rev.aux));
+            }
+
             haveBMCVersion = true;
         }
     }
