@@ -1,3 +1,16 @@
+// Test-controllable D-Bus property store: setDbusPropertyStubValue
+// records what the last setDbusProperty call committed;
+// getDbusPropertyStubValue is what the next getDbusProperty<std::string>
+// returns.
+
+#include <string>
+
+namespace ipmi
+{
+extern std::string setDbusPropertyStubValue;
+extern std::string getDbusPropertyStubValue;
+} // namespace ipmi
+
 // Minimal daemon-host symbols required by libipmi20.so at load time.
 //
 // The libipmi20 provider library references registration entry points, SEL
@@ -41,8 +54,21 @@ std::string getChannelName(uint8_t)
 
 boost::system::error_code getService(
     Context::ptr /*ctx*/, const std::string& /*intf*/,
-    const std::string& /*path*/, std::string& /*service*/)
+    const std::string& /*path*/, std::string& service)
 {
+    service = "test.service";
+    return {};
+}
+
+// Explicit specialization for the std::string overload used by
+// dcmi::getHostName; returns the test-programmed value.
+template <>
+boost::system::error_code getDbusProperty<std::string>(
+    Context::ptr /*ctx*/, const std::string& /*service*/,
+    const std::string& /*objPath*/, const std::string& /*interface*/,
+    const std::string& /*property*/, std::string& propertyValue)
+{
+    propertyValue = getDbusPropertyStubValue;
     return {};
 }
 
@@ -90,8 +116,13 @@ namespace ipmi
 
 boost::system::error_code setDbusProperty(
     Context::ptr, const std::string&, const std::string&, const std::string&,
-    const std::string&, const Value&)
+    const std::string& /*property*/, const Value& value)
 {
+    const std::string* str = std::get_if<std::string>(&value);
+    if (str != nullptr)
+    {
+        setDbusPropertyStubValue = *str;
+    }
     return {};
 }
 
