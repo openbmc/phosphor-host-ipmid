@@ -14,6 +14,7 @@
 #include <xyz/openbmc_project/Network/EthernetInterface/server.hpp>
 #include <xyz/openbmc_project/Sensor/Value/common.hpp>
 
+#include <algorithm>
 #include <bitset>
 #include <cmath>
 #include <fstream>
@@ -931,36 +932,49 @@ ipmi::RspType<uint8_t> setMgmntCtrlIdStr(ipmi::Context::ptr& ctx,
         return ipmi::responseParmOutOfRange();
     }
 
-    static std::string hostname{};
-    // read in the current value if not starting at offset 0
-    if (hostname.size() == 0 && offset != 0)
+    /* The identifier is a C string end to end: a NUL before the final
+     * byte would be lost when the spliced value crosses the D-Bus
+     * string type (marshalled via strlen), so the written value would
+     * not equal the value a subsequent read returns. The terminal NUL
+     * has already been stripped above, so any NUL left here is an
+     * interior one. */
+    if (std::find(data.begin(), data.end(), '\0') != data.end())
     {
-        /* read old ctrlIdStr */
-        std::optional<std::string> hostnameResp = dcmi::getHostName(ctx);
-        if (!hostnameResp)
-        {
-            return ipmi::responseUnspecifiedError();
-        }
-        hostname = hostnameResp.value();
-        hostname.resize(offset);
+        return ipmi::responseReqDataLenInvalid();
+    }
+
+    /* Read the current value on every write and splice in the new bytes,
+     * the same stateless pattern setAssetTag uses. The previous
+     * function-local static accumulator leaked abandoned partial writes
+     * into the next session's string and was unsynchronized across
+     * sessions. */
+    std::optional<std::string> hostnameResp = dcmi::getHostName(ctx);
+    if (!hostnameResp)
+    {
+        return ipmi::responseUnspecifiedError();
+    }
+    std::string& hostname = hostnameResp.value();
+
+    if (offset > hostname.size())
+    {
+        return ipmi::responseParmOutOfRange();
     }
 
     // operation is to truncate at offset and append new data
+    hostname.resize(offset);
     hostname.append(data.begin(), data.end());
 
-    // do the update if this is the last write
-    if (terminalWrite)
+    boost::system::error_code ec = ipmi::setDbusProperty(
+        ctx, dcmi::networkServiceName, dcmi::networkConfigObj,
+        dcmi::networkConfigIntf, dcmi::hostNameProp, hostname);
+    if (ec.value())
     {
-        boost::system::error_code ec = ipmi::setDbusProperty(
-            ctx, dcmi::networkServiceName, dcmi::networkConfigObj,
-            dcmi::networkConfigIntf, dcmi::hostNameProp, hostname);
-        hostname.clear();
-        if (ec.value())
-        {
-            return ipmi::responseUnspecifiedError();
-        }
+        return ipmi::responseUnspecifiedError();
     }
 
+    /* DCMI 1.5 6.4.6 Table 6-11: the response length is the sum of
+     * offset and bytes written (the example shows 32 + 4 = 36), even
+     * though the terminal NUL itself is consumed and not stored. */
     auto totalIdSize = static_cast<uint8_t>(offset + count);
     return ipmi::responseSuccess(totalIdSize);
 }
