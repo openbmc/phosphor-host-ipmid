@@ -1362,6 +1362,13 @@ void UserAccess::checkAndReloadUserData()
                       0);
             readUserData();
         }
+        catch (const Json::exception& e)
+        {
+            lg2::error("User data file corrupted during reload, "
+                       "reinitializing: {ERROR}",
+                       "ERROR", e.what());
+            initializeUserDataFile();
+        }
         catch (const std::ios_base::failure& e)
         {
             lg2::error("User data file not found or not readable during "
@@ -1516,6 +1523,13 @@ void UserAccess::cacheUserDataFile()
     try
     {
         readUserData();
+    }
+    catch (const Json::exception& e)
+    {
+        lg2::error("Error parsing IPMI user data file, reinitializing: "
+                   "{ERROR}",
+                   "ERROR", e.what());
+        initializeUserDataFile();
     }
     catch (const std::ios_base::failure& e)
     { // File is empty or missing, create it for the first time
