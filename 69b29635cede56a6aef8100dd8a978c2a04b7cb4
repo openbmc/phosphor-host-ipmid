@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "96465244_18c3263c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-10-14T05:33:13Z",
+      "side": 1,
+      "message": "CLGTMT,This change fixes the race and prevents aux revision from being overwritten to zero.",
+      "revId": "69b29635cede56a6aef8100dd8a978c2a04b7cb4",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
