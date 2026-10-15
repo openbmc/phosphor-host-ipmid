@@ -615,7 +615,7 @@ ipmi::RspType<uint16_t, // reserved
 {
     if (!dcmi::isDCMIPowerMgmtSupported())
     {
-        return ipmi::responseInvalidCommand();
+        return ipmi::responseCommandNotAvailable();
     }
     if (reserved)
     {
@@ -682,7 +682,7 @@ ipmi::RspType<> setPowerLimit(ipmi::Context::ptr& ctx, uint16_t reserved1,
     if (!dcmi::isDCMIPowerMgmtSupported())
     {
         lg2::error("DCMI Power management is unsupported!");
-        return ipmi::responseInvalidCommand();
+        return ipmi::responseCommandNotAvailable();
     }
 
     if (reserved1 || reserved2 || reserved3)
@@ -759,7 +759,7 @@ ipmi::RspType<> applyPowerLimit(ipmi::Context::ptr& ctx, bool enabled,
     if (!dcmi::isDCMIPowerMgmtSupported())
     {
         lg2::error("DCMI Power management is unsupported!");
-        return ipmi::responseInvalidCommand();
+        return ipmi::responseCommandNotAvailable();
     }
     if (reserved1 || reserved2)
     {
@@ -1394,7 +1394,7 @@ ipmi::RspType<uint16_t, // current power
     if (!dcmi::isDCMIPowerMgmtSupported())
     {
         lg2::error("DCMI Power management is unsupported!");
-        return ipmi::responseInvalidCommand();
+        return ipmi::responseCommandNotAvailable();
     }
     if (reserved)
     {
