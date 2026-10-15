@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "29511b20_a1b9a5a8",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-10-15T12:13:13Z",
+      "side": 1,
+      "message": "The recovery change looks reasonable and complements the existing handling for invalid JSON syntax by catching JSON type/schema errors. Could we add a focused test for this case to make the behavior clear and easier to understand in the PR?",
+      "range": {
+        "startLine": 10,
+        "startChar": 29,
+        "endLine": 10,
+        "endChar": 30
+      },
+      "revId": "f4f3f66967c2ba5d4cf5f89a4575a2b81c13db36",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
