@@ -2,6 +2,13 @@
 #include <ipmid/filter.hpp>
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/lg2.hpp>
+#include <stdplus/fd/ops.hpp>
+#include <xyz/openbmc_project/Logging/CPER/Processor/common.hpp>
+#include <xyz/openbmc_project/Logging/CPER/Types/common.hpp>
+
+#include <set>
+
+constexpr auto cperDescriptorSize = 72;
 
 constexpr auto sbmrBootStateIntf = "xyz.openbmc_project.State.Boot.Raw";
 constexpr auto sbmrHostStateIntf = "xyz.openbmc_project.State.Boot.Progress";
@@ -36,6 +43,11 @@ constexpr auto efiSwOsLoaderStart = 0x0180;
 constexpr auto efiSwBsPcExitBootServices = 0x1910;
 
 void registerNetfnSBMRFunctions() __attribute__((constructor));
+
+using ContentType =
+    sdbusplus::common::xyz::openbmc_project::logging::cper::Types::ContentType;
+using Processor =
+    sdbusplus::common::xyz::openbmc_project::logging::cper::Processor;
 
 namespace ipmi
 {
@@ -270,6 +282,64 @@ bool checkAllowedMediumType(uint8_t mediumType)
     return false;
 }
 
+static stdplus::ManagedFd makeSealedCperFd(const std::vector<uint8_t>& data)
+{
+    int raw = memfd_create("cper", MFD_CLOEXEC | MFD_ALLOW_SEALING);
+    if (raw < 0)
+    {
+        throw std::system_error(errno, std::generic_category(), "memfd_create");
+    }
+
+    stdplus::ManagedFd fd(std::move(raw));
+    stdplus::fd::writeExact(fd, data);
+    stdplus::fd::lseek(fd, 0, stdplus::fd::Whence::Set);
+
+    // enforce RO on the receiver end
+    constexpr int seals = F_SEAL_WRITE | F_SEAL_SHRINK | F_SEAL_GROW |
+                          F_SEAL_SEAL;
+    if (fcntl(fd.get(), F_ADD_SEALS, seals) < 0)
+    {
+        throw std::system_error(errno, std::generic_category(), "F_ADD_SEALS");
+    }
+    return fd;
+}
+
+ipmi::RspType<uint8_t> sendPlatformErrorRecord(ipmi::Context::ptr& ctx,
+                                               const std::vector<uint8_t>& data)
+{
+    if (data.size() < cperDescriptorSize)
+    {
+        lg2::error("CPER data is empty or too short, size: {SIZE}", "SIZE",
+                   data.size());
+        return ipmi::responseReqDataLenInvalid();
+    }
+
+    constexpr auto defaultInventoryPath = "/xyz/openbmc_project/inventory";
+
+    try
+    {
+        stdplus::ManagedFd fd = makeSealedCperFd(data);
+        auto ec = ipmi::callDbusMethod(
+            ctx, Processor::default_service, Processor::instance_path,
+            Processor::interface, "Process",
+            sdbusplus::object_path(defaultInventoryPath),
+            ContentType::CPERSection, sdbusplus::message::unix_fd(fd.get()));
+        if (ec)
+        {
+            lg2::error("CPER Process D-Bus call failed: {MSG}", "MSG",
+                       ec.message());
+            return ipmi::responseUnspecifiedError();
+        }
+    }
+    catch (const std::exception& e)
+    {
+        lg2::error("Failed to process CPER data: {ERROR}", "ERROR", e);
+        return ipmi::responseUnspecifiedError();
+    }
+
+    return ipmi::responseSuccess();
+}
+
 ipmi::Cc sbmrFilterCommands(ipmi::message::Request::ptr request)
 {
     if (request->ctx->netFn != ipmi::netFnGroup ||
@@ -287,7 +357,11 @@ ipmi::Cc sbmrFilterCommands(ipmi::message::Request::ptr request)
         return ipmi::ccUnspecifiedError;
     }
 
-    if (request->ctx->cmd == ipmi::sbmr::cmdSendBootProgressCode &&
+    static const std::set<uint8_t> mediumCheckCommands = {
+        ipmi::sbmr::cmdSendBootProgressCode,
+        ipmi::sbmr::cmdSendPlatformErrorRecord};
+
+    if (mediumCheckCommands.count(request->ctx->cmd) &&
         !checkAllowedMediumType(chInfo.mediumType))
     {
         lg2::error("Error - Medium interface not supported, medium={TYPE}",
@@ -302,6 +376,10 @@ ipmi::Cc sbmrFilterCommands(ipmi::message::Request::ptr request)
 
 void registerNetfnSBMRFunctions()
 {
+    registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupSBMR,
+                         ipmi::sbmr::cmdSendPlatformErrorRecord,
+                         ipmi::Privilege::Admin, ipmi::sendPlatformErrorRecord);
+
     registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupSBMR,
                          ipmi::sbmr::cmdSendBootProgressCode,
                          ipmi::Privilege::Admin, ipmi::sendBootProgressCode);
