@@ -2,6 +2,15 @@
 #include <ipmid/filter.hpp>
 #include <ipmid/utils.hpp>
 #include <phosphor-logging/lg2.hpp>
+#include <xyz/openbmc_project/Logging/CPER/Types/common.hpp>
+
+#include <fstream>
+#include <set>
+
+constexpr auto cperService = "xyz.openbmc_project.Logging.CPER.Processor";
+constexpr auto cperObjPath = "/xyz/openbmc_project/logging/cper";
+constexpr auto cperInterface = "xyz.openbmc_project.Logging.CPER.Processor";
+constexpr auto cperDescriptorSize = 72;
 
 constexpr auto sbmrBootStateIntf = "xyz.openbmc_project.State.Boot.Raw";
 constexpr auto sbmrHostStateIntf = "xyz.openbmc_project.State.Boot.Progress";
@@ -36,6 +45,9 @@ constexpr auto efiSwOsLoaderStart = 0x0180;
 constexpr auto efiSwBsPcExitBootServices = 0x1910;
 
 void registerNetfnSBMRFunctions() __attribute__((constructor));
+
+using ContentType =
+    sdbusplus::common::xyz::openbmc_project::logging::cper::Types::ContentType;
 
 namespace ipmi
 {
@@ -270,6 +282,127 @@ bool checkAllowedMediumType(uint8_t mediumType)
     return false;
 }
 
+bool saveCperToFile(std::vector<uint8_t>& data, std::string& fileName)
+{
+    // Save event data to file
+    std::filesystem::path dirName{"/var/cper"};
+    if (!std::filesystem::exists(dirName))
+    {
+        try
+        {
+            std::filesystem::create_directory(dirName);
+        }
+        catch (const std::filesystem::filesystem_error& e)
+        {
+            lg2::error("Failed to create /var/cper directory: {ERROR}", "ERROR",
+                       e.what());
+            return false;
+        }
+    }
+
+    fileName = dirName.string() + "/cper-XXXXXX";
+    auto fd = mkstemp(fileName.data());
+    if (fd < 0)
+    {
+        lg2::error("Failed to generate temp file, error {ERRORNO}", "ERRORNO",
+                   std::strerror(errno));
+        return false;
+    }
+    close(fd);
+
+    if (fileName.empty())
+    {
+        lg2::error("Failed to generate valid temp file name");
+        return false;
+    }
+
+    std::ofstream ofs;
+    ofs.exceptions(std::ofstream::failbit | std::ofstream::badbit |
+                   std::ofstream::eofbit);
+    try
+    {
+        ofs.open(fileName);
+        ofs.write(reinterpret_cast<char*>(data.data()), data.size());
+        ofs.close();
+    }
+    catch (const std::ofstream::failure& e)
+    {
+        lg2::error("Failed to save CPER to '{FILENAME}', error - {ERROR}.",
+                   "FILENAME", fileName, "ERROR", e.what());
+        std::filesystem::remove(fileName);
+        return false;
+    }
+    return true;
+}
+
+bool submitCperForProcessing(ipmi::Context::ptr& ctx, std::string& filePath)
+{
+    constexpr auto defaultInventoryPath = "/xyz/openbmc_project/inventory";
+
+    auto cperFd = open(filePath.c_str(), O_RDONLY);
+    if (cperFd < 0)
+    {
+        lg2::error("Failed to open CPER file {FILE}, errno={ERR}", "FILE",
+                   filePath, "ERR", std::strerror(errno));
+        unlink(filePath.c_str());
+        return false;
+    }
+
+    boost::system::error_code ec = ipmi::callDbusMethod(
+        ctx, cperService, cperObjPath, cperInterface, "Process",
+        sdbusplus::object_path(defaultInventoryPath), ContentType::CPERSection,
+        sdbusplus::message::unix_fd(cperFd));
+
+    // Close the original FD after the D-Bus call.
+    if (close(cperFd) < 0)
+    {
+        lg2::error("Failed to close CPER FD: {ERR}", "ERR",
+                   std::strerror(errno));
+    }
+
+    // Remove the temporary CPER file.
+    if (unlink(filePath.c_str()) < 0)
+    {
+        lg2::error("Failed to remove CPER file {FILE}: {ERR}", "FILE", filePath,
+                   "ERR", std::strerror(errno));
+    }
+
+    // Capture error
+    if (ec)
+    {
+        lg2::error("error in submitting CPER process: {MSG}", "MSG",
+                   ec.message());
+        return false;
+    }
+
+    return true;
+}
+
+ipmi::RspType<uint8_t> sendPlatformErrorRecord(ipmi::Context::ptr ctx,
+                                               std::vector<uint8_t>& data)
+{
+    std::string filePath;
+
+    if (data.size() < cperDescriptorSize)
+    {
+        lg2::error("Error: CPER data is empty or too short, size: {SIZE}",
+                   "SIZE", data.size());
+        return ipmi::responseReqDataLenInvalid();
+    }
+
+    if (!saveCperToFile(data, filePath))
+    {
+        return ipmi::responseUnspecifiedError();
+    }
+
+    if (!submitCperForProcessing(ctx, filePath))
+    {
+        return ipmi::responseUnspecifiedError();
+    }
+
+    return ipmi::responseSuccess();
+}
+
 ipmi::Cc sbmrFilterCommands(ipmi::message::Request::ptr request)
 {
     if (request->ctx->netFn != ipmi::netFnGroup ||
@@ -287,7 +420,11 @@ ipmi::Cc sbmrFilterCommands(ipmi::message::Request::ptr request)
         return ipmi::ccUnspecifiedError;
     }
 
-    if (request->ctx->cmd == ipmi::sbmr::cmdSendBootProgressCode &&
+    static const std::set<uint8_t> mediumCheckCommands = {
+        ipmi::sbmr::cmdSendBootProgressCode,
+        ipmi::sbmr::cmdSendPlatformErrorRecord};
+
+    if (mediumCheckCommands.count(request->ctx->cmd) &&
         !checkAllowedMediumType(chInfo.mediumType))
     {
         lg2::error("Error - Medium interface not supported, medium={TYPE}",
@@ -302,6 +439,10 @@ ipmi::Cc sbmrFilterCommands(ipmi::message::Request::ptr request)
 
 void registerNetfnSBMRFunctions()
 {
+    registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupSBMR,
+                         ipmi::sbmr::cmdSendPlatformErrorRecord,
+                         ipmi::Privilege::Admin, ipmi::sendPlatformErrorRecord);
+
     registerGroupHandler(ipmi::prioOpenBmcBase, ipmi::groupSBMR,
                          ipmi::sbmr::cmdSendBootProgressCode,
                          ipmi::Privilege::Admin, ipmi::sendBootProgressCode);
