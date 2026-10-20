@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e548834b_8d6ea3b7",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-10-20T04:42:53Z",
+      "side": 1,
+      "message": "Good Change,CLGTM\n\nI have Tested the Functionality with following commands:\n\n1.ipmitool lan print 1\n2.systemctl stop phosphor-ipmi-host\n3.systemctl stop phosphor-ipmi-host\nf \u0027{\"usroot@evb-ast2600:~# {\n\u003e   printf \u0027[\u0027\n\u003e   i\u003d0\n\u003e   while [ $i -lt 15 ]; do\n\u003e     [ $i -gt 0 ] \u0026\u0026 printf \u0027,\u0027\n\u003e     printf \u0027{\"userName\":123,\"privilege\":\"x\",\"ipmiEnabled\":[],\"linkAuthEnabled\":[],\"accessCallback\":[]}\u0027\n\u003e     i\u003d$((i+1))\n\u003e   done\n\u003e   printf \u0027]\u0027\n\u003e } \u003e /var/lib/ipmi/ipmi_user.json\n4.systemctl start phosphor-ipmi-host\n\nBefore Fix: ipmid crashed \n\nAfter fix: ipmid not crashed and able to access ipmitool user list 1",
+      "revId": "37ff6267e34f05f46f39b3775ce1b9e97a60f6d0",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
