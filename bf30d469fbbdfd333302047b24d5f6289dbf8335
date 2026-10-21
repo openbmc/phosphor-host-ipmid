@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "082c4bf2_f917106b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-10-21T05:59:06Z",
+      "side": 1,
+      "message": "Better, Please add tests for invalid payload lengths ?",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 31,
+        "endChar": 3
+      },
+      "revId": "bf30d469fbbdfd333302047b24d5f6289dbf8335",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "26b8da35_600f1343",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 340,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-10-21T05:59:06Z",
+      "side": 1,
+      "message": "If failed open file better handle the error?to prevent orphaned files accumulating under /var/cper.",
+      "range": {
+        "startLine": 340,
+        "startChar": 0,
+        "endLine": 340,
+        "endChar": 75
+      },
+      "revId": "bf30d469fbbdfd333302047b24d5f6289dbf8335",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "db7ab199_3c7c9210",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 342,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-10-21T05:59:06Z",
+      "side": 1,
+      "message": "cperFD closed Anywhere ?",
+      "range": {
+        "startLine": 342,
+        "startChar": 9,
+        "endLine": 342,
+        "endChar": 16
+      },
+      "revId": "bf30d469fbbdfd333302047b24d5f6289dbf8335",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
