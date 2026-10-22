@@ -612,31 +612,10 @@ void reconfigureVLAN(sdbusplus::bus_t& bus, ChannelParams& params,
         return;
     }
 
-    // Unfortunately we don't have built-in functions to migrate our interface
-    // customizations to new VLAN interfaces, or have some kind of decoupling.
-    // We therefore must retain all of our old information, setup the new VLAN
-    // configuration, then restore the old info.
-
     // Save info from the old logical interface
     bool dhcp4 = getEthProp<bool>(bus, params, "DHCP4");
     bool dhcp6 = getEthProp<bool>(bus, params, "DHCP6");
     bool ra = getEthProp<bool>(bus, params, "IPv6AcceptRA");
-    ObjectLookupCache ips(bus, params, NetworkIP::interface);
-    auto ifaddr4 = findIfAddr<AF_INET>(bus, params, 0, originsV4, ips);
-    std::vector<IfAddr<AF_INET6>> ifaddrs6;
-    for (uint8_t i = 0; i < MAX_IPV6_STATIC_ADDRESSES; ++i)
-    {
-        auto ifaddr6 =
-            findIfAddr<AF_INET6>(bus, params, i, originsV6Static, ips);
-        if (!ifaddr6)
-        {
-            break;
-        }
-        ifaddrs6.push_back(std::move(*ifaddr6));
-    }
-    ObjectLookupCache neighbors(bus, params, INTF_NEIGHBOR);
-    auto neighbor4 = findGatewayNeighbor<AF_INET>(bus, params, neighbors);
-    auto neighbor6 = findGatewayNeighbor<AF_INET6>(bus, params, neighbors);
 
     if (params.logicalPath != params.ifPath)
     {
@@ -644,24 +623,11 @@ void reconfigureVLAN(sdbusplus::bus_t& bus, ChannelParams& params,
     }
     createVLAN(bus, params, vlan);
 
-    setEthProp(bus, params, "DHCP4", dhcp4);
-    setEthProp(bus, params, "DHCP6", dhcp6);
-    setEthProp(bus, params, "IPv6AcceptRA", ra);
-    if (ifaddr4)
+    if (vlan != 0)
     {
-        createIfAddr<AF_INET>(bus, params, ifaddr4->address, ifaddr4->prefix);
-    }
-    for (const auto& ifaddr6 : ifaddrs6)
-    {
-        createIfAddr<AF_INET6>(bus, params, ifaddr6.address, ifaddr6.prefix);
-    }
-    if (neighbor4)
-    {
-        createNeighbor<AF_INET>(bus, params, neighbor4->ip, neighbor4->mac);
-    }
-    if (neighbor6)
-    {
-        createNeighbor<AF_INET6>(bus, params, neighbor6->ip, neighbor6->mac);
+        setEthProp(bus, params, "DHCP4", dhcp4);
+        setEthProp(bus, params, "DHCP6", dhcp6);
+        setEthProp(bus, params, "IPv6AcceptRA", ra);
     }
 }
 
