@@ -26,6 +26,7 @@
 #include <filesystem>
 #include <optional>
 #include <string>
+#include <unordered_map>
 #include <variant>
 
 void registerNetFnStorageFunctions() __attribute__((constructor));
@@ -629,6 +630,65 @@ ipmi::RspType<int16_t> ipmiStorageGetSelTimeUtcOffset()
     return ipmi::responseSuccess(timeEquation);
 }
 
+/** @brief implements the set SEL timezone command
+ *  @param offset timezone offset in minutes
+ *  @returns IPMI completion code
+ */
+ipmi::RspType<> ipmiStorageSetSelTimeUtcOffset(int16_t offset)
+{
+    constexpr int16_t minOffset = -1440;
+    constexpr int16_t maxOffset = 1440;
+    constexpr int16_t unspecifiedOffset = 0x07FF;
+    static const std::unordered_map<int16_t, std::string> etcGmtMap = {
+        {0, "Etc/GMT"},       {60, "Etc/GMT-1"},    {120, "Etc/GMT-2"},
+        {180, "Etc/GMT-3"},   {240, "Etc/GMT-4"},   {300, "Etc/GMT-5"},
+        {360, "Etc/GMT-6"},   {420, "Etc/GMT-7"},   {480, "Etc/GMT-8"},
+        {540, "Etc/GMT-9"},   {600, "Etc/GMT-10"},  {660, "Etc/GMT-11"},
+        {720, "Etc/GMT-12"},  {780, "Etc/GMT-13"},  {840, "Etc/GMT-14"},
+        {-60, "Etc/GMT+1"},   {-120, "Etc/GMT+2"},  {-180, "Etc/GMT+3"},
+        {-240, "Etc/GMT+4"},  {-300, "Etc/GMT+5"},  {-360, "Etc/GMT+6"},
+        {-420, "Etc/GMT+7"},  {-480, "Etc/GMT+8"},  {-540, "Etc/GMT+9"},
+        {-600, "Etc/GMT+10"}, {-660, "Etc/GMT+11"}, {-720, "Etc/GMT+12"}};
+
+    try
+    {
+        sdbusplus::bus_t bus{ipmid_get_sd_bus_connection()};
+        bool ntp = std::get<bool>(
+            ipmi::getDbusProperty(bus, SystemdTimeService, SystemdTimePath,
+                                  SystemdTimeInterface, "NTP"));
+        if (ntp)
+        {
+            return ipmi::responseCommandNotAvailable();
+        }
+
+        if ((offset < minOffset || offset > maxOffset) &&
+            offset != unspecifiedOffset)
+        {
+            return ipmi::responseParmOutOfRange();
+        }
+
+        auto it = etcGmtMap.find(offset);
+        const auto& timezone =
+            it == etcGmtMap.end() ? etcGmtMap.at(0) : it->second;
+        auto method = bus.new_method_call(SystemdTimeService, SystemdTimePath,
+                                          SystemdTimeInterface, "SetTimezone");
+        method.append(timezone, false);
+        bus.call(method);
+    }
+    catch (const InternalFailure& e)
+    {
+        lg2::error("Internal Failure: {ERROR}", "ERROR", e);
+        return ipmi::responseUnspecifiedError();
+    }
+    catch (const std::exception& e)
+    {
+        lg2::error("exception message: {ERROR}", "ERROR", e);
+        return ipmi::responseUnspecifiedError();
+    }
+
+    return ipmi::responseSuccess();
+}
+
 /** @brief implements the reserve SEL command
  *  @returns IPMI completion code plus response data
  *   - SEL reservation ID.
@@ -878,6 +938,12 @@ void registerNetFnStorageFunctions()
                           ipmi::storage::cmdGetSelTimeUtcOffset,
                           ipmi::Privilege::User,
                           ipmiStorageGetSelTimeUtcOffset);
+
+    // <Set SEL Time UTC Offset>
+    ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
+                          ipmi::storage::cmdSetSelTimeUtcOffset,
+                          ipmi::Privilege::User,
+                          ipmiStorageSetSelTimeUtcOffset);
 
     // <Get SEL Entry>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
