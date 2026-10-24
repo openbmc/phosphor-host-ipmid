@@ -36,7 +36,6 @@ owners:
 - vernon.mauery@gmail.com
 
 reviewers:
-- deepak.kodihalli.83@gmail.com
 - ratankgupta31@gmail.com
 - saipavann@ami.com
 
@@ -49,9 +48,6 @@ matchers:
   - prithvi24pai@gmail.com
 
 openbmc:
-- name: Deepak Kodihalli
-  email: deepak.kodihalli.83@gmail.com
-  discord: dkodihal
 - name: George Liu
   email: liuxiwei@ieisystem.com
   discord: George Liu
