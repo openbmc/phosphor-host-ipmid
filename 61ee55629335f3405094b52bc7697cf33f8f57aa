@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a29152da_2be65986",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1001886
+      },
+      "writtenOn": "2026-10-24T07:15:57Z",
+      "side": 1,
+      "message": "Change it from commands to command? Only one command is added.",
+      "revId": "61ee55629335f3405094b52bc7697cf33f8f57aa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c1f70a90_bcace856",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1001886
+      },
+      "writtenOn": "2026-10-24T07:15:57Z",
+      "side": 1,
+      "message": "Can we use PDI constants instead of local definitions?",
+      "revId": "61ee55629335f3405094b52bc7697cf33f8f57aa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "056ecdbe_92a5379e",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 1001886
+      },
+      "writtenOn": "2026-10-24T07:15:57Z",
+      "side": 1,
+      "message": "Can this be const std::vector\u003cuint8_t\u003e\u0026 and const std::string\u0026 ?",
+      "revId": "61ee55629335f3405094b52bc7697cf33f8f57aa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
