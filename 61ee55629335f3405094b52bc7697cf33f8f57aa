@@ -18,6 +18,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "b2e0284d_e5c8e676",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2026-10-26T19:55:51Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "a29152da_2be65986",
+      "revId": "61ee55629335f3405094b52bc7697cf33f8f57aa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "c1f70a90_bcace856",
@@ -35,6 +53,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "d239cff2_9762338c",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2026-10-26T19:55:51Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "c1f70a90_bcace856",
+      "revId": "61ee55629335f3405094b52bc7697cf33f8f57aa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "056ecdbe_92a5379e",
@@ -48,6 +84,24 @@
       "writtenOn": "2026-10-24T07:15:57Z",
       "side": 1,
       "message": "Can this be const std::vector\u003cuint8_t\u003e\u0026 and const std::string\u0026 ?",
+      "revId": "61ee55629335f3405094b52bc7697cf33f8f57aa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f2b45ece_782300e2",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2026-10-26T19:55:51Z",
+      "side": 1,
+      "message": "Acknowledged. fileName cannot be declared as const because it is also used as an output parameter for subsequent processing.",
+      "parentUuid": "056ecdbe_92a5379e",
       "revId": "61ee55629335f3405094b52bc7697cf33f8f57aa",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
