@@ -19,6 +19,7 @@
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/interprocess/sync/named_recursive_mutex.hpp>
 #include <ipmid/api.hpp>
+#include <org/freedesktop/DBus/ObjectManager/common.hpp>
 #include <sdbusplus/bus.hpp>
 
 #include <algorithm>
@@ -30,19 +31,13 @@
 namespace ipmi
 {
 
+using ObjectManager = sdbusplus::common::org::freedesktop::d_bus::ObjectManager;
+
 static constexpr const char* dBusPropertiesInterface =
     "org.freedesktop.DBus.Properties";
 static constexpr const char* getAllPropertiesMethod = "GetAll";
 static constexpr const char* propertiesChangedSignal = "PropertiesChanged";
 static constexpr const char* setPropertiesMethod = "Set";
-
-// Object Manager related
-static constexpr const char* dBusObjManager =
-    "org.freedesktop.DBus.ObjectManager";
-static constexpr const char* getManagedObjectsMethod = "GetManagedObjects";
-// Object Manager signals
-static constexpr const char* intfAddedSignal = "InterfacesAdded";
-static constexpr const char* intfRemovedSignal = "InterfacesRemoved";
 
 static constexpr const char* ipmiUserMutex = "ipmi_usr_mutex";
 static constexpr const char* ipmiMutexCleanupLockFile =
@@ -117,12 +112,11 @@ inline void safeUsernameCopyToBuffer(uint8_t* buf, size_t bufSize,
 using DbusUserPropVariant =
     std::variant<std::vector<std::string>, std::string, bool>;
 
-using DbusUserObjPath = sdbusplus::object_path;
-
-using DbusUserObjProperties =
-    std::vector<std::pair<std::string, DbusUserPropVariant>>;
-
-using DbusUserObjValue = std::map<std::string, DbusUserObjProperties>;
+using DbusUserManagedObjects =
+    ObjectManager::get_managed_objects_t::return_type;
+using DbusUserObjPath = DbusUserManagedObjects::key_type;
+using DbusUserObjValue = DbusUserManagedObjects::mapped_type;
+using DbusUserObjProperties = DbusUserObjValue::mapped_type;
 
 /**
  * @enum User update events.

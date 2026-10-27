@@ -195,7 +195,7 @@ void userUpdatedSignalHandler(UserAccess& usrAccess, sdbusplus::message_t& msg)
     std::vector<std::string> groups;
     bool enabled = false;
     UserUpdateEvent userEvent = UserUpdateEvent::reservedEvent;
-    if (signal == intfAddedSignal)
+    if (signal == ObjectManager::signal_names::interfaces_added)
     {
         DbusUserObjPath objPath;
         DbusUserObjValue objValue;
@@ -213,7 +213,7 @@ void userUpdatedSignalHandler(UserAccess& usrAccess, sdbusplus::message_t& msg)
         }
         userEvent = UserUpdateEvent::userCreated;
     }
-    else if (signal == intfRemovedSignal)
+    else if (signal == ObjectManager::signal_names::interfaces_removed)
     {
         DbusUserObjPath objPath;
         std::vector<std::string> interfaces;
@@ -457,19 +457,20 @@ bool UserAccess::isValidUserName(const std::string& userName)
         lg2::error("Invalid user name - root");
         return false;
     }
-    std::map<DbusUserObjPath, DbusUserObjValue> properties;
+    DbusUserManagedObjects properties;
     try
     {
-        auto method =
-            bus.new_method_call(userMgrService, userMgrObjBasePath,
-                                dBusObjManager, getManagedObjectsMethod);
+        auto method = bus.new_method_call(
+            userMgrService, userMgrObjBasePath, ObjectManager::interface,
+            ObjectManager::method_names::get_managed_objects);
         auto reply = bus.call(method);
         reply.read(properties);
     }
     catch (const sdbusplus::exception_t& e)
     {
         lg2::error("Failed to execute {METHOD}, path: {PATH}", "METHOD",
-                   getManagedObjectsMethod, "PATH", userMgrObjBasePath);
+                   ObjectManager::method_names::get_managed_objects, "PATH",
+                   userMgrObjBasePath);
         return false;
     }
 
@@ -1550,7 +1551,7 @@ void UserAccess::cacheUserDataFile()
         userUpdatedSignal = std::make_unique<sdbusplus::match>(
             bus,
             sdbusplus::match_rules::type::signal() +
-                sdbusplus::match_rules::interface(dBusObjManager) +
+                sdbusplus::match_rules::interface(ObjectManager::interface) +
                 sdbusplus::match_rules::path(userMgrObjBasePath),
             [&](sdbusplus::message_t& msg) {
                 userUpdatedSignalHandler(*this, msg);
@@ -1575,19 +1576,20 @@ void UserAccess::cacheUserDataFile()
             });
         signalHndlrObject = true;
     }
-    std::map<DbusUserObjPath, DbusUserObjValue> managedObjs;
+    DbusUserManagedObjects managedObjs;
     try
     {
-        auto method =
-            bus.new_method_call(userMgrService, userMgrObjBasePath,
-                                dBusObjManager, getManagedObjectsMethod);
+        auto method = bus.new_method_call(
+            userMgrService, userMgrObjBasePath, ObjectManager::interface,
+            ObjectManager::method_names::get_managed_objects);
         auto reply = bus.call(method);
         reply.read(managedObjs);
     }
     catch (const sdbusplus::exception_t& e)
     {
         lg2::debug("Failed to execute {METHOD}, path: {PATH}", "METHOD",
-                   getManagedObjectsMethod, "PATH", userMgrObjBasePath);
+                   ObjectManager::method_names::get_managed_objects, "PATH",
+                   userMgrObjBasePath);
         return;
     }
     bool updateRequired = false;
