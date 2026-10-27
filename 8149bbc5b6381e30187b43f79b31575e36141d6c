@@ -24,6 +24,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "c6163c31_792db978",
+        "filename": "user_channel/user_layer.hpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 299,
+      "author": {
+        "id": 1002977
+      },
+      "writtenOn": "2026-10-27T04:53:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dc5db903_58e132d5",
+      "range": {
+        "startLine": 283,
+        "startChar": 2,
+        "endLine": 299,
+        "endChar": 63
+      },
+      "revId": "8149bbc5b6381e30187b43f79b31575e36141d6c",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "5338fb04_964444c4",
