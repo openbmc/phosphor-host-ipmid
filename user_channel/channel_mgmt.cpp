@@ -25,6 +25,7 @@
 
 #include <boost/interprocess/sync/scoped_lock.hpp>
 #include <ipmid/utils.hpp>
+#include <org/freedesktop/DBus/ObjectManager/common.hpp>
 #include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/bus/match.hpp>
 #include <sdbusplus/server/object.hpp>
@@ -37,6 +38,8 @@
 
 namespace ipmi
 {
+
+using ObjectManager = sdbusplus::common::org::freedesktop::d_bus::ObjectManager;
 
 static constexpr const char* channelAccessDefaultFilename =
     "/usr/share/ipmi-providers/channel_access.json";
@@ -58,8 +61,6 @@ static constexpr const char* privilegePropertyString = "MaxPrivilege";
 static constexpr const char* dBusPropertiesInterface =
     "org.freedesktop.DBus.Properties";
 static constexpr const char* propertiesChangedSignal = "PropertiesChanged";
-static constexpr const char* interfaceAddedSignal = "InterfacesAdded";
-static constexpr const char* interfaceRemovedSignal = "InterfacesRemoved";
 
 // STRING DEFINES: Should sync with key's in JSON
 static constexpr const char* nameString = "name";
@@ -353,7 +354,8 @@ ChannelConfig::ChannelConfig() : bus(ipmid_get_sd_bus_connection())
         chInterfaceAddedSignal = std::make_unique<sdbusplus::match>(
             bus,
             sdbusplus::match_rules::type::signal() +
-                sdbusplus::match_rules::member(interfaceAddedSignal) +
+                sdbusplus::match_rules::member(
+                    ObjectManager::signal_names::interfaces_added) +
                 sdbusplus::match_rules::argNpath(
                     0, std::string(networkIntfObjectBasePath) + "/"),
             [&](sdbusplus::message_t&) { initChannelPersistData(); });
@@ -361,7 +363,8 @@ ChannelConfig::ChannelConfig() : bus(ipmid_get_sd_bus_connection())
         chInterfaceRemovedSignal = std::make_unique<sdbusplus::match>(
             bus,
             sdbusplus::match_rules::type::signal() +
-                sdbusplus::match_rules::member(interfaceRemovedSignal) +
+                sdbusplus::match_rules::member(
+                    ObjectManager::signal_names::interfaces_removed) +
                 sdbusplus::match_rules::argNpath(
                     0, std::string(networkIntfObjectBasePath) + "/"),
             [&](sdbusplus::message_t&) { initChannelPersistData(); });

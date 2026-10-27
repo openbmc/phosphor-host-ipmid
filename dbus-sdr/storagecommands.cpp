@@ -26,6 +26,7 @@
 #include <ipmid/message.hpp>
 #include <ipmid/types.hpp>
 #include <ipmid/utils.hpp>
+#include <org/freedesktop/DBus/ObjectManager/common.hpp>
 #include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/message/types.hpp>
 #include <sdbusplus/timer.hpp>
@@ -39,6 +40,7 @@
 #include <string_view>
 
 using ObjectMapper = sdbusplus::common::xyz::openbmc_project::ObjectMapper;
+using ObjectManager = sdbusplus::common::org::freedesktop::d_bus::ObjectManager;
 
 static constexpr bool DEBUG = false;
 
@@ -221,8 +223,8 @@ void replaceCacheFru(
     boost::system::error_code ec;
 
     frus = bus->yield_method_call<ManagedObjectType>(
-        yield, ec, fruDeviceServiceName, "/",
-        "org.freedesktop.DBus.ObjectManager", "GetManagedObjects");
+        yield, ec, fruDeviceServiceName, "/", ObjectManager::interface,
+        ObjectManager::method_names::get_managed_objects);
     if (ec)
     {
         lg2::error("GetManagedObjects for replaceCacheFru failed: {ERROR}",

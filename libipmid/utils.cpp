@@ -9,6 +9,7 @@
 #include <unistd.h>
 
 #include <ipmid/utils.hpp>
+#include <org/freedesktop/DBus/ObjectManager/common.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/message/types.hpp>
@@ -26,6 +27,7 @@ using namespace phosphor::logging;
 using namespace sdbusplus::error::xyz::openbmc_project::common;
 
 using ObjectMapper = sdbusplus::common::xyz::openbmc_project::ObjectMapper;
+using ObjectManager = sdbusplus::common::org::freedesktop::d_bus::ObjectManager;
 
 namespace network
 {
@@ -128,9 +130,9 @@ ObjectValueTree getManagedObjects(sdbusplus::bus_t& bus,
 {
     ipmi::ObjectValueTree interfaces;
 
-    auto method = bus.new_method_call(service.c_str(), objPath.c_str(),
-                                      "org.freedesktop.DBus.ObjectManager",
-                                      "GetManagedObjects");
+    auto method = bus.new_method_call(
+        service.c_str(), objPath.c_str(), ObjectManager::interface,
+        ObjectManager::method_names::get_managed_objects);
     auto reply = bus.call(method);
     reply.read(interfaces);
 
@@ -432,7 +434,8 @@ boost::system::error_code getManagedObjects(
     boost::system::error_code ec;
     objects = ctx->bus->yield_method_call<ipmi::ObjectValueTree>(
         ctx->yield, ec, service.c_str(), objPath.c_str(),
-        "org.freedesktop.DBus.ObjectManager", "GetManagedObjects");
+        ObjectManager::interface,
+        ObjectManager::method_names::get_managed_objects);
     return ec;
 }
 
