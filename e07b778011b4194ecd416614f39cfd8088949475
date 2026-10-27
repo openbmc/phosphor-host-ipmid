@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e5c035fe_d200dfc5",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-10-27T05:08:32Z",
+      "side": 1,
+      "message": "@liuxiwei@ieisystem.com Gentile Reminder for Review",
+      "revId": "e07b778011b4194ecd416614f39cfd8088949475",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
