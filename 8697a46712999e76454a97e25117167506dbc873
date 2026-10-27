@@ -24,6 +24,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "5044993b_4958ae33",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 22
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 1002977
+      },
+      "writtenOn": "2026-10-27T12:42:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c7850e94_440a3ba2",
+      "range": {
+        "startLine": 253,
+        "startChar": 5,
+        "endLine": 256,
+        "endChar": 57
+      },
+      "revId": "8697a46712999e76454a97e25117167506dbc873",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "f220faad_dcd3f98b",
@@ -37,6 +61,24 @@
       "writtenOn": "2026-10-09T23:46:30Z",
       "side": 1,
       "message": "this fails to check for the first character being a lower/upper alpha.",
+      "revId": "8697a46712999e76454a97e25117167506dbc873",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "557aaca9_210940fa",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 22
+      },
+      "lineNbr": 257,
+      "author": {
+        "id": 1002977
+      },
+      "writtenOn": "2026-10-27T12:42:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f220faad_dcd3f98b",
       "revId": "8697a46712999e76454a97e25117167506dbc873",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -58,6 +100,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "d27e4e11_a5900163",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 22
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1002977
+      },
+      "writtenOn": "2026-10-27T12:42:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "75e90c17_ffbde296",
+      "revId": "8697a46712999e76454a97e25117167506dbc873",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "77d2bf6e_b89c2ff2",
@@ -71,6 +131,24 @@
       "writtenOn": "2026-10-09T23:46:30Z",
       "side": 1,
       "message": "move this check into the loop for an early break out of the loop",
+      "revId": "8697a46712999e76454a97e25117167506dbc873",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3847d131_1b831b02",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 22
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1002977
+      },
+      "writtenOn": "2026-10-27T12:42:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "77d2bf6e_b89c2ff2",
       "revId": "8697a46712999e76454a97e25117167506dbc873",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -98,6 +176,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "d39f58ba_39edd4db",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 22
+      },
+      "lineNbr": 299,
+      "author": {
+        "id": 1002977
+      },
+      "writtenOn": "2026-10-27T12:42:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a011a414_28403da0",
+      "range": {
+        "startLine": 296,
+        "startChar": 0,
+        "endLine": 299,
+        "endChar": 57
+      },
+      "revId": "8697a46712999e76454a97e25117167506dbc873",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "74a89d91_952d9a09",
@@ -111,6 +213,24 @@
       "writtenOn": "2026-10-09T23:46:30Z",
       "side": 1,
       "message": "Use SecureBuffer to eliminate copy at the end of the ipmi function and to have automatic memory wiping at the end of the life cycle.",
+      "revId": "8697a46712999e76454a97e25117167506dbc873",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c3ad838b_bfdc1258",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 22
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 1002977
+      },
+      "writtenOn": "2026-10-27T12:42:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "74a89d91_952d9a09",
       "revId": "8697a46712999e76454a97e25117167506dbc873",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -138,6 +258,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "ecf806be_23fab5d9",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 22
+      },
+      "lineNbr": 393,
+      "author": {
+        "id": 1002977
+      },
+      "writtenOn": "2026-10-27T12:42:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e3a01cda_8a9e4090",
+      "range": {
+        "startLine": 387,
+        "startChar": 0,
+        "endLine": 393,
+        "endChar": 1
+      },
+      "revId": "8697a46712999e76454a97e25117167506dbc873",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "00e2a1fb_4c7e23a8",
@@ -151,6 +295,24 @@
       "writtenOn": "2026-10-09T23:46:30Z",
       "side": 1,
       "message": "move this check into the loop so there is an early break out option",
+      "revId": "8697a46712999e76454a97e25117167506dbc873",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f1498ed2_268b9770",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 22
+      },
+      "lineNbr": 418,
+      "author": {
+        "id": 1002977
+      },
+      "writtenOn": "2026-10-27T12:42:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "00e2a1fb_4c7e23a8",
       "revId": "8697a46712999e76454a97e25117167506dbc873",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -172,6 +334,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "5600342d_8c54fff5",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 22
+      },
+      "lineNbr": 432,
+      "author": {
+        "id": 1002977
+      },
+      "writtenOn": "2026-10-27T12:42:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6add218a_c99334f7",
+      "revId": "8697a46712999e76454a97e25117167506dbc873",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "e57ef0c5_583eb6be",
@@ -185,6 +365,30 @@
       "writtenOn": "2026-10-09T23:46:30Z",
       "side": 1,
       "message": "SecureBuffer password(passwordLength);",
+      "range": {
+        "startLine": 442,
+        "startChar": 9,
+        "endLine": 442,
+        "endChar": 15
+      },
+      "revId": "8697a46712999e76454a97e25117167506dbc873",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "68722def_77c0bad9",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 22
+      },
+      "lineNbr": 442,
+      "author": {
+        "id": 1002977
+      },
+      "writtenOn": "2026-10-27T12:42:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e57ef0c5_583eb6be",
       "range": {
         "startLine": 442,
         "startChar": 9,
@@ -218,6 +422,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "5eeabbe8_7aa088b8",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 22
+      },
+      "lineNbr": 448,
+      "author": {
+        "id": 1002977
+      },
+      "writtenOn": "2026-10-27T12:42:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4597c855_548e5cf4",
+      "range": {
+        "startLine": 443,
+        "startChar": 1,
+        "endLine": 448,
+        "endChar": 58
+      },
+      "revId": "8697a46712999e76454a97e25117167506dbc873",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "a09e9ad7_d173627f",
@@ -231,6 +459,30 @@
       "writtenOn": "2026-10-09T23:46:30Z",
       "side": 1,
       "message": "SecureBuffer password;",
+      "range": {
+        "startLine": 500,
+        "startChar": 9,
+        "endLine": 500,
+        "endChar": 15
+      },
+      "revId": "8697a46712999e76454a97e25117167506dbc873",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "78a1c66d_5bda9590",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 22
+      },
+      "lineNbr": 500,
+      "author": {
+        "id": 1002977
+      },
+      "writtenOn": "2026-10-27T12:42:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a09e9ad7_d173627f",
       "range": {
         "startLine": 500,
         "startChar": 9,
@@ -264,6 +516,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "e938a79c_91114049",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 22
+      },
+      "lineNbr": 579,
+      "author": {
+        "id": 1002977
+      },
+      "writtenOn": "2026-10-27T12:42:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8bdbe021_4ab62c81",
+      "range": {
+        "startLine": 578,
+        "startChar": 0,
+        "endLine": 579,
+        "endChar": 40
+      },
+      "revId": "8697a46712999e76454a97e25117167506dbc873",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "9d863148_f6cb54b0",
@@ -277,6 +553,30 @@
       "writtenOn": "2026-10-09T23:46:30Z",
       "side": 1,
       "message": "by dealing in SecureBuffer all along the path, there is no need for this copy and the memory will get wiped after it is sent out on the wire.",
+      "range": {
+        "startLine": 739,
+        "startChar": 4,
+        "endLine": 742,
+        "endChar": 67
+      },
+      "revId": "8697a46712999e76454a97e25117167506dbc873",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f3b73413_36974ada",
+        "filename": "redfishhostinterface.cpp",
+        "patchSetId": 22
+      },
+      "lineNbr": 742,
+      "author": {
+        "id": 1002977
+      },
+      "writtenOn": "2026-10-27T12:42:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9d863148_f6cb54b0",
       "range": {
         "startLine": 739,
         "startChar": 4,
