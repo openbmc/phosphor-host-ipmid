@@ -16,6 +16,24 @@
       "message": "Could you please rebase your change onto the latest master branch and upload a new patch set? The build error changes already merged.\n\nFYI:\nclang-format: update latest spec and reformat with clang-23 (95376) · Gerrit Code Review",
       "revId": "b7c6547609c4fb62038234b7169390e3e9e2649a",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "039b8b1d_9ba79a1b",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1001712
+      },
+      "writtenOn": "2026-10-28T11:59:50Z",
+      "side": 1,
+      "message": "Thanks for letting me know 👍",
+      "parentUuid": "86fb827d_e0db2c53",
+      "revId": "b7c6547609c4fb62038234b7169390e3e9e2649a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
