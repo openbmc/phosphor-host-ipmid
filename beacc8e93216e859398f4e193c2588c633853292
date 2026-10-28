@@ -16,6 +16,23 @@
       "message": "I think this looks pretty good to me, but I think we should wait until the mechanisms that use it are ready to go in before merging this.",
       "revId": "beacc8e93216e859398f4e193c2588c633853292",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "cb00ff48_779000a2",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 22
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-10-28T23:44:54Z",
+      "side": 1,
+      "message": "After looking more at how this is to be used, I don\u0027t think this is correct. We should not be referencing ipmi user IDs at all. the non-ipmi user table needs to be fully independent from the ipmi user pathway (and thus probably separate from the user/channel code that the ipmi users use).",
+      "revId": "beacc8e93216e859398f4e193c2588c633853292",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
