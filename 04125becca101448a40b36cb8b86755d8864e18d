@@ -3,6 +3,29 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "afb263b3_f14ee26d",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 1897,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-10-28T00:25:34Z",
+      "side": 1,
+      "message": "this can throw. And it isn\u0027t being caught by its direct caller, so the contract of return ok on success and error on failure is broken.",
+      "range": {
+        "startLine": 1896,
+        "startChar": 4,
+        "endLine": 1897,
+        "endChar": 61
+      },
+      "revId": "04125becca101448a40b36cb8b86755d8864e18d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "a0e00f45_a05a2cec",
         "filename": "user_channel/user_mgmt.cpp",
         "patchSetId": 21
