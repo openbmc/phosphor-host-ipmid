@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a0e00f45_a05a2cec",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 1917,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-10-28T00:19:59Z",
+      "side": 1,
+      "message": "It is unclear to me what the point of this portion of code is supposed to be doing. The getUserInfo reloads the table from file, but the bootstrap state is not stored in that file. And then the writeUserData only writes out what is already in the table (that which was just reloaded for getUserInfo with no change.)\n\nIt seems like a lot of cycles with nothing done.",
+      "range": {
+        "startLine": 1899,
+        "startChar": 0,
+        "endLine": 1917,
+        "endChar": 5
+      },
+      "revId": "04125becca101448a40b36cb8b86755d8864e18d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
