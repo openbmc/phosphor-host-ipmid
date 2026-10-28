@@ -1320,7 +1320,8 @@ bool UserAccess::addUserEntry(const std::string& userName,
         userData->user[freeIndex].userPrivAccess[chIndex].ipmiEnabled = true;
         userData->user[freeIndex].userPrivAccess[chIndex].linkAuthEnabled =
             true;
-        userData->user[freeIndex].userPrivAccess[chIndex].accessCallback = true;
+        userData->user[freeIndex].userPrivAccess[chIndex].accessCallback =
+            false;
     }
     userData->user[freeIndex].userInSystem = true;
     userData->user[freeIndex].userEnabled = enabled;
