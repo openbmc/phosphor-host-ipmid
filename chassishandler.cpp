@@ -2196,6 +2196,8 @@ ipmi::RspType<> ipmiChassisSetSysBootOptions(ipmi::Context::ptr ctx,
     {
         uint2_t setInProgressFlag;
         uint6_t rsvd;
+        constexpr uint8_t commitWrite = 0x2;
+
         if (data.unpack(setInProgressFlag, rsvd) != 0 || !data.fullyUnpacked())
         {
             return ipmi::responseReqDataLenInvalid();
@@ -2203,6 +2205,14 @@ ipmi::RspType<> ipmiChassisSetSysBootOptions(ipmi::Context::ptr ctx,
         if (rsvd)
         {
             return ipmi::responseInvalidFieldRequest();
+        }
+        if (setInProgressFlag > commitWrite)
+        {
+            return ipmi::responseInvalidFieldRequest();
+        }
+        if (setInProgressFlag == commitWrite)
+        {
+            return ipmi::responseParmNotSupported();
         }
         if ((transferStatus == setInProgress) &&
             (static_cast<uint8_t>(setInProgressFlag) != setComplete))
