@@ -48,6 +48,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "af40bfe3_9bc0b7ca",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1002630
+      },
+      "writtenOn": "2026-10-29T08:05:59Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "25b39fe7_c664ca15",
+      "range": {
+        "startLine": 25,
+        "startChar": 39,
+        "endLine": 25,
+        "endChar": 40
+      },
+      "revId": "103f87c83981698d279745bee88795b7c8665433",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d07d3391_533f9e5d",
@@ -95,6 +119,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "3fcf7fb0_48737b37",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1002630
+      },
+      "writtenOn": "2026-10-29T08:05:59Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "d7cfbaf0_65fe7a2c",
+      "range": {
+        "startLine": 26,
+        "startChar": 21,
+        "endLine": 26,
+        "endChar": 31
+      },
+      "revId": "103f87c83981698d279745bee88795b7c8665433",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "37a90285_32b0b023",
@@ -132,6 +180,30 @@
       "side": 1,
       "message": "Intentional.\nA stored true from the old default can\u0027t be told apart from one an admin set via Set User Access, so migrating would silently overwrite real configuration on upgrade. The bit is never enforced in OpenBMC, only stored and reported back, so a stale true is a misleading report rather than a functional issue, and ipmitool channel setaccess clears it.",
       "parentUuid": "37a90285_32b0b023",
+      "range": {
+        "startLine": 1324,
+        "startChar": 12,
+        "endLine": 1324,
+        "endChar": 17
+      },
+      "revId": "103f87c83981698d279745bee88795b7c8665433",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8192e9df_92021190",
+        "filename": "user_channel/user_mgmt.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1324,
+      "author": {
+        "id": 1002630
+      },
+      "writtenOn": "2026-10-29T08:05:59Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "9beeb956_36e6507e",
       "range": {
         "startLine": 1324,
         "startChar": 12,
