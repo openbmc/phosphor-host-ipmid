@@ -26,6 +26,7 @@
 #include <exception>
 #include <filesystem>
 #include <map>
+#include <memory>
 #include <optional>
 #include <string>
 #include <unordered_set>
@@ -274,6 +275,10 @@ inline IPMIWriteTable sdrWriteTable;
  * /xyz/openbmc_project/sensors or /xyz/openbmc_project/extsensors. It will
  * optionally search VR typed sensors under /xyz/openbmc_project/vr
  *
+ * The tree is cached until sensors are added or removed, which may happen at
+ * any yield. Keep the subtree pointer for as long as the tree is used: it
+ * stays valid when the cache is replaced.
+ *
  * @return the updated amount of times any of "sensors" or "extsensors" sensor
  * paths updated successfully, previous amount if all failed. The "vr"
  * sensor path is optional, and does not participate in the return value.
@@ -282,8 +287,6 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree);
 
 bool getSensorNumMap(std::shared_ptr<SensorNumMap>& sensorNumMap);
 } // namespace details
-
-bool getSensorSubtree(SensorSubTree& subtree);
 
 #ifdef FEATURE_HYBRID_SENSORS
 ipmi::sensor::IdInfoMap::const_iterator findStaticSensor(
@@ -348,8 +351,19 @@ std::optional<std::map<std::string, std::vector<std::string>>>
 std::map<std::string, Value> getEntityManagerProperties(const char* path,
                                                         const char* interface);
 
-std::optional<std::unordered_set<std::string>>& getIpmiDecoratorPaths(
-    const std::optional<ipmi::Context::ptr>& ctx);
+/**
+ * Get the paths of the D-Bus objects that have the IPMI decorator.
+ *
+ * The paths are cached until resetIpmiDecoratorPaths() is called. The cache
+ * may be reset at any yield, so hold the returned pointer for as long as the
+ * set is used.
+ *
+ * @return the paths; an empty set if they could not be fetched
+ */
+std::shared_ptr<const std::unordered_set<std::string>> getIpmiDecoratorPaths(
+    ipmi::Context::ptr ctx);
+
+void resetIpmiDecoratorPaths();
 
 const std::string* getSensorConfigurationInterface(
     const std::map<std::string, std::vector<std::string>>&

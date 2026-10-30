@@ -140,8 +140,7 @@ static sdbusplus::match sensorAdded(
     "type='signal',member='InterfacesAdded',arg0path='/xyz/openbmc_project/"
     "sensors/'",
     [](sdbusplus::message_t&) {
-        getSensorTree().clear();
-        getIpmiDecoratorPaths(/*ctx=*/std::nullopt).reset();
+        resetIpmiDecoratorPaths();
         sdrLastAdd = std::chrono::duration_cast<std::chrono::seconds>(
                          std::chrono::system_clock::now().time_since_epoch())
                          .count();
@@ -152,8 +151,7 @@ static sdbusplus::match sensorRemoved(
     "type='signal',member='InterfacesRemoved',arg0path='/xyz/openbmc_project/"
     "sensors/'",
     [](sdbusplus::message_t&) {
-        getSensorTree().clear();
-        getIpmiDecoratorPaths(/*ctx=*/std::nullopt).reset();
+        resetIpmiDecoratorPaths();
         sdrLastRemove = std::chrono::duration_cast<std::chrono::seconds>(
                             std::chrono::system_clock::now().time_since_epoch())
                             .count();
@@ -163,8 +161,9 @@ ipmi::Cc getSensorConnection(ipmi::Context::ptr ctx, uint8_t sensnum,
                              std::string& connection, std::string& path,
                              std::vector<std::string>* interfaces)
 {
-    auto& sensorTree = getSensorTree();
-    if (!getSensorSubtree(sensorTree) && sensorTree.empty())
+    std::shared_ptr<SensorSubTree> sensorTree;
+    details::getSensorSubtree(sensorTree);
+    if (!sensorTree)
     {
         return ipmi::ccResponseError;
     }
@@ -180,7 +179,7 @@ ipmi::Cc getSensorConnection(ipmi::Context::ptr ctx, uint8_t sensnum,
         return ipmi::ccInvalidFieldRequest;
     }
 
-    for (const auto& sensor : sensorTree)
+    for (const auto& sensor : *sensorTree)
     {
         if (path == sensor.first)
         {
@@ -192,12 +191,6 @@ ipmi::Cc getSensorConnection(ipmi::Context::ptr ctx, uint8_t sensnum,
     }
 
     return 0;
-}
-
-SensorSubTree& getSensorTree()
-{
-    static SensorSubTree sensorTree;
-    return sensorTree;
 }
 
 // this keeps track of deassertions for sensor event status command. A
@@ -2132,7 +2125,13 @@ bool constructVrSdr(ipmi::Context::ptr ctx,
 
 uint16_t getNumberOfSensors()
 {
-    return std::min(getSensorTree().size(), maxIPMISensors);
+    std::shared_ptr<SensorSubTree> sensorTree;
+    details::getSensorSubtree(sensorTree);
+    if (!sensorTree)
+    {
+        return 0;
+    }
+    return std::min(sensorTree->size(), maxIPMISensors);
 }
 
 static int getSensorDataRecord(
@@ -2311,14 +2310,15 @@ static ipmi::RspType<uint8_t, // respcount
     ipmiSensorGetDeviceSdrInfo(ipmi::Context::ptr ctx,
                                std::optional<uint8_t> operation)
 {
-    auto& sensorTree{getSensorTree()};
+    std::shared_ptr<SensorSubTree> sensorTree;
     uint8_t sdrCount{};
     // Sensors are dynamically allocated
     uint8_t lunsAndDynamicPopulation{0x80};
     constexpr uint8_t getSdrCount{1};
     constexpr uint8_t getSensorCount{0};
 
-    if (!getSensorSubtree(sensorTree) || sensorTree.empty())
+    details::getSensorSubtree(sensorTree);
+    if (!sensorTree || sensorTree->empty())
     {
         return ipmi::responseResponseError();
     }
@@ -2469,19 +2469,19 @@ ipmi::RspType<uint16_t,            // next record ID
         return ipmi::responseInvalidReservationId();
     }
 
-    auto& sensorTree = getSensorTree();
-    if (!getSensorSubtree(sensorTree) && sensorTree.empty())
+    std::shared_ptr<SensorSubTree> sensorTree;
+    details::getSensorSubtree(sensorTree);
+    if (!sensorTree)
     {
         lg2::error("ipmiStorageGetSDR: getSensorSubtree error");
         return ipmi::responseResponseError();
     }
 
-    auto& ipmiDecoratorPaths = getIpmiDecoratorPaths(ctx);
+    auto ipmiDecoratorPaths = getIpmiDecoratorPaths(ctx);
 
     std::vector<uint8_t> record;
-    int nextRecordId = getSensorDataRecord(
-        ctx, ipmiDecoratorPaths.value_or(std::unordered_set<std::string>()),
-        record, recordID, offset + bytesToRead);
+    int nextRecordId = getSensorDataRecord(ctx, *ipmiDecoratorPaths, record,
+                                           recordID, offset + bytesToRead);
 
     if (nextRecordId < 0)
     {
@@ -2537,16 +2537,19 @@ std::tuple<uint8_t,                // Total of instance sensors
         return std::make_tuple(totalInstSensor, sensorList);
     }
 
-    auto& sensorTree = getSensorTree();
-    if (!getSensorSubtree(sensorTree) && sensorTree.empty())
+    // Hold snapshots of the sensor tree and the decorator paths: getSensorMap()
+    // yields, and the sensorAdded/sensorRemoved matches may replace both then.
+    std::shared_ptr<SensorSubTree> sensorTree;
+    details::getSensorSubtree(sensorTree);
+    if (!sensorTree)
     {
         return std::make_tuple(totalInstSensor, sensorList);
     }
 
-    auto& ipmiDecoratorPaths = getIpmiDecoratorPaths(ctx);
+    auto ipmiDecoratorPaths = getIpmiDecoratorPaths(ctx);
 
     size_t invalidSensorNumberErrCount = 0;
-    for (const auto& sensor : sensorTree)
+    for (const auto& sensor : *sensorTree)
     {
         const std::string& sensorObjPath = sensor.first;
         const auto& sensorTypeValue = getSensorTypeFromPath(sensorObjPath);
@@ -2580,10 +2583,8 @@ std::tuple<uint8_t,                // Total of instance sensors
          * Get the Entity ID, Entity Instance information which are configured
          * in the Entity-Manager.
          */
-        updateIpmiFromAssociation(
-            sensorObjPath,
-            ipmiDecoratorPaths.value_or(std::unordered_set<std::string>()),
-            sensorMap, entityIdValue, entityInstanceValue);
+        updateIpmiFromAssociation(sensorObjPath, *ipmiDecoratorPaths, sensorMap,
+                                  entityIdValue, entityInstanceValue);
 
         if (entityIdValue == match->first || entityIdValue == match->second)
         {

@@ -281,19 +281,6 @@ bool getSensorNumMap(std::shared_ptr<SensorNumMap>& sensorNumMap)
 }
 } // namespace details
 
-bool getSensorSubtree(SensorSubTree& subtree)
-{
-    std::shared_ptr<SensorSubTree> sensorTree;
-    details::getSensorSubtree(sensorTree);
-    if (!sensorTree)
-    {
-        return false;
-    }
-
-    subtree = *sensorTree;
-    return true;
-}
-
 #ifdef FEATURE_HYBRID_SENSORS
 // Static sensors are listed in sensor-gen.cpp.
 ipmi::sensor::IdInfoMap::const_iterator findStaticSensor(
@@ -446,22 +433,23 @@ std::map<std::string, Value> getEntityManagerProperties(const char* path,
     return properties;
 }
 
+static std::shared_ptr<const std::unordered_set<std::string>>
+    ipmiDecoratorPathsCache;
+
 // Fetch the ipmiDecoratorPaths to get the list of dbus objects that
 // have ipmi decorator to prevent unnecessary dbus call to fetch the info
-std::optional<std::unordered_set<std::string>>& getIpmiDecoratorPaths(
-    const std::optional<ipmi::Context::ptr>& ctx)
+std::shared_ptr<const std::unordered_set<std::string>> getIpmiDecoratorPaths(
+    ipmi::Context::ptr ctx)
 {
-    static std::optional<std::unordered_set<std::string>> ipmiDecoratorPaths;
-
-    if (!ctx.has_value() || ipmiDecoratorPaths != std::nullopt)
+    if (ipmiDecoratorPathsCache)
     {
-        return ipmiDecoratorPaths;
+        return ipmiDecoratorPathsCache;
     }
 
     using Paths = std::vector<std::string>;
     boost::system::error_code ec;
     Paths paths = ipmi::callDbusMethod<Paths>(
-        *ctx, ec, ObjectMapper::default_service, ObjectMapper::instance_path,
+        ctx, ec, ObjectMapper::default_service, ObjectMapper::instance_path,
         ObjectMapper::interface, ObjectMapper::method_names::get_sub_tree_paths,
         "/", int32_t(0),
         std::array<const char*, 1>{
@@ -469,12 +457,18 @@ std::optional<std::unordered_set<std::string>>& getIpmiDecoratorPaths(
 
     if (ec)
     {
-        return ipmiDecoratorPaths;
+        return std::make_shared<const std::unordered_set<std::string>>();
     }
 
-    ipmiDecoratorPaths =
-        std::unordered_set<std::string>(paths.begin(), paths.end());
-    return ipmiDecoratorPaths;
+    ipmiDecoratorPathsCache =
+        std::make_shared<const std::unordered_set<std::string>>(
+            paths.begin(), paths.end());
+    return ipmiDecoratorPathsCache;
+}
+
+void resetIpmiDecoratorPaths()
+{
+    ipmiDecoratorPathsCache.reset();
 }
 
 const std::string* getSensorConfigurationInterface(
