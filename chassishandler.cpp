@@ -2554,7 +2554,7 @@ void registerNetFnChassisFunctions()
     // Set Chassis Capabilities
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnChassis,
                           ipmi::chassis::cmdSetChassisCapabilities,
-                          ipmi::Privilege::User, ipmiSetChassisCap);
+                          ipmi::Privilege::Admin, ipmiSetChassisCap);
 
     // <Get System Boot Options>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnChassis,
