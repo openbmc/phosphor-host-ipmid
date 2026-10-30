@@ -2637,7 +2637,7 @@ std::tuple<uint8_t,                // Total of instance sensors
     }
 
     auto cmpFunc = [](sensorInfo first, sensorInfo second) {
-        return first.entityInstance <= second.entityInstance;
+        return first.entityInstance < second.entityInstance;
     };
 
     sort(sensorList.begin(), sensorList.end(), cmpFunc);
