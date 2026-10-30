@@ -548,25 +548,30 @@ ipmi::Cc getFruSdrCount(ipmi::Context::ptr, size_t& count)
 ipmi::Cc getFruSdrs([[maybe_unused]] ipmi::Context::ptr ctx, size_t index,
                     get_sdr::SensorDataFruRecord& resp)
 {
-    if (deviceHashes.size() < index)
+    if (index >= deviceHashes.size())
     {
         return ipmi::ccInvalidFieldRequest;
     }
-    auto device = deviceHashes.begin() + index;
-    uint16_t& bus = device->second.first;
-    uint8_t& address = device->second.second;
 
-    boost::container::flat_map<std::string, Value>* fruData = nullptr;
+    // Copy what is used from deviceHashes and frus: the entity-manager
+    // decorator lookups below yield, and the FruDevice matches may rewrite
+    // both meanwhile.
+    auto device = deviceHashes.begin() + index;
+    uint8_t fruId = device->first;
+    uint16_t bus = device->second.first;
+    uint8_t address = device->second.second;
+
+    const boost::container::flat_map<std::string, Value>* fruDevice = nullptr;
     auto fru = std::find_if(
         frus.begin(), frus.end(),
-        [bus, address, &fruData](ManagedEntry& entry) {
+        [bus, address, &fruDevice](ManagedEntry& entry) {
             auto findFruDevice =
                 entry.second.find("xyz.openbmc_project.FruDevice");
             if (findFruDevice == entry.second.end())
             {
                 return false;
             }
-            fruData = &(findFruDevice->second);
+            fruDevice = &(findFruDevice->second);
             auto findBus = findFruDevice->second.find("BUS");
             auto findAddress = findFruDevice->second.find("ADDRESS");
             if (findBus == findFruDevice->second.end() ||
@@ -588,6 +593,8 @@ ipmi::Cc getFruSdrs([[maybe_unused]] ipmi::Context::ptr ctx, size_t index,
     {
         return ipmi::ccResponseError;
     }
+    const boost::container::flat_map<std::string, Value> fruData = *fruDevice;
+
     std::string name;
     uint8_t entityID = 0;
     uint8_t entityInstance = 0x1;
@@ -693,8 +700,8 @@ ipmi::Cc getFruSdrs([[maybe_unused]] ipmi::Context::ptr ctx, size_t index,
 
     for (const std::string& prop : nameProperties)
     {
-        auto findProp = fruData->find(prop);
-        if (findProp != fruData->end())
+        auto findProp = fruData.find(prop);
+        if (findProp != fruData.end())
         {
             name = std::get<std::string>(findProp->second);
             break;
@@ -716,7 +723,7 @@ ipmi::Cc getFruSdrs([[maybe_unused]] ipmi::Context::ptr ctx, size_t index,
     resp.header.recordType = get_sdr::SENSOR_DATA_FRU_RECORD;
     resp.header.recordLength = sizeof(resp.body) + sizeof(resp.key) - sizeDiff;
     resp.key.deviceAddress = 0x20;
-    resp.key.fruID = device->first;
+    resp.key.fruID = fruId;
     resp.key.accessLun = 0x80; // logical / physical fru device
     resp.key.channelNumber = 0x0;
     resp.body.reserved = 0x0;
