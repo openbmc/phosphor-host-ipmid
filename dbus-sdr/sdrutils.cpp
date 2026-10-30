@@ -122,9 +122,9 @@ static void filterSensors(SensorSubTree& subtree)
                   subtree.end());
 }
 
-uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
+uint16_t getSensorSubtree(std::shared_ptr<const SensorSubTree>& subtree)
 {
-    static std::shared_ptr<SensorSubTree> sensorTreePtr;
+    static std::shared_ptr<const SensorSubTree> sensorTreePtr;
     static uint16_t sensorUpdatedIndex = 0;
     std::shared_ptr<sdbusplus::asio::connection> dbus = getSdBus();
     static sdbusplus::match sensorAdded(
@@ -145,12 +145,12 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
         return sensorUpdatedIndex;
     }
 
-    sensorTreePtr = std::make_shared<SensorSubTree>();
+    auto newSensorTree = std::make_shared<SensorSubTree>();
 
     static constexpr const int32_t depth = 2;
 
-    auto lbdUpdateSensorTree = [&dbus](const char* path,
-                                       const auto& interfaces) {
+    auto lbdUpdateSensorTree = [&dbus, &newSensorTree](const char* path,
+                                                       const auto& interfaces) {
         auto mapperCall = dbus->new_method_call(
             ObjectMapper::default_service, ObjectMapper::instance_path,
             ObjectMapper::interface, ObjectMapper::method_names::get_sub_tree);
@@ -174,7 +174,7 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
             std::fprintf(stderr, "IPMI updated: %zu sensors under %s\n",
                          sensorTreePartial.size(), path);
         }
-        sensorTreePtr->merge(std::move(sensorTreePartial));
+        newSensorTree->merge(std::move(sensorTreePartial));
         return true;
     };
 
@@ -207,7 +207,7 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
             boost::container::flat_map<std::string, std::vector<std::string>>
                 connectionMap{
                     {"", {sensor.second.propertyInterfaces.begin()->first}}};
-            sensorTreePtr->emplace(sensor.second.sensorPath, connectionMap);
+            newSensorTree->emplace(sensor.second.sensorPath, connectionMap);
         }
     }
 
@@ -219,10 +219,11 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
         return sensorUpdatedIndex;
     }
 
-    filterSensors(*sensorTreePtr);
+    filterSensors(*newSensorTree);
     // Add VR control as optional search path.
     (void)lbdUpdateSensorTree("/xyz/openbmc_project/vr", vrInterfaces);
 
+    sensorTreePtr = std::move(newSensorTree);
     subtree = sensorTreePtr;
     sensorUpdatedIndex++;
     // The SDR is being regenerated, wipe the old stats
@@ -236,7 +237,7 @@ bool getSensorNumMap(std::shared_ptr<SensorNumMap>& sensorNumMap)
     static std::shared_ptr<SensorNumMap> sensorNumMapPtr;
     bool sensorNumMapUpdated = false;
     static uint16_t prevSensorUpdatedIndex = 0;
-    std::shared_ptr<SensorSubTree> sensorTree;
+    std::shared_ptr<const SensorSubTree> sensorTree;
     uint16_t curSensorUpdatedIndex = details::getSensorSubtree(sensorTree);
     if (!sensorTree)
     {
@@ -280,19 +281,6 @@ bool getSensorNumMap(std::shared_ptr<SensorNumMap>& sensorNumMap)
     return sensorNumMapUpdated;
 }
 } // namespace details
-
-bool getSensorSubtree(SensorSubTree& subtree)
-{
-    std::shared_ptr<SensorSubTree> sensorTree;
-    details::getSensorSubtree(sensorTree);
-    if (!sensorTree)
-    {
-        return false;
-    }
-
-    subtree = *sensorTree;
-    return true;
-}
 
 #ifdef FEATURE_HYBRID_SENSORS
 // Static sensors are listed in sensor-gen.cpp.
@@ -446,22 +434,23 @@ std::map<std::string, Value> getEntityManagerProperties(const char* path,
     return properties;
 }
 
+static std::shared_ptr<const std::unordered_set<std::string>>
+    ipmiDecoratorPathsCache;
+
 // Fetch the ipmiDecoratorPaths to get the list of dbus objects that
 // have ipmi decorator to prevent unnecessary dbus call to fetch the info
-std::optional<std::unordered_set<std::string>>& getIpmiDecoratorPaths(
-    const std::optional<ipmi::Context::ptr>& ctx)
+std::shared_ptr<const std::unordered_set<std::string>> getIpmiDecoratorPaths(
+    ipmi::Context::ptr ctx)
 {
-    static std::optional<std::unordered_set<std::string>> ipmiDecoratorPaths;
-
-    if (!ctx.has_value() || ipmiDecoratorPaths != std::nullopt)
+    if (ipmiDecoratorPathsCache)
     {
-        return ipmiDecoratorPaths;
+        return ipmiDecoratorPathsCache;
     }
 
     using Paths = std::vector<std::string>;
     boost::system::error_code ec;
     Paths paths = ipmi::callDbusMethod<Paths>(
-        *ctx, ec, ObjectMapper::default_service, ObjectMapper::instance_path,
+        ctx, ec, ObjectMapper::default_service, ObjectMapper::instance_path,
         ObjectMapper::interface, ObjectMapper::method_names::get_sub_tree_paths,
         "/", int32_t(0),
         std::array<const char*, 1>{
@@ -469,12 +458,20 @@ std::optional<std::unordered_set<std::string>>& getIpmiDecoratorPaths(
 
     if (ec)
     {
-        return ipmiDecoratorPaths;
+        lg2::error("Failed to fetch IPMI decorator paths, error: {ERROR}",
+                   "ERROR", ec.message());
+        return std::make_shared<const std::unordered_set<std::string>>();
     }
 
-    ipmiDecoratorPaths =
-        std::unordered_set<std::string>(paths.begin(), paths.end());
-    return ipmiDecoratorPaths;
+    ipmiDecoratorPathsCache =
+        std::make_shared<const std::unordered_set<std::string>>(
+            paths.begin(), paths.end());
+    return ipmiDecoratorPathsCache;
+}
+
+void resetIpmiDecoratorPaths()
+{
+    ipmiDecoratorPathsCache.reset();
 }
 
 const std::string* getSensorConfigurationInterface(
