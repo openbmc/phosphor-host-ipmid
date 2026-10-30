@@ -1637,7 +1637,8 @@ void registerNetFnSenFunctions()
     // <Set Sensor Thresholds>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
                           ipmi::sensor_event::cmdSetSensorThreshold,
-                          ipmi::Privilege::User, ipmiSenSetSensorThresholds);
+                          ipmi::Privilege::Operator,
+                          ipmiSenSetSensorThresholds);
 
     // <Get Device SDR>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnSensor,
