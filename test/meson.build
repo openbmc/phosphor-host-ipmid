@@ -89,6 +89,32 @@ test(
     ),
 )
 
+test(
+    'host_network_data',
+    executable(
+        'host_network_data',
+        'host_network_data_unittest.cpp',
+        'host_network_data_stub.cpp',
+        '../chassishandler.cpp',
+        include_directories: root_inc,
+        build_by_default: false,
+        implicit_include_directories: false,
+        # Compile the handler source directly and stub the daemon-supplied
+        # D-Bus helpers it calls (see host_network_data_stub.cpp), so the
+        # test binary links no project DSOs.
+        dependencies: [
+            boost,
+            crypto,
+            gmock,
+            gtest,
+            nlohmann_json_dep,
+            phosphor_dbus_interfaces_dep,
+            phosphor_logging_dep,
+            sdbusplus_dep,
+        ],
+    ),
+)
+
 # Build/add sensorcommands_unittest to test suite
 test(
     'dbus-sdr/sensorcommands',

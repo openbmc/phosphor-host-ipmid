@@ -361,6 +361,10 @@ std::string getAddrStr(uint8_t family, uint8_t* data, uint8_t offset,
         case AF_INET:
         {
             struct sockaddr_in addr4{};
+            if (addrSize != sizeof(addr4.sin_addr.s_addr))
+            {
+                return {};
+            }
             std::memcpy(&addr4.sin_addr.s_addr, &data[offset], addrSize);
 
             inet_ntop(AF_INET, &addr4.sin_addr, ipAddr, INET_ADDRSTRLEN);
@@ -370,6 +374,10 @@ std::string getAddrStr(uint8_t family, uint8_t* data, uint8_t offset,
         case AF_INET6:
         {
             struct sockaddr_in6 addr6{};
+            if (addrSize != sizeof(addr6.sin6_addr.s6_addr))
+            {
+                return {};
+            }
             std::memcpy(&addr6.sin6_addr.s6_addr, &data[offset], addrSize);
 
             inet_ntop(AF_INET6, &addr6.sin6_addr, ipAddr, INET6_ADDRSTRLEN);
@@ -496,6 +504,14 @@ ipmi::Cc setHostNetworkData(ipmi::message::Payload& data)
                       (msgPayloadStartingPos + addrSizeOffset +
                        sizeof(decltype(addrSize))),
                       &addrSize);
+
+            if (addrSize != ipmi::network::IPV4_ADDRESS_SIZE_BYTE &&
+                addrSize != ipmi::network::IPV6_ADDRESS_SIZE_BYTE)
+            {
+                lg2::error("Invalid address size {SIZE} in setHostNetworkData",
+                           "SIZE", addrSize);
+                return ipmi::ccInvalidFieldRequest;
+            }
 
             uint8_t prefixOffset = ipAddrOffset + addrSize;
             if (msgLen < prefixOffset + sizeof(decltype(prefix)))
