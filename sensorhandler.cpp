@@ -1713,7 +1713,7 @@ ipmi::RspType<> ipmicmdPlatformEvent(ipmi::Context::ptr& ctx,
     else
     {
         req = reinterpret_cast<const PlatformEventRequest*>(raw);
-        // TODO GenratorID for IPMB is combination of RqSA and RqLUN
+        // TODO GeneratorID for IPMB is combination of RqSA and RqLUN
     }
 
     // Content of event data field depends on sensor class.

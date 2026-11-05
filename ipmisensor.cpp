@@ -140,7 +140,7 @@ int set_sensor_dbus_state_fwprogress(const sensorRES_t* pRec,
         default:
             std::snprintf(
                 p, sizeof(valuestring),
-                "Internal warning, fw_progres offset unknown (0x%02x)",
+                "Internal warning, fw_progress offset unknown (0x%02x)",
                 pTable->offset);
             break;
     }
