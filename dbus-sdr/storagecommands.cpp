@@ -402,6 +402,17 @@ ipmi::RspType<uint8_t,             // Count
                                  requestedData);
 }
 
+static inline bool isValidFruChecksum(const std::vector<uint8_t>& fru,
+                                      size_t start, size_t len)
+{
+    uint8_t sum = 0;
+    for (size_t i = 0; i < len; ++i)
+    {
+        sum += fru[start + i];
+    }
+    return sum == 0;
+}
+
 /** @brief implements the write FRU data command
  *  @param fruDeviceId        - FRU Device ID
  *  @param fruInventoryOffset - FRU Inventory Offset to write
@@ -446,6 +457,7 @@ ipmi::RspType<uint8_t> ipmiStorageWriteFruData(
             {header->internalOffset, header->chassisOffset, header->boardOffset,
              header->productOffset, header->multiRecordOffset});
         lastRecordStart *= 8; // header starts in are multiples of 8 bytes
+        bool walkValid = true;
 
         if (header->multiRecordOffset)
         {
@@ -454,6 +466,23 @@ ipmi::RspType<uint8_t> ipmiStorageWriteFruData(
             // Walk the MultiRecord headers until the last record
             while (!endOfList)
             {
+                // Three guards stop the walk early on a garbage record
+                // chain (stale area bytes behind a freshly written
+                // common header):
+                // - bound: the five record header bytes to be read must
+                //   fit in the buffer;
+                // - flags: with the End of List bit masked off, the rest
+                //   of the byte must be 0x02 (reserved bits 000b, record
+                //   format version 2h), per IPMI FRU spec Table 16-1;
+                // - header checksum: the trailing checksum byte must
+                //   cover the preceding four header bytes.
+                if (lastRecordStart + 4 >= fru.size() ||
+                    (fru[lastRecordStart + 1] & 0x7F) != 0x02 ||
+                    !isValidFruChecksum(fru, lastRecordStart, 5))
+                {
+                    walkValid = false;
+                    break;
+                }
                 // The MSB in the second byte of the MultiRecord header signals
                 // "End of list"
                 endOfList = fru[lastRecordStart + 1] & 0x80;
@@ -479,7 +508,7 @@ ipmi::RspType<uint8_t> ipmiStorageWriteFruData(
                 areaLength *= 8; // it is in multiples of 8 bytes
             }
         }
-        if (lastWriteAddr >= (areaLength + lastRecordStart))
+        if (walkValid && lastWriteAddr >= (areaLength + lastRecordStart))
         {
             atEnd = true;
         }
