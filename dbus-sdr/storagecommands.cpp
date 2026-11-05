@@ -446,14 +446,27 @@ ipmi::RspType<uint8_t> ipmiStorageWriteFruData(
             {header->internalOffset, header->chassisOffset, header->boardOffset,
              header->productOffset, header->multiRecordOffset});
         lastRecordStart *= 8; // header starts in are multiples of 8 bytes
+        bool walkValid = true;
 
         if (header->multiRecordOffset)
         {
             // This FRU has a MultiRecord Area
             uint8_t endOfList = 0;
-            // Walk the MultiRecord headers until the last record
+            // Walk the MultiRecord headers until the last record. During a
+            // chunked write the buffer can hold a freshly written header with
+            // old area bytes behind it; the record chain then starts from the
+            // new offset but is walked over old data and may reach past the
+            // end of the buffer. Stop the walk when it reaches for bytes
+            // beyond the buffer and do not grant write completion from a
+            // chain that could not be fully walked; those writes complete
+            // through the deferred timer flush instead.
             while (!endOfList)
             {
+                if (lastRecordStart + 2 >= fru.size())
+                {
+                    walkValid = false;
+                    break;
+                }
                 // The MSB in the second byte of the MultiRecord header signals
                 // "End of list"
                 endOfList = fru[lastRecordStart + 1] & 0x80;
@@ -479,7 +492,7 @@ ipmi::RspType<uint8_t> ipmiStorageWriteFruData(
                 areaLength *= 8; // it is in multiples of 8 bytes
             }
         }
-        if (lastWriteAddr >= (areaLength + lastRecordStart))
+        if (walkValid && lastWriteAddr >= (areaLength + lastRecordStart))
         {
             atEnd = true;
         }
