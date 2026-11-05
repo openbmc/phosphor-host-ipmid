@@ -446,6 +446,7 @@ ipmi::RspType<uint8_t> ipmiStorageWriteFruData(
             {header->internalOffset, header->chassisOffset, header->boardOffset,
              header->productOffset, header->multiRecordOffset});
         lastRecordStart *= 8; // header starts in are multiples of 8 bytes
+        bool walkValid = true;
 
         if (header->multiRecordOffset)
         {
@@ -454,6 +455,26 @@ ipmi::RspType<uint8_t> ipmiStorageWriteFruData(
             // Walk the MultiRecord headers until the last record
             while (!endOfList)
             {
+                // Two guards stop the walk early. First the memory safety
+                // bound: the three record header bytes to be read must fit
+                // in the buffer. Then a fast validity check: with the End
+                // of List bit (the MSB of the second record header byte)
+                // masked off, the rest of the byte must be 0x02 -- bits
+                // 6:4 are reserved (000b) and bits 3:0 hold the record
+                // format version (2h). During a chunked write the buffer
+                // can hold a freshly written header with old area bytes
+                // behind it; the stale bytes do not honor this, so a
+                // garbage chain is rejected at its first record instead of
+                // being followed by length. Do not grant write completion
+                // from a chain that could not be fully walked; those
+                // writes complete through the deferred timer flush
+                // instead.
+                if (lastRecordStart + 2 >= fru.size() ||
+                    (fru[lastRecordStart + 1] & 0x7F) != 0x02)
+                {
+                    walkValid = false;
+                    break;
+                }
                 // The MSB in the second byte of the MultiRecord header signals
                 // "End of list"
                 endOfList = fru[lastRecordStart + 1] & 0x80;
@@ -479,7 +500,7 @@ ipmi::RspType<uint8_t> ipmiStorageWriteFruData(
                 areaLength *= 8; // it is in multiples of 8 bytes
             }
         }
-        if (lastWriteAddr >= (areaLength + lastRecordStart))
+        if (walkValid && lastWriteAddr >= (areaLength + lastRecordStart))
         {
             atEnd = true;
         }
