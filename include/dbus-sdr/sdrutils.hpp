@@ -66,7 +66,7 @@ class IPMIStatsEntry
 {
   private:
     int numReadings = 0;
-    int numMissings = 0;
+    int numMissing = 0;
     int numStreakRead = 0;
     int numStreakMiss = 0;
     double minValue = 0.0;
@@ -93,7 +93,7 @@ class IPMIStatsEntry
             return false;
         }
 
-        bool first = ((numReadings == 0) && (numMissings == 0));
+        bool first = ((numReadings == 0) && (numMissing == 0));
 
         // Sensors can use "nan" to indicate unavailable reading
         if (!(std::isfinite(reading)))
@@ -105,11 +105,11 @@ class IPMIStatsEntry
                     "IPMI sensor {NAME}: Missing reading, byte={BYTE}, Reading "
                     "counts good={GOOD} miss={MISS}, Prior good streak={STREAK}",
                     "NAME", sensorName, "BYTE", raw, "GOOD", numReadings,
-                    "MISS", numMissings, "STREAK", numStreakRead);
+                    "MISS", numMissing, "STREAK", numStreakRead);
             }
 
             numStreakRead = 0;
-            ++numMissings;
+            ++numMissing;
             ++numStreakMiss;
 
             return first;
@@ -123,7 +123,7 @@ class IPMIStatsEntry
                 ", Reading counts good={GOOD} miss={MISS}, Prior miss "
                 "streak={STREAK}",
                 "NAME", sensorName, "VALUE", reading, "BYTE", raw, "GOOD",
-                numReadings, "MISS", numMissings, "STREAK", numStreakMiss);
+                numReadings, "MISS", numMissing, "STREAK", numStreakMiss);
         }
 
         // Initialize min/max if the first successful reading

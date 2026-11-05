@@ -125,7 +125,7 @@ enum ipmi_return_codes
 };
 
 // Temp solution: To detect the request source channel.
-// There is no stright forward way to get the exact
+// There is no straight forward way to get the exact
 // channel so we are hardcoding it to KCS in case host-ipmid
 // and LAN1 for netipmid.
 // we can't differentiate between LAN1 & LAN2 for netipmid in this logic.

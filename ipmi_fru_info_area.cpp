@@ -301,7 +301,7 @@ FruAreaData buildChassisInfoArea(const PropertyMap& propMap)
         // chassis type
         appendChassisType(propMap, fruAreaData);
 
-        // Chasiss part number, in config.yaml it is configured as model
+        // Chassis part number, in config.yaml it is configured as model
         appendData(modelNumber, propMap, fruAreaData);
 
         // Board serial number
