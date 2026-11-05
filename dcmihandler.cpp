@@ -34,7 +34,7 @@ constexpr auto pcapInterface = "xyz.openbmc_project.Control.Power.Cap";
 constexpr auto powerCapProp = "PowerCap";
 constexpr auto powerCapEnableProp = "PowerCapEnable";
 constexpr auto powerCapExceptActProp = "ExceptionAction";
-constexpr auto powerCapSamplPeriodProp = "SamplingPeriod";
+constexpr auto powerCapSamplePeriodProp = "SamplingPeriod";
 constexpr auto powerCapCorrectTimeProp = "CorrectionTime";
 
 using namespace phosphor::logging;
@@ -278,7 +278,7 @@ std::optional<uint32_t> getPcapCorrectTime(ipmi::Context::ptr& ctx)
         .count();
 }
 
-std::optional<uint16_t> getPcapSamplPeriod(ipmi::Context::ptr& ctx)
+std::optional<uint16_t> getPcapSamplePeriod(ipmi::Context::ptr& ctx)
 {
     std::optional<ipmi::DbusObjectInfo> pcapObject = getPCapObject(ctx);
 
@@ -287,21 +287,21 @@ std::optional<uint16_t> getPcapSamplPeriod(ipmi::Context::ptr& ctx)
         return std::nullopt;
     }
 
-    uint64_t pcapSamplPeriodUs{};
+    uint64_t pcapSamplePeriodUs{};
     boost::system::error_code ec =
         ipmi::getDbusProperty(ctx, pcapObject.value().second.c_str(),
                               pcapObject.value().first.c_str(), pcapInterface,
-                              powerCapSamplPeriodProp, pcapSamplPeriodUs);
+                              powerCapSamplePeriodProp, pcapSamplePeriodUs);
     if (ec.value())
     {
-        lg2::error("Error in getPcapSamplPeriod prop: {ERROR}", "ERROR",
+        lg2::error("Error in getPcapSamplePeriod prop: {ERROR}", "ERROR",
                    ec.message());
         elog<InternalFailure>();
         return std::nullopt;
     }
 
     return (uint16_t)(std::chrono::duration_cast<std::chrono::seconds>(
-                          std::chrono::microseconds(pcapSamplPeriodUs)))
+                          std::chrono::microseconds(pcapSamplePeriodUs)))
         .count();
 }
 
@@ -410,7 +410,7 @@ bool setPcapCorrectTime(ipmi::Context::ptr& ctx, uint32_t pcapCorrectTime)
     return true;
 }
 
-bool setPcapSamplPeriod(ipmi::Context::ptr& ctx, uint16_t pcapSamplPeriod)
+bool setPcapSamplePeriod(ipmi::Context::ptr& ctx, uint16_t pcapSamplePeriod)
 {
     std::optional<ipmi::DbusObjectInfo> pcapObject = getPCapObject(ctx);
 
@@ -423,17 +423,17 @@ bool setPcapSamplPeriod(ipmi::Context::ptr& ctx, uint16_t pcapSamplPeriod)
      * Dbus is storing Sampling period in microseconds unit.
      * Therefore, we have to convert it from seconds to microseconds unit.
      */
-    uint64_t pcapSamplPeriodUs =
+    uint64_t pcapSamplePeriodUs =
         (uint64_t)(std::chrono::duration_cast<std::chrono::microseconds>(
-                       std::chrono::seconds(pcapSamplPeriod)))
+                       std::chrono::seconds(pcapSamplePeriod)))
             .count();
     boost::system::error_code ec =
         ipmi::setDbusProperty(ctx, pcapObject.value().second.c_str(),
                               pcapObject.value().first.c_str(), pcapInterface,
-                              powerCapSamplPeriodProp, pcapSamplPeriodUs);
+                              powerCapSamplePeriodProp, pcapSamplePeriodUs);
     if (ec.value())
     {
-        lg2::error("Error in setPcapSamplPeriod property: {ERROR}", "ERROR",
+        lg2::error("Error in setPcapSamplePeriod property: {ERROR}", "ERROR",
                    ec.message());
         elog<InternalFailure>();
         return false;
@@ -625,10 +625,10 @@ ipmi::RspType<uint16_t, // reserved
     std::optional<uint16_t> pcapValue = dcmi::getPcap(ctx);
     std::optional<bool> pcapEnable = dcmi::getPcapEnabled(ctx);
     std::optional<uint32_t> pcapCorrectTime = dcmi::getPcapCorrectTime(ctx);
-    std::optional<uint16_t> pcapSamplPeriod = dcmi::getPcapSamplPeriod(ctx);
+    std::optional<uint16_t> pcapSamplePeriod = dcmi::getPcapSamplePeriod(ctx);
     std::optional<std::string> pcapExceptAct = dcmi::getPcapExceptAction(ctx);
 
-    if (!pcapValue || !pcapEnable || !pcapCorrectTime || !pcapSamplPeriod ||
+    if (!pcapValue || !pcapEnable || !pcapCorrectTime || !pcapSamplePeriod ||
         !pcapExceptAct)
     {
         return ipmi::responseUnspecifiedError();
@@ -666,12 +666,12 @@ ipmi::RspType<uint16_t, // reserved
         constexpr ipmi::Cc responseNoPowerLimitSet = 0x80;
         return ipmi::response(responseNoPowerLimitSet, reserved1, exception,
                               pcapValue.value(), pcapCorrectTime.value(),
-                              reserved2, pcapSamplPeriod.value());
+                              reserved2, pcapSamplePeriod.value());
     }
 
     return ipmi::responseSuccess(reserved1, exception, pcapValue.value(),
                                  pcapCorrectTime.value(), reserved2,
-                                 pcapSamplPeriod.value());
+                                 pcapSamplePeriod.value());
 }
 
 ipmi::RspType<> setPowerLimit(ipmi::Context::ptr& ctx, uint16_t reserved1,
@@ -745,7 +745,7 @@ ipmi::RspType<> setPowerLimit(ipmi::Context::ptr& ctx, uint16_t reserved1,
         return ipmi::responseUnspecifiedError();
     }
 
-    if (!dcmi::setPcapSamplPeriod(ctx, statsPeriod))
+    if (!dcmi::setPcapSamplePeriod(ctx, statsPeriod))
     {
         return ipmi::responseUnspecifiedError();
     }
@@ -1037,9 +1037,9 @@ ipmi::RspType<ipmi::message::Payload> getDCMICapabilities(uint8_t parameter)
             uint7_t powerMgmtDeviceTargetAddress =
                 data.value("PowerMgmtDeviceSlaveAddress", 0);
             uint4_t bmcChannelNumber = data.value("BMCChannelNumber", 0);
-            uint4_t deviceRivision = data.value("DeviceRivision", 0);
+            uint4_t deviceRevision = data.value("DeviceRevision", 0);
             payload.pack(powerMgmtDeviceTargetAddress, reserved1,
-                         deviceRivision, bmcChannelNumber);
+                         deviceRevision, bmcChannelNumber);
             break;
         }
         // Manageability Access Attributes

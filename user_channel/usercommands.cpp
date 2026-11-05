@@ -395,7 +395,7 @@ ipmi::RspType<> // user name
  *   - rmcpp - RMCP+ (IPMI 2.0) connection support
  *   - reserved3
  *   - oemID - OEM IANA of any OEM auth support
- *   - oemAuxillary - OEM data for auth
+ *   - oemAuxiliary - OEM data for auth
  */
 ipmi::RspType<uint8_t,  // channel number
               uint6_t,  // rmcpAuthTypes
@@ -412,7 +412,7 @@ ipmi::RspType<uint8_t,  // channel number
               bool,     // rmcpp
               uint6_t,  // reserved3
               uint24_t, // oemID
-              uint8_t   // oemAuxillary
+              uint8_t   // oemAuxiliary
               >
     ipmiGetChannelAuthenticationCapabilities(
         ipmi::Context::ptr ctx, uint4_t chNum, uint3_t reserved1,
@@ -447,7 +447,7 @@ ipmi::RspType<uint8_t,  // channel number
     constexpr bool rmcpp = true;           // IPMI 2.0 - supported
     constexpr bool rmcp = false;           // IPMI 1.5 - not supported
     constexpr uint24_t oemID = 0;
-    constexpr uint8_t oemAuxillary = 0;
+    constexpr uint8_t oemAuxiliary = 0;
 
     bool nonNullUsers = 0;
     uint8_t maxChUsers = 0, enabledUsers = 0, fixedUsers = 0;
@@ -457,7 +457,7 @@ ipmi::RspType<uint8_t,  // channel number
     return ipmi::responseSuccess(
         channel, rmcpAuthTypes, reserved3, extDataSupport, anonymousLogin,
         nullUsers, nonNullUsers, userAuth, perMessageAuth, KGStatus, reserved4,
-        rmcp, rmcpp, reserved5, oemID, oemAuxillary);
+        rmcp, rmcpp, reserved5, oemID, oemAuxiliary);
 }
 
 /** @brief implements the set user payload access command.

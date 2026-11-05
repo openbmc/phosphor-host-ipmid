@@ -234,19 +234,19 @@ uint16_t getSensorSubtree(std::shared_ptr<SensorSubTree>& subtree)
 bool getSensorNumMap(std::shared_ptr<SensorNumMap>& sensorNumMap)
 {
     static std::shared_ptr<SensorNumMap> sensorNumMapPtr;
-    bool sensorNumMapUpated = false;
+    bool sensorNumMapUpdated = false;
     static uint16_t prevSensorUpdatedIndex = 0;
     std::shared_ptr<SensorSubTree> sensorTree;
     uint16_t curSensorUpdatedIndex = details::getSensorSubtree(sensorTree);
     if (!sensorTree)
     {
-        return sensorNumMapUpated;
+        return sensorNumMapUpdated;
     }
 
     if ((curSensorUpdatedIndex == prevSensorUpdatedIndex) && sensorNumMapPtr)
     {
         sensorNumMap = sensorNumMapPtr;
-        return sensorNumMapUpated;
+        return sensorNumMapUpdated;
     }
     prevSensorUpdatedIndex = curSensorUpdatedIndex;
 
@@ -276,8 +276,8 @@ bool getSensorNumMap(std::shared_ptr<SensorNumMap>& sensorNumMap)
         sensorNum = sensorIndex;
     }
     sensorNumMap = sensorNumMapPtr;
-    sensorNumMapUpated = true;
-    return sensorNumMapUpated;
+    sensorNumMapUpdated = true;
+    return sensorNumMapUpdated;
 }
 } // namespace details
 

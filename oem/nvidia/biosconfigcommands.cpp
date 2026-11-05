@@ -29,7 +29,7 @@ constexpr uint8_t biosPasswordSaltSize = 32;
 constexpr uint8_t biosPasswordMaxHashSize = 64;
 constexpr uint8_t biosPasswordTypeNoChange = 0x00;
 constexpr uint8_t biosPasswordSelectorAdmin = 0x01;
-constexpr uint8_t biosPasswordTypeNoPassowrd = 0x01;
+constexpr uint8_t biosPasswordTypeNoPassword = 0x01;
 constexpr uint8_t biosPasswordTypePbkdf2Sha256 = 0x02;
 constexpr uint8_t biosPasswordTypePbkdf2Sha384 = 0x03;
 
@@ -57,7 +57,7 @@ ipmi::RspType<> ipmiSetBiosPassword(
 
     switch (type)
     {
-        case biosPasswordTypeNoPassowrd:
+        case biosPasswordTypeNoPassword:
             json[keyHashAlgo] = "SHA256";
             RAND_bytes(salt.data(), salt.size());
             // password is only Null-terminated character
@@ -168,7 +168,7 @@ ipmi::RspType<uint8_t,                                     // action
                       keylen, nullHash.data());
     if (hash == nullHash)
     {
-        action = biosPasswordTypeNoPassowrd;
+        action = biosPasswordTypeNoPassword;
         salt.fill(0x00);
         hash.fill(0x00);
     }
