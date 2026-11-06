@@ -1,6 +1,7 @@
 #include "transporthandler.hpp"
 
 #include <ipmid/utils.hpp>
+#include <org/freedesktop/DBus/Error/event.hpp>
 #include <phosphor-logging/lg2.hpp>
 #include <stdplus/net/addr/subnet.hpp>
 #include <stdplus/raw.hpp>
@@ -9,8 +10,10 @@
 #include <fstream>
 
 using phosphor::logging::elog;
+using sdbusplus::error::org::freedesktop::d_bus::Error::UnknownObject;
 using sdbusplus::error::xyz::openbmc_project::common::InternalFailure;
 using sdbusplus::error::xyz::openbmc_project::common::InvalidArgument;
+using sdbusplus::error::xyz::openbmc_project::common::NotAllowed;
 using sdbusplus::server::xyz::openbmc_project::network::EthernetInterface;
 using sdbusplus::server::xyz::openbmc_project::network::IP;
 using sdbusplus::server::xyz::openbmc_project::network::Neighbor;
@@ -236,14 +239,16 @@ void deleteObjectIfExists(sdbusplus::bus_t& bus, const std::string& service,
                                        ipmi::DELETE_INTERFACE, "Delete");
         bus.call_noreply(req);
     }
+    catch (const UnknownObject&)
+    {
+        // Object already gone; nothing to do.
+    }
     catch (const sdbusplus::exception_t& e)
     {
-        // handle Delete Interface DBus errors
-        if (strcmp(e.name(),
-                   "xyz.openbmc_project.Common.Error.InternalFailure") != 0 &&
-            strcmp(e.name(), "org.freedesktop.DBus.Error.UnknownObject") != 0 &&
-            strcmp(e.name(), "xyz.openbmc_project.Common.Error.NotAllowed") !=
-                0)
+        // InternalFailure and NotAllowed are legacy errors, so match them
+        // by name.
+        if (std::string_view{InternalFailure::errName} != e.name() &&
+            std::string_view{NotAllowed::errName} != e.name())
         {
             // We want to rethrow real errors
             throw;

@@ -19,6 +19,8 @@ extern const ipmi::sensor::InvObjectIDMap invSensors;
 using namespace phosphor::logging;
 using InternalFailure =
     sdbusplus::error::xyz::openbmc_project::common::InternalFailure;
+using ResourceNotFound =
+    sdbusplus::error::xyz::openbmc_project::common::ResourceNotFound;
 
 using ObjectMapper = sdbusplus::common::xyz::openbmc_project::ObjectMapper;
 
@@ -392,11 +394,12 @@ void readLoggingObjectPaths(ObjectPaths& paths)
     }
     catch (const sdbusplus::exception_t& e)
     {
-        if (strcmp(e.name(),
-                   "xyz.openbmc_project.Common.Error.ResourceNotFound"))
+        // ResourceNotFound is a legacy error, so match by name.
+        if (std::string_view{ResourceNotFound::errName} != e.name())
         {
             throw;
         }
+        // No log entries exist; leave paths empty.
     }
 
     std::sort(paths.begin(), paths.end(),
