@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7d123d35_0246b162",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-11-13T08:47:55Z",
+      "side": 1,
+      "message": "CLGTM",
+      "revId": "68304ce99756edbea1a11dfda79c64a2146a96cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7030aadf_85ccbc80",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2640,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-11-13T08:47:55Z",
+      "side": 1,
+      "message": "Tested:\n\nBefore Fix:\n\n\u003d\u003d251810\u003d\u003dERROR: AddressSanitizer: heap-buffer-overflow on address 0x517000000328 at pc 0x0000004110b5 bp 0x7ffd84eee0e0 sp 0x7ffd84eee0d0\n\n\u003d\u003d251810\u003d\u003dABORTING\nExit status: 1\nPASS: reproduced expected old comparator failure\n\nAfter Fix:\n\nExit status: 0\nPASS: fixed comparator sanitizer test",
+      "range": {
+        "startLine": 2640,
+        "startChar": 21,
+        "endLine": 2640,
+        "endChar": 36
+      },
+      "revId": "68304ce99756edbea1a11dfda79c64a2146a96cc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
