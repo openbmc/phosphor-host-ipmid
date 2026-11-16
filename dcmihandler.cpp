@@ -690,11 +690,6 @@ ipmi::RspType<> setPowerLimit(ipmi::Context::ptr& ctx, uint16_t reserved1,
         return ipmi::responseInvalidFieldRequest();
     }
 
-    if (!dcmi::setPcap(ctx, powerLimit))
-    {
-        return ipmi::responseUnspecifiedError();
-    }
-
     /*
      * As defined in table 6-18 of DCMI specification version 1.5.
      * The Exception action value is mapped as below
@@ -705,6 +700,11 @@ ipmi::RspType<> setPowerLimit(ipmi::Context::ptr& ctx, uint16_t reserved1,
      *  12h-FFh Reserved
      */
     if (exceptionAction >= 0x12)
+    {
+        return ipmi::responseUnspecifiedError();
+    }
+
+    if (!dcmi::setPcap(ctx, powerLimit))
     {
         return ipmi::responseUnspecifiedError();
     }
