@@ -706,7 +706,7 @@ ipmi::RspType<> setPowerLimit(ipmi::Context::ptr& ctx, uint16_t reserved1,
      */
     if (exceptionAction >= 0x12)
     {
-        return ipmi::responseUnspecifiedError();
+        return ipmi::responseParmOutOfRange();
     }
 
     std::string exceptActStr;
