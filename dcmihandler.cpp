@@ -587,6 +587,7 @@ bool setDHCPOption(ipmi::Context::ptr& ctx, std::string prop, bool value)
         return false;
     }
 
+    bool updated = false;
     for (const auto& [path, serviceMap] : objectTree)
     {
         for (const auto& [service, object] : serviceMap)
@@ -596,10 +597,11 @@ bool setDHCPOption(ipmi::Context::ptr& ctx, std::string prop, bool value)
             {
                 return false;
             }
+            updated = true;
         }
     }
 
-    return true;
+    return updated;
 }
 
 } // namespace dcmi
@@ -1257,7 +1259,10 @@ ipmi::RspType<> setDCMIConfParams(ipmi::Context::ptr& ctx, uint8_t parameter,
             {
                 return ipmi::responseCommandNotAvailable();
             }
-            dcmi::setDHCPOption(ctx, dcmi::dhcpOpt12Enabled, option12);
+            if (!dcmi::setDHCPOption(ctx, dcmi::dhcpOpt12Enabled, option12))
+            {
+                return ipmi::responseUnspecifiedError();
+            }
             break;
         }
         // Systemd-networkd doesn't allow to configure DHCP timings
