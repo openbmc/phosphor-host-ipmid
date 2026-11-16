@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ff06dcfb_c1b70c0f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-11-16T05:55:30Z",
+      "side": 1,
+      "message": "Set Chassis Capabilities requires Admin privilege per IPMI 2.0 Appendix G; this change correctly enforces it.",
+      "revId": "581796ba270a903af215fec24336bb85d001a298",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
