@@ -906,8 +906,8 @@ void registerNetFnStorageFunctions()
 
     // <READ FRU Data>
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnStorage,
-                          ipmi::storage::cmdReadFruData,
-                          ipmi::Privilege::Operator, ipmiStorageReadFruData);
+                          ipmi::storage::cmdReadFruData, ipmi::Privilege::User,
+                          ipmiStorageReadFruData);
 
 #endif // FEATURE_DYNAMIC_STORAGES_ONLY
 
