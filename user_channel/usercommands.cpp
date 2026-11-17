@@ -651,11 +651,11 @@ void registerUserIpmiFunctions()
 
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
                           ipmi::app::cmdGetUserAccessCommand,
-                          ipmi::Privilege::Admin, ipmiGetUserAccess);
+                          ipmi::Privilege::Operator, ipmiGetUserAccess);
 
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
                           ipmi::app::cmdGetUserNameCommand,
-                          ipmi::Privilege::Admin, ipmiGetUserName);
+                          ipmi::Privilege::Operator, ipmiGetUserName);
 
     ipmi::registerHandler(ipmi::prioOpenBmcBase, ipmi::netFnApp,
                           ipmi::app::cmdSetUserName, ipmi::Privilege::Admin,
