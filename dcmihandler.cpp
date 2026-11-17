@@ -558,6 +558,7 @@ std::optional<bool> getDHCPOption(ipmi::Context::ptr& ctx,
         return std::nullopt;
     }
 
+    bool read = false;
     for (const auto& [path, serviceMap] : objectTree)
     {
         for (const auto& [service, object] : serviceMap)
@@ -569,6 +570,7 @@ std::optional<bool> getDHCPOption(ipmi::Context::ptr& ctx,
                 return std::nullopt;
             }
 
+            read = true;
             if (value)
             {
                 return true;
@@ -576,7 +578,7 @@ std::optional<bool> getDHCPOption(ipmi::Context::ptr& ctx,
         }
     }
 
-    return false;
+    return read ? std::optional<bool>{false} : std::nullopt;
 }
 
 bool setDHCPOption(ipmi::Context::ptr& ctx, std::string prop, bool value)
