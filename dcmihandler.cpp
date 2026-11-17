@@ -17,6 +17,7 @@
 #include <bitset>
 #include <cmath>
 #include <fstream>
+#include <utility>
 #include <variant>
 
 using namespace phosphor::logging;
@@ -549,13 +550,17 @@ std::optional<EthernetInterface::DHCPConf> getDHCPEnabled(
     return EthernetInterface::convertDHCPConfFromString(dhcpVal);
 }
 
-std::optional<bool> getDHCPOption(ipmi::Context::ptr& ctx,
-                                  const std::string& prop)
+std::pair<ipmi::Cc, bool> getDHCPOption(ipmi::Context::ptr& ctx,
+                                        const std::string& prop)
 {
     ipmi::ObjectTree objectTree;
     if (ipmi::getAllDbusObjects(ctx, networkRoot, dhcpIntf, objectTree))
     {
-        return std::nullopt;
+        return {ipmi::ccUnspecifiedError, false};
+    }
+    if (objectTree.empty())
+    {
+        return {ipmi::ccCommandNotAvailable, false};
     }
 
     for (const auto& [path, serviceMap] : objectTree)
@@ -566,17 +571,17 @@ std::optional<bool> getDHCPOption(ipmi::Context::ptr& ctx,
             if (ipmi::getDbusProperty(ctx, service, path, dhcpIntf, prop,
                                       value))
             {
-                return std::nullopt;
+                return {ipmi::ccUnspecifiedError, false};
             }
 
             if (value)
             {
-                return true;
+                return {ipmi::ccSuccess, true};
             }
         }
     }
 
-    return false;
+    return {ipmi::ccSuccess, false};
 }
 
 bool setDHCPOption(ipmi::Context::ptr& ctx, std::string prop, bool value)
@@ -1290,13 +1295,13 @@ ipmi::RspType<ipmi::message::Payload> getDCMIConfParams(
         case dcmi::DCMIConfigParameters::DiscoveryConfig:
         {
             uint8_t discovery{};
-            std::optional<bool> enabled =
-                dcmi::getDHCPOption(ctx, dcmi::dhcpOpt12Enabled);
-            if (!enabled.has_value())
+            auto [status,
+                  enabled] = dcmi::getDHCPOption(ctx, dcmi::dhcpOpt12Enabled);
+            if (status != ipmi::ccSuccess)
             {
-                return ipmi::responseUnspecifiedError();
+                return ipmi::response(status);
             }
-            if (enabled.value())
+            if (enabled)
             {
                 discovery = dcmi::option12Mask;
             }
