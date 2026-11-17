@@ -553,7 +553,8 @@ std::optional<bool> getDHCPOption(ipmi::Context::ptr& ctx,
                                   const std::string& prop)
 {
     ipmi::ObjectTree objectTree;
-    if (ipmi::getAllDbusObjects(ctx, networkRoot, dhcpIntf, objectTree))
+    if (ipmi::getAllDbusObjects(ctx, networkRoot, dhcpIntf, objectTree) ||
+        objectTree.empty())
     {
         return std::nullopt;
     }
