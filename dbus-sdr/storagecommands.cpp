@@ -389,7 +389,7 @@ ipmi::RspType<uint8_t,             // Count
     }
     else
     {
-        return ipmi::responseReqDataLenExceeded();
+        return ipmi::responseParmOutOfRange();
     }
 
     std::vector<uint8_t> requestedData;
