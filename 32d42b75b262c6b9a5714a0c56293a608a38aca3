@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c47dbcc6_f305c0ce",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-11-18T08:21:12Z",
+      "side": 1,
+      "message": "Hi @liuxiwei@ieisystem.com,\n\nKeeping the IPMI threshold cache in sync with D-Bus is a useful change. I tested OUTLET_TEMP on the AST2600 EVB and also ran a standalone test against my local working tree.\n\n1.EVB test passed: Changing WarningHigh from 52 to 53 and back was reflected correctly in IPMI. WarningLow stayed at 12. The callback trace showed that it received both properties in this run.\n\nroot@evb-ast2600:~# SVC\u003dxyz.openbmc_project.HwmonTempSensor\nroot@evb-ast2600:~# OBJ\u003d/xyz/openbmc_project/sensors/temperature/OUTLET_TEMP\nroot@evb-ast2600:~# IFACE\u003dxyz.openbmc_project.Sensor.Threshold.Warning\nroot@evb-ast2600:~#\nroot@evb-ast2600:~# ipmitool raw 0x04 0x27 0xfe\n 1b 0c 07 00 34 39 00\nroot@evb-ast2600:~# busctl set-property \"$SVC\" \"$OBJ\" \"$IFACE\" WarningHigh d 53\nroot@evb-ast2600:~# sleep 1\nroot@evb-ast2600:~# busctl get-property \"$SVC\" \"$OBJ\" \"$IFACE\" WarningLow\nd 12\nroot@evb-ast2600:~# ipmitool raw 0x04 0x27 0xfe\n 1b 0c 07 00 35 39 00\nroot@evb-ast2600:~#\nroot@evb-ast2600:~#\nroot@evb-ast2600:~# busctl set-property \"$SVC\" \"$OBJ\" \"$IFACE\" WarningHigh d 52\nroot@evb-ast2600:~# busctl get-property \"$SVC\" \"$OBJ\" \"$IFACE\" WarningHigh\nd 52\nroot@evb-ast2600:~#\n\nJournal Logs:\nroot@evb-ast2600:~# journalctl -b | grep \u0027Threshold trace:\u0027\nNov 18 07:42:18 evb-ast2600 ipmid[381]: Threshold trace: sensor\u003d254 path\u003d/xyz/openbmc_project/sensors/temperature/OUTLET_TEMP hasLow\u003dTrue hasHigh\u003dTrue low\u003d12-\u003e12 high\u003d52-\u003e53 validMask\u003d27-\u003e27\nNov 18 07:43:28 evb-ast2600 ipmid[381]: Threshold trace: sensor\u003d254 path\u003d/xyz/openbmc_project/sensors/temperature/OUTLET_TEMP hasLow\u003dTrue hasHigh\u003dTrue low\u003d12-\u003e12 high\u003d53-\u003e52 validMask\u003d27-\u003e27\nroot@evb-ast2600:~#\n\n\n2.Standalone test reproduced an issue: With cached values WarningLow\u003d12 and WarningHigh\u003d52, I passed an update containing only WarningHigh\u003d53. The helper correctly set the high threshold to 53, but it also changed the cached low threshold from 12 to 0 and still marked it as valid. I expected the low threshold to remain unchanged.\n\nsaipavan@msgubuntu-Precision-3680:~/pavan_community/openbmc/build/evb-ast2600/tmp/deploy/images/evb-ast2600$ python3 /home/saipavan/.copilot/session-state/1e950013-341a-4b0e-9c8a-f62304547e06/files/check_warning_thresholds.py \\\n  --working-tree /home/saipavan/pavan_community/openbmc/build/evb-ast2600/workspace/sources/phosphor-ipmi-host \\\n  2\u003e\u00261 | tee warning-threshold-test.log\nSource under test: local working tree\nBaseline: WarningLow\u003d12 WarningHigh\u003d52 lowValid\u003d1\nFull update: WarningLow\u003d12 WarningHigh\u003d53 lowValid\u003d1\nFull-update control: PASS\nHigh-only update: WarningLow\u003d0 WarningHigh\u003d53 lowValid\u003d1\nHigh-only regression: FAIL\nTest exit code: 1\nsaipavan@msgubuntu-Precision-3680:~/pavan_community/openbmc/build/evb-ast2600/tmp/deploy/images/evb-ast2600$\n\n\nNote: I did not reproduce the incorrect value end-to-end on the EVB. Please handle the single-property update without overwriting the unchanged threshold and add a regression test for that case.\n\nPlease Correct me if My Understanding is Wrong?",
+      "revId": "32d42b75b262c6b9a5714a0c56293a608a38aca3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
