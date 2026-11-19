@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9258de3f_3909ff32",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-11-19T04:15:32Z",
+      "side": 1,
+      "message": "CLGTM\n\nIPMI v2.0, Table 28-14, marks 11b reserved and 10b commit-write optional, requiring an error if unsupported; these responses are appropriate.",
+      "revId": "726fb453609a5d5e51dc1601e638ccba5d1618fc",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
