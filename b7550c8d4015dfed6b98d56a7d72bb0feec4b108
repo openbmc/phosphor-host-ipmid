@@ -39,6 +39,30 @@
       },
       "revId": "b7550c8d4015dfed6b98d56a7d72bb0feec4b108",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9f7b2778_b94d3574",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 1214,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-11-19T11:13:44Z",
+      "side": 1,
+      "message": "Removed the redundant helper and its calls. Invalid parameter selectors are handled by the existing switch default cases, returning 0xC9 when setSelector is zero. ActivateDHCP data validation remains unchanged.",
+      "parentUuid": "36799ce5_c90e0bc1",
+      "range": {
+        "startLine": 1201,
+        "startChar": 0,
+        "endLine": 1214,
+        "endChar": 1
+      },
+      "revId": "b7550c8d4015dfed6b98d56a7d72bb0feec4b108",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
