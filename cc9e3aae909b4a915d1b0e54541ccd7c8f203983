@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8f84125c_52a87a82",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 298,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2026-11-19T07:47:54Z",
+      "side": 1,
+      "message": "e",
+      "range": {
+        "startLine": 298,
+        "startChar": 23,
+        "endLine": 298,
+        "endChar": 31
+      },
+      "revId": "cc9e3aae909b4a915d1b0e54541ccd7c8f203983",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d6f14b4c_654c22c9",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 383,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2026-11-19T07:47:54Z",
+      "side": 1,
+      "message": "ipmi::Context::ptr\u0026",
+      "range": {
+        "startLine": 383,
+        "startChar": 47,
+        "endLine": 383,
+        "endChar": 65
+      },
+      "revId": "cc9e3aae909b4a915d1b0e54541ccd7c8f203983",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dd7d9e49_01da3408",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 384,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2026-11-19T07:47:54Z",
+      "side": 1,
+      "message": "const \u0026",
+      "range": {
+        "startLine": 384,
+        "startChar": 47,
+        "endLine": 384,
+        "endChar": 68
+      },
+      "revId": "cc9e3aae909b4a915d1b0e54541ccd7c8f203983",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d1f29b88_f39634ac",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 386,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2026-11-19T07:47:54Z",
+      "side": 1,
+      "message": "Move to line 394?",
+      "range": {
+        "startLine": 386,
+        "startChar": 4,
+        "endLine": 386,
+        "endChar": 25
+      },
+      "revId": "cc9e3aae909b4a915d1b0e54541ccd7c8f203983",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "20d89e4e_c6de5e00",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 390,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2026-11-19T07:47:54Z",
+      "side": 1,
+      "message": "This is already an error log entry, so this description is unnecessary.",
+      "range": {
+        "startLine": 390,
+        "startChar": 20,
+        "endLine": 390,
+        "endChar": 27
+      },
+      "revId": "cc9e3aae909b4a915d1b0e54541ccd7c8f203983",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
