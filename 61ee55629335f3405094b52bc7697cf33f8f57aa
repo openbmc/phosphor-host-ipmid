@@ -104,6 +104,24 @@
       "parentUuid": "056ecdbe_92a5379e",
       "revId": "61ee55629335f3405094b52bc7697cf33f8f57aa",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "23ad9461_149a528e",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 1002038
+      },
+      "writtenOn": "2026-11-19T17:44:36Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "f2b45ece_782300e2",
+      "revId": "61ee55629335f3405094b52bc7697cf33f8f57aa",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
