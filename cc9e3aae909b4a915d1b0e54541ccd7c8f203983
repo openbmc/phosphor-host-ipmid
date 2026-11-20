@@ -3,6 +3,23 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "0a2008cd_151ea819",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-11-20T00:08:35Z",
+      "side": 1,
+      "message": "I don\u0027t really like the mkdir/mkstemp/close/ofstream/close/open path. It feels clunky.\n\n```\nstatic stdplus::ManagedFd makeSealedCperFd(const std::vector\u003cuint8_t\u003e\u0026 data)\n{\n    int raw \u003d memfd_create(\"cper\", MFD_CLOEXEC | MFD_ALLOW_SEALING);\n    if (raw \u003c 0)\n    {\n        throw std::system_error(errno, std::generic_category(), \"memfd_create\");\n    }\n    stdplus::ManagedFd fd(std::move(raw));\n    stdplus::fd::writeExact(fd, data);\n    stdplus::fd::lseek(fd, 0, stdplus::fd::Whence::Set);\n\n    // enforce RO on the receiver end\n    constexpr int seals \u003d F_SEAL_WRITE | F_SEAL_SHRINK | F_SEAL_GROW | F_SEAL_SEAL;\n    if (fcntl(fd.get(), F_ADD_SEALS, seals) \u003c 0)\n    {\n        throw std::system_error(errno, std::generic_category(), \"F_ADD_SEALS\");\n    }\n    return fd;\n}\n```",
+      "revId": "cc9e3aae909b4a915d1b0e54541ccd7c8f203983",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "8f84125c_52a87a82",
         "filename": "sbmrhandler.cpp",
         "patchSetId": 3
@@ -44,6 +61,46 @@
         "endLine": 298,
         "endChar": 31
       },
+      "revId": "cc9e3aae909b4a915d1b0e54541ccd7c8f203983",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4eebd165_6ae0ab05",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 363,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-11-20T00:08:35Z",
+      "side": 1,
+      "message": "Then you can call the write function directly like this and pass it on to dbus:\n```\ntry {\n    stdplus::ManagedFd fd \u003d makeSealedCperFd(data);\n    auto ec \u003d ipmi::callDbusMethod(\n        ctx, Processor::default_service, Processor::instance_path,\n        Processor::interface, \"Process\",\n        sdbusplus::object_path(defaultInventoryPath), ContentType::CPERSection,\n        sdbusplus::message::unix_fd(fd.get()));\n    if (ec) { lg2::error(\"CPER Process failed: {MSG}\", \"MSG\", ec.message());\n\n              return ipmi::responseUnspecifiedError(); }\n}\ncatch (const std::exception\u0026 e)\n{ ... }\n```\n\nYou can see that it greatly reduces the complexity of the file handling and turns the pesky fd into an RAII situation.",
+      "range": {
+        "startLine": 343,
+        "startChar": 0,
+        "endLine": 363,
+        "endChar": 5
+      },
+      "revId": "cc9e3aae909b4a915d1b0e54541ccd7c8f203983",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6b01f9c0_526fc926",
+        "filename": "sbmrhandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 366,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-11-20T00:08:35Z",
+      "side": 1,
+      "message": "memfd automatically goes away after last fd closes, so no need to unlink.",
       "revId": "cc9e3aae909b4a915d1b0e54541ccd7c8f203983",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
