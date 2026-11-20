@@ -33,6 +33,24 @@
       "message": "Suggest checking objectTree.empty() upfront and returning std::nullopt, which removes the need for read and lets us simply return false after the loops:\n```\nif (ipmi::getAllDbusObjects(ctx, networkRoot, dhcpIntf, objectTree) ||\n    objectTree.empty())\n{\n    return std::nullopt;\n}\n```",
       "revId": "94d701f0303d8880590a463379a226fb0dc38c73",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d2924441_cdc399c8",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 561,
+      "author": {
+        "id": 1002754
+      },
+      "writtenOn": "2026-11-20T09:59:56Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "85eba898_3d8c833b",
+      "revId": "94d701f0303d8880590a463379a226fb0dc38c73",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
