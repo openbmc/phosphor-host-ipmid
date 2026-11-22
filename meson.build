@@ -280,7 +280,10 @@ if get_option('arm-sbmr').allowed()
     arm_sbmr_cmds_src = ['sbmrhandler.cpp']
 endif
 
-redfish_host_interface_src = ['redfishhostinterface.cpp']
+redfish_host_interface_src = [
+    'bootstrap_credentials.cpp',
+    'redfishhostinterface.cpp',
+]
 
 libipmi20_src = [
     'app/channel.cpp',

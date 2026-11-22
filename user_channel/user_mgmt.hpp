@@ -315,7 +315,8 @@ class UserAccess
      *  @param[in] userName - user name
      *  @param[in] userPassword  - new password of the user
      *
-     *  @return ccSuccess for success, others for failure.
+     *  @return ccSuccess for success, ccInvalidFieldRequest if the password
+     *          is rejected, others for failure.
      */
     Cc setSpecialUserPassword(const std::string& userName,
                               const SecureString& userPassword);

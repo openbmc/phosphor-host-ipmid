@@ -76,6 +76,29 @@ test(
     ),
 )
 
+# Build/add bootstrap_credentials_unittest to test suite
+test(
+    'bootstrap_credentials',
+    executable(
+        'bootstrap_credentials',
+        'bootstrap_credentials_unittest.cpp',
+        '../bootstrap_credentials.cpp',
+        include_directories: root_inc,
+        build_by_default: false,
+        override_options: ['b_lundef=true'],
+        implicit_include_directories: false,
+        dependencies: [
+            boost,
+            crypto,
+            gmock,
+            gtest,
+            libsystemd_dep,
+            phosphor_logging_dep,
+            sdbusplus_dep,
+        ],
+    ),
+)
+
 # Build/add closesession_unittest to test suite
 test(
     'session/closesession',

@@ -593,12 +593,23 @@ int pamUpdatePasswd(const char* username, const char* password)
 Cc UserAccess::setSpecialUserPassword(const std::string& userName,
                                       const SecureString& userPassword)
 {
-    if (pamUpdatePasswd(userName.c_str(), userPassword.c_str()) != PAM_SUCCESS)
+    switch (pamUpdatePasswd(userName.c_str(), userPassword.c_str()))
     {
-        lg2::debug("Failed to update password");
-        return ccUnspecifiedError;
+        case PAM_SUCCESS:
+        {
+            return ccSuccess;
+        }
+        case PAM_AUTHTOK_ERR:
+        {
+            lg2::debug("Bad authentication token");
+            return ccInvalidFieldRequest;
+        }
+        default:
+        {
+            lg2::debug("Failed to update password");
+            return ccUnspecifiedError;
+        }
     }
-    return ccSuccess;
 }
 
 Cc UserAccess::setUserPassword(const uint8_t userId, const char* userPassword)
