@@ -166,7 +166,8 @@ Cc ipmiUserSetUserPassword(const uint8_t userId, const char* userPassword);
  *  @param[in] userName - user name
  *  @param[in] userPassword - New Password
  *
- *  @return ccSuccess for success, others for failure.
+ *  @return ccSuccess for success, ccInvalidFieldRequest if the password
+ *          is rejected, others for failure.
  */
 Cc ipmiSetSpecialUserPassword(const std::string& userName,
                               const SecureString& userPassword);
