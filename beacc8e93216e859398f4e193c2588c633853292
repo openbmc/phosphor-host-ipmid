@@ -33,6 +33,23 @@
       "message": "After looking more at how this is to be used, I don\u0027t think this is correct. We should not be referencing ipmi user IDs at all. the non-ipmi user table needs to be fully independent from the ipmi user pathway (and thus probably separate from the user/channel code that the ipmi users use).",
       "revId": "beacc8e93216e859398f4e193c2588c633853292",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0f4cbf97_ddbc87eb",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 22
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002977
+      },
+      "writtenOn": "2026-11-22T11:58:55Z",
+      "side": 1,
+      "message": "@vernon.mauery@gmail.com\nhttps://gerrit.openbmc.org/c/openbmc/phosphor-host-ipmid/+/82358\n\nThanks agreed. I\u0027ve updated 82358 (patch set 31) so it no longer uses IPMI user IDs or this change: the bootstrap account is now created by name through phosphor-user-manager, and the user_channel code is left unchanged. This change is therefore no longer needed.",
+      "revId": "beacc8e93216e859398f4e193c2588c633853292",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
