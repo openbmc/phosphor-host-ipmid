@@ -126,6 +126,75 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "5e7bfe4d_e946666b",
+        "filename": "pefhandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 337,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-11-24T07:50:42Z",
+      "side": 1,
+      "message": "This lock remains held while the handler makes yielding D-Bus calls. A concurrent PEF request can block the executor waiting for this mutex, preventing the suspended request from resuming. Can we restrict the lock to in-memory state/cache access and use non-blocking serialization for the filter read-modify-write?",
+      "range": {
+        "startLine": 337,
+        "startChar": 25,
+        "endLine": 337,
+        "endChar": 30
+      },
+      "revId": "324d9228e08f45c5af3fdfbb66ff4c3af08fe925",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1cc1df7b_a8dcca7b",
+        "filename": "pefhandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 364,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-11-24T07:50:42Z",
+      "side": 1,
+      "message": "The contract defines PEF Control bits 1–3, but this masks them off and still returns success. A client setting these flags silently loses them. Can we support the defined bits or reject unsupported ones instead?\n\nPlease Correct me if my understanding is wrong?",
+      "range": {
+        "startLine": 364,
+        "startChar": 25,
+        "endLine": 364,
+        "endChar": 40
+      },
+      "revId": "324d9228e08f45c5af3fdfbb66ff4c3af08fe925",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1f082357_f5d318e2",
+        "filename": "pefhandler.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 484,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-11-24T07:50:42Z",
+      "side": 1,
+      "message": "This lock remains held while the handler makes yielding D-Bus calls. A concurrent PEF request can block the executor waiting for this mutex, preventing the suspended request from resuming. Can we restrict the lock to in-memory state/cache access and use non-blocking serialization for the filter read-modify-write?",
+      "range": {
+        "startLine": 484,
+        "startChar": 9,
+        "endLine": 484,
+        "endChar": 19
+      },
+      "revId": "324d9228e08f45c5af3fdfbb66ff4c3af08fe925",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": false,
       "key": {
         "uuid": "d70a6403_279015a2",
