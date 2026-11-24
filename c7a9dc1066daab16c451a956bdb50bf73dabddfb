@@ -16,6 +16,23 @@
       "message": "CLGTM",
       "revId": "c7a9dc1066daab16c451a956bdb50bf73dabddfb",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "684292dc_dd56b506",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 552,
+      "author": {
+        "id": 1000163
+      },
+      "writtenOn": "2026-11-24T18:46:51Z",
+      "side": 1,
+      "message": "we may have to change this to more than an optional boolean response to get the appropriate behavior. Returning nullopt if no dhcp objects are found should make the ipmi command return 0xd5, not 0xff. 0xff should be reserved for internal errors that cannot be described by ipmi completion codes.",
+      "revId": "c7a9dc1066daab16c451a956bdb50bf73dabddfb",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
