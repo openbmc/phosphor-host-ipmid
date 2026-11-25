@@ -33,6 +33,23 @@
       "message": "Looks good to me.",
       "revId": "1ffaa9f7dff50c0e6817b08bcd67250c10f32f9f",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8d33d6c6_caf0fbb2",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-11-25T12:20:46Z",
+      "side": 1,
+      "message": "Good Change\n\nBefore:\n\nroot@evb-ast2600:~# ipmitool raw 0x0c 0x01 0x01 0x04 0x02\nUnable to send RAW command (channel\u003d0x0 netfn\u003d0xc lun\u003d0x0 cmd\u003d0x1 rsp\u003d0xff): Unspecified error\nroot@evb-ast2600:~#\n\nroot@evb-ast2600:~# ipmitool raw 0x0c 0x01 0x01 0x04 0x00\n\nroot@evb-ast2600:~#\n\nAfter:\n\nroot@evb-ast2600:~# ipmitool raw 0x0c 0x01 0x01 0x04 0x02\n\nroot@evb-ast2600:~#\n\nroot@evb-ast2600:~# ipmitool raw 0x0c 0x01 0x01 0x04 0x00\nUnable to send RAW command (channel\u003d0x0 netfn\u003d0xc lun\u003d0x0 cmd\u003d0x1 rsp\u003d0xcc): Invalid data field in request\nroot@evb-ast2600:~#",
+      "revId": "1ffaa9f7dff50c0e6817b08bcd67250c10f32f9f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
