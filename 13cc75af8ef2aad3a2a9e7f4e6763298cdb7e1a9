@@ -16,6 +16,24 @@
       "message": "if an object path has an empty serviceMap, the loop does nothing and the function returns {ccSuccess, false}, which reports \"disabled\" with no data read. Suggested change: count how many properties were read, and return ccCommandNotAvailable when that count is zero.",
       "revId": "13cc75af8ef2aad3a2a9e7f4e6763298cdb7e1a9",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a15f7d7a_59dbb36a",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 584,
+      "author": {
+        "id": 1002754
+      },
+      "writtenOn": "2026-11-25T14:05:48Z",
+      "side": 1,
+      "message": "I checked the upstream ObjectMapper implementation. GetSubTree adds a path only when it adds a matching service, so it can return an empty tree, but not a path with an empty service map. Patch set 6 already handles the empty tree with ccCommandNotAvailable. Is there a mapper implementation or runtime case I’m missing?",
+      "parentUuid": "86173f69_d19910fd",
+      "revId": "13cc75af8ef2aad3a2a9e7f4e6763298cdb7e1a9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
