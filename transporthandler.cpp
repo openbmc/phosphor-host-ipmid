@@ -895,10 +895,10 @@ RspType<> setLanInt(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
                     // subcommand.
                     channelCall<setEthProp<bool>>(channel, "DHCP4", true);
                     return responseSuccess();
-                case IPSrc::Unspecified:
                 case IPSrc::Static:
                     channelCall<setEthProp<bool>>(channel, "DHCP4", false);
                     return responseSuccess();
+                case IPSrc::Unspecified:
                 case IPSrc::BIOS:
                 case IPSrc::BMC:
                     return responseInvalidFieldRequest();
