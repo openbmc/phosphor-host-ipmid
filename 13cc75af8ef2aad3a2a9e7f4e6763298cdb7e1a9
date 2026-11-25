@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "86173f69_d19910fd",
+        "filename": "dcmihandler.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 584,
+      "author": {
+        "id": 1003102
+      },
+      "writtenOn": "2026-11-25T12:25:39Z",
+      "side": 1,
+      "message": "if an object path has an empty serviceMap, the loop does nothing and the function returns {ccSuccess, false}, which reports \"disabled\" with no data read. Suggested change: count how many properties were read, and return ccCommandNotAvailable when that count is zero.",
+      "revId": "13cc75af8ef2aad3a2a9e7f4e6763298cdb7e1a9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
