@@ -903,7 +903,7 @@ RspType<> setLanInt(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
                 case IPSrc::BMC:
                     return responseInvalidFieldRequest();
             }
-            return responseParamNotSupported();
+            return responseInvalidFieldRequest();
         }
         case LanParam::MAC:
         {
@@ -991,11 +991,10 @@ RspType<> setLanInt(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
         case LanParam::IPFamilyEnables:
         {
             uint8_t enables;
-            if (req.unpack(enables) != 0)
+            if (req.unpack(enables) != 0 || !req.fullyUnpacked())
             {
                 return responseReqDataLenInvalid();
             }
-            unpackFinal(req);
             switch (static_cast<IPFamilyEnables>(enables))
             {
                 case IPFamilyEnables::DualStack:
@@ -1004,7 +1003,7 @@ RspType<> setLanInt(Context::ptr ctx, uint4_t channelBits, uint4_t reserved1,
                 case IPFamilyEnables::IPv6Only:
                     return responseParamNotSupported();
             }
-            return responseParamNotSupported();
+            return responseInvalidFieldRequest();
         }
         case LanParam::IPv6Status:
         {
