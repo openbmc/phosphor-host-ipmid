@@ -42,6 +42,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "23e6fff5_37db210b",
+        "filename": "dbus-sdr/sdrutils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 456,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-11-26T12:24:43Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "245ff17d_58761504",
+      "range": {
+        "startLine": 456,
+        "startChar": 0,
+        "endLine": 456,
+        "endChar": 61
+      },
+      "revId": "b80316b42d3d809f992d6e13d936b096a6cc98ea",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "a76895aa_46f42cb5",
@@ -83,6 +107,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "3045a4e3_bff44137",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2126,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-11-26T12:24:43Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "a76895aa_46f42cb5",
+      "range": {
+        "startLine": 2126,
+        "startChar": 0,
+        "endLine": 2126,
+        "endChar": 29
+      },
+      "revId": "b80316b42d3d809f992d6e13d936b096a6cc98ea",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "19e0502f_506206c4",
@@ -120,6 +168,30 @@
       "side": 1,
       "message": "Done in PS2: changed details::getSensorSubtree() and its cached snapshot/callers to std::shared_ptr\u003cconst SensorSubTree\u003e, populating a local mutable tree before publishing.",
       "parentUuid": "19e0502f_506206c4",
+      "revId": "b80316b42d3d809f992d6e13d936b096a6cc98ea",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6d64609e_1b8e1c22",
+        "filename": "include/dbus-sdr/sdrutils.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 286,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-11-26T12:24:43Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "19e0502f_506206c4",
+      "range": {
+        "startLine": 286,
+        "startChar": 31,
+        "endLine": 286,
+        "endChar": 41
+      },
       "revId": "b80316b42d3d809f992d6e13d936b096a6cc98ea",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
