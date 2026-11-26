@@ -294,9 +294,9 @@ int getHostNetworkData(ipmi::Context::ptr& ctx, ipmi::message::Payload& payload)
     std::vector<uint8_t> ipAddrBytes(addrSize);
     std::vector<uint8_t> gatewayBytes(addrSize);
     if (inet_pton(addressFamily, ipAddress.c_str(),
-                  reinterpret_cast<void*>(ipAddrBytes.data())) ||
+                  reinterpret_cast<void*>(ipAddrBytes.data())) != 1 ||
         inet_pton(addressFamily, gateway.c_str(),
-                  reinterpret_cast<void*>(gatewayBytes.data())))
+                  reinterpret_cast<void*>(gatewayBytes.data())) != 1)
     {
         lg2::error("Failed to parse address/gateway values from settings: "
                    "address={ADDRESS}, gateway={GATEWAY}, family={FAMILY}",
