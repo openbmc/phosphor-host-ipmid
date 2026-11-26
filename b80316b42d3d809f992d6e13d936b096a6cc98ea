@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "245ff17d_58761504",
+        "filename": "dbus-sdr/sdrutils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 456,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-11-26T09:50:43Z",
+      "side": 1,
+      "message": "Nit: Could we log the D-Bus error here? Returning an empty set makes a fetch failure indistinguishable from having no decorator paths.",
+      "range": {
+        "startLine": 456,
+        "startChar": 0,
+        "endLine": 456,
+        "endChar": 61
+      },
+      "revId": "b80316b42d3d809f992d6e13d936b096a6cc98ea",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a76895aa_46f42cb5",
+        "filename": "dbus-sdr/sensorcommands.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2126,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-11-26T09:50:43Z",
+      "side": 1,
+      "message": "Could we also test that the sensor count is correct at startup and after a sensor is added or removed?",
+      "range": {
+        "startLine": 2126,
+        "startChar": 0,
+        "endLine": 2126,
+        "endChar": 29
+      },
+      "revId": "b80316b42d3d809f992d6e13d936b096a6cc98ea",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "19e0502f_506206c4",
+        "filename": "include/dbus-sdr/sdrutils.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 286,
+      "author": {
+        "id": 1002762
+      },
+      "writtenOn": "2026-11-26T09:50:43Z",
+      "side": 1,
+      "message": "Nit: Could the sensor-tree snapshot use shared_ptr\u003cconst SensorSubTree\u003e to prevent callers from accidentally modifying it?",
+      "range": {
+        "startLine": 286,
+        "startChar": 31,
+        "endLine": 286,
+        "endChar": 41
+      },
+      "revId": "b80316b42d3d809f992d6e13d936b096a6cc98ea",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
